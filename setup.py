@@ -7,7 +7,7 @@ with open("./README.md") as fp:
 
 setuptools.setup(
     name="multacdkrecipies",
-    version="0.0.1",
+    version="0.0.2",
     url="http://cdkrecipies.s3-website-us-east-1.amazonaws.com",
     description="A CDK Python Construct for AWS IoT Infrastructure",
     long_description=long_description,

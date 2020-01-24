@@ -3,14 +3,13 @@ from aws_cdk import (
     aws_iam as iam,
     aws_iot as iot,
     aws_lambda as lambda_,
-    aws_sns as sns,
-    aws_sns_subscriptions as sns_subs,
+    aws_sqs as sqs,
 )
 from schema import Schema, And, Use, Optional, SchemaError
 
 SQS_CONFIG_SCHEMA = Schema(
     {
-        "topic_name": And(Use(str)),
+        "queue_name": And(Use(str)),
         "lambda_handler": {
             "lambda_name": And(Use(str)),
             "description": And(Use(str)),
@@ -37,19 +36,19 @@ class AwsIotRulesSqsPipes(core.Construct):
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
-        self.environment = environment
+        self.environment_ = environment
         valid_config = self.validate_configuration(
             configuration_schema=SQS_CONFIG_SCHEMA, configuration_received=configuration
         )
         if not valid_config:
             raise RuntimeError("Improper configuration passed to AwsIotRulesSnsPipes CDK Cons")
 
-        sns_name = self.prefix + configuration["topic_name"] + "_" + "topic" + "_" + self.environment_
-        iam_role_name = self.prefix + configuration["topic_name"] + "_" + "topic_role" + "_" + self.environment_
-        iam_policy_name = self.prefix + configuration["topic_name"] + "_" + "topic_policy" + "_" + self.environment_
+        sqs_name = self.prefix + configuration["queue_name"] + "_" + "topic" + "_" + self.environment_
+        iam_role_name = self.prefix + configuration["queue_name"] + "_" + "topic_role" + "_" + self.environment_
+        iam_policy_name = self.prefix + configuration["queue_name"] + "_" + "topic_policy" + "_" + self.environment_
 
         # Defining SNS Topic
-        self._sns_topic = sns.Topic(self, id=sns_name, topic_name=sns_name, display_name=sns_name)
+        self._sqs_queue = sqs.Queue(self, id=sqs_name, queue_name=sqs_name)
 
         # Defining IAM Role
         # Defining Service Principal
@@ -59,7 +58,7 @@ class AwsIotRulesSqsPipes(core.Construct):
         role = iam.Role(self, id=iam_role_name, role_name=iam_role_name, assumed_by=principal)
 
         # Defining Policy Statement, Policy and Attaching to Role
-        policy_statements = iam.PolicyStatement(actions=["SNS:Publish"], resources=[topic_arn])
+        policy_statements = iam.PolicyStatement(actions=["sqs:SendMessage"], resources=[self._sqs_queue.queue_arn])
         policy = iam.Policy(self, id=iam_policy_name, policy_name=iam_policy_name, statements=[policy_statements])
         policy.attach_to_role(role=role)
 
@@ -79,20 +78,20 @@ class AwsIotRulesSqsPipes(core.Construct):
             # layers=layers,
             description=function_data["description"],
             tracing=lambda_.Tracing.ACTIVE,
-            environment=function_data["environment_vars"],
+            environment=function_data.get("environment_vars"),
             timeout=core.Duration.seconds(function_data["timeout"]),
             reserved_concurrent_executions=function_data["reserved_concurrent_executions"],
         )
 
-        for policy in configuration["iam_actions"]:
-            self._lambda_function.add_to_role_policy(statement=policy)
+        self.iam_policies = list()
+        for iam_actions in configuration["iam_actions"]:
+            self.iam_policies.append(iam_actions)
 
-        # Defining the Lambda subscription to the specified SNS Topic in cdk.json file.
-        sns_subscription = sns_subs.LambdaSubscription(fn=self._lambda_function)
-        self._sns_topic.add_subscription(sns_subscription)
+        policy_statement = iam.PolicyStatement(actions=self.iam_policies, resources=["*"])
+        self._lambda_function.add_to_role_policy(statement=policy_statement)
 
-        action = iot.CfnTopicRule.SnsActionProperty(target_arn=self._sns_topic.topic_arn, role_arn=role.role_arn)
-        action_property = iot.CfnTopicRule.ActionProperty(sns=action)
+        action = iot.CfnTopicRule.SqsActionProperty(queue_url=self._sqs_queue.queue_url, role_arn=role.role_arn)
+        action_property = iot.CfnTopicRule.ActionProperty(sqs=action)
 
         rule_data = configuration["iot_rule"]
         rule_payload = iot.CfnTopicRule.TopicRulePayloadProperty(

@@ -37,7 +37,7 @@ class AwsIotRulesSnsPipes(core.Construct):
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
-        self.environment = environment
+        self.environment_ = environment
         valid_config = self.validate_configuration(
             configuration_schema=SNS_CONFIG_SCHEMA, configuration_received=configuration
         )
@@ -59,7 +59,7 @@ class AwsIotRulesSnsPipes(core.Construct):
         role = iam.Role(self, id=iam_role_name, role_name=iam_role_name, assumed_by=principal)
 
         # Defining Policy Statement, Policy and Attaching to Role
-        policy_statements = iam.PolicyStatement(actions=["SNS:Publish"], resources=[topic_arn])
+        policy_statements = iam.PolicyStatement(actions=["SNS:Publish"], resources=[self._sns_topic.topic_arn])
         policy = iam.Policy(self, id=iam_policy_name, policy_name=iam_policy_name, statements=[policy_statements])
         policy.attach_to_role(role=role)
 
@@ -79,13 +79,17 @@ class AwsIotRulesSnsPipes(core.Construct):
             # layers=layers,
             description=function_data["description"],
             tracing=lambda_.Tracing.ACTIVE,
-            environment=function_data["environment_vars"],
+            environment=function_data.get("environment_vars"),
             timeout=core.Duration.seconds(function_data["timeout"]),
             reserved_concurrent_executions=function_data["reserved_concurrent_executions"],
         )
 
-        for policy in configuration["iam_actions"]:
-            self._lambda_function.add_to_role_policy(statement=policy)
+        self.iam_policies = list()
+        for iam_actions in configuration["iam_actions"]:
+            self.iam_policies.append(iam_actions)
+
+        policy_statement = iam.PolicyStatement(actions=self.iam_policies, resources=["*"])
+        self._lambda_function.add_to_role_policy(statement=policy_statement)
 
         # Defining the Lambda subscription to the specified SNS Topic in cdk.json file.
         sns_subscription = sns_subs.LambdaSubscription(fn=self._lambda_function)
@@ -126,3 +130,7 @@ class AwsIotRulesSnsPipes(core.Construct):
             return True
         except SchemaError:
             return False
+
+    @staticmethod
+    def validate_naming(configuration_received):
+        pass
