@@ -1,2 +1,4 @@
-from .aws_iot_rules_sns_pipes import AwsIotRulesSnsPipes, SNS_CONFIG_SCHEMA
-from .aws_iot_rules_sqs_pipes import AwsIotRulesSqsPipes, SQS_CONFIG_SCHEMA
+from .iot_rule_sns_pipes import AwsIotRulesSnsPipes
+from .iot_rule_sqs_pipes import AwsIotRulesSqsPipes
+from .settings import *
+from .utils import *
