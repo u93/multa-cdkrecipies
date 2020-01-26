@@ -7,7 +7,7 @@ with open("./README.md") as fp:
 
 setuptools.setup(
     name="multacdkrecipies",
-    version="0.0.3",
+    version="0.0.7",
     url="http://cdkrecipies.s3-website-us-east-1.amazonaws.com",
     description="A CDK Python Construct for AWS IoT Infrastructure",
     long_description=long_description,
@@ -31,6 +31,7 @@ setuptools.setup(
         "aws-cdk.aws-events==1.22.0",
         "aws-cdk.aws-iam==1.22.0",
         "aws-cdk.aws-iot==1.21.1",
+        "aws-cdk.aws-iotanalytics==1.22.0",
         "aws-cdk.aws-kinesis==1.22.0",
         "aws-cdk.aws-kms==1.22.0",
         "aws-cdk.aws-lambda==1.22.0",
@@ -42,7 +43,7 @@ setuptools.setup(
         "aws-cdk.aws-s3-notifications==1.22.0",
         "aws-cdk.aws-sns==1.22.0",
         "aws-cdk.aws-sns-subscriptions==1.22.0",
-       " aws-cdk.aws-sqs==1.22.0",
+        "aws-cdk.aws-sqs==1.22.0",
         "aws-cdk.aws-ssm==1.22.0",
         "aws-cdk.core==1.22.0",
         "aws-cdk.cx-api==1.22.0",

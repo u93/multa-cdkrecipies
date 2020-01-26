@@ -13,6 +13,7 @@ aws-cdk.aws-elasticloadbalancingv2==1.22.0
 aws-cdk.aws-events==1.22.0
 aws-cdk.aws-iam==1.22.0
 aws-cdk.aws-iot==1.21.1
+aws-cdk.aws-iotanalytics==1.22.0
 aws-cdk.aws-kinesis==1.22.0
 aws-cdk.aws-kms==1.22.0
 aws-cdk.aws-lambda==1.22.0
@@ -40,7 +41,7 @@ Jinja2==2.10.3
 jmespath==0.9.4
 jsii==0.21.2
 MarkupSafe==1.1.1
-multacdkrecipies==0.0.2
+multacdkrecipies==0.0.3
 pathspec==0.7.0
 publication==0.0.3
 python-dateutil==2.8.1

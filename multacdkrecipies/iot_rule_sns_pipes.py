@@ -24,6 +24,7 @@ class AwsIotRulesSnsPipes(core.Construct):
         _iot_rule (object): IoT Topic Rule representation in CDK.
 
     """
+
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
@@ -67,11 +68,11 @@ class AwsIotRulesSnsPipes(core.Construct):
             handler=function_data["handler"],
             runtime=function_runtime,
             # layers=layers,
-            description=function_data["description"],
+            description=function_data.get("description"),
             tracing=lambda_.Tracing.ACTIVE,
             environment=function_data.get("environment_vars"),
-            timeout=core.Duration.seconds(function_data["timeout"]),
-            reserved_concurrent_executions=function_data["reserved_concurrent_executions"],
+            timeout=core.Duration.seconds(function_data.get("timeout")),
+            reserved_concurrent_executions=function_data.get("reserved_concurrent_executions"),
         )
 
         # Defining Lambda Function IAM policies to access other services
@@ -96,7 +97,7 @@ class AwsIotRulesSnsPipes(core.Construct):
             rule_disabled=rule_data["rule_disabled"],
             sql=rule_data["sql"],
             aws_iot_sql_version=rule_data["aws_iot_sql_version"],
-            description=rule_data["description"],
+            description=rule_data.get("description"),
         )
 
         # Defining AWS IoT Rule
@@ -114,4 +115,3 @@ class AwsIotRulesSnsPipes(core.Construct):
     @property
     def iot_rule(self):
         return self._iot_rule
-
