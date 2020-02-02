@@ -1,3 +1,5 @@
+import traceback
+
 from schema import Schema, And, Use, Optional, SchemaError
 
 
@@ -50,9 +52,12 @@ SQS_CONFIG_SCHEMA = Schema(
     }
 )
 
-IOT_ANALYTICS_DATA_WORKFLOW = Schema(
+IOT_ANALYTICS_DATA_WORKFLOW = Schema({"name": And(Use(str))})
+
+IOT_ANALYTICS_FAN_IN = Schema(
     {
-        "name": And(Use(str))
+        "channel_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}],
+        "datastore_name": And(Use(str)),
     }
 )
 
@@ -61,4 +66,5 @@ def validate_configuration(configuration_schema, configuration_received):
     try:
         configuration_schema.validate(configuration_received)
     except SchemaError:
+        print(traceback.format_exc())
         raise RuntimeError("Improper configuration passed to Multa CDK Construct!!!")

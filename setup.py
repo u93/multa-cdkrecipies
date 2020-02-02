@@ -1,5 +1,8 @@
+import os
 import setuptools
 
+
+VERSION = os.environ.get("VERSION", "0.0.1")
 
 with open("./README.md") as fp:
     long_description = fp.read()
@@ -7,7 +10,7 @@ with open("./README.md") as fp:
 
 setuptools.setup(
     name="multacdkrecipies",
-    version="0.0.7",
+    version=VERSION,
     url="http://cdkrecipies.s3-website-us-east-1.amazonaws.com",
     description="A CDK Python Construct for AWS IoT Infrastructure",
     long_description=long_description,
