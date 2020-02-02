@@ -1,3 +1,5 @@
+import traceback
+
 from aws_cdk import (
     core,
     aws_iam as iam,
@@ -7,7 +9,7 @@ from aws_cdk import (
     aws_sns_subscriptions as sns_subs,
 )
 
-from .utils import SNS_CONFIG_SCHEMA, validate_configuration
+from .utils import SNS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
 class AwsIotRulesSnsPipes(core.Construct):
@@ -56,8 +58,10 @@ class AwsIotRulesSnsPipes(core.Construct):
         function_data = configuration["lambda_handler"]
         try:
             function_runtime = getattr(lambda_.Runtime, function_data["runtime"])
-        except Exception as e:
-            raise RuntimeError(f"Wrong function runtime {function_data['runtime']} specified")
+        except Exception:
+            raise WrongRuntimePassed(
+                detail=f"Wrong function runtime {function_data['runtime']} specified", tb=traceback.format_exc()
+            )
 
         # Defining Lambda function
         self._lambda_function = lambda_.Function(

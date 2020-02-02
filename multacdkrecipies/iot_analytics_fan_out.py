@@ -3,7 +3,7 @@ from aws_cdk import (
     aws_iotanalytics as analytics,
 )
 
-from .utils import IOT_ANALYTICS_FAN_OUT, validate_configuration, WrongTypeException
+from .utils import IOT_ANALYTICS_FAN_OUT, validate_configuration
 
 
 class AwsIotAnalyticsFanOut(core.Construct):

@@ -1,3 +1,5 @@
+import traceback
+
 from aws_cdk import (
     core,
     aws_iam as iam,
@@ -6,7 +8,7 @@ from aws_cdk import (
     aws_lambda_event_sources as lambda_sources,
     aws_sqs as sqs,
 )
-from .utils import SQS_CONFIG_SCHEMA, validate_configuration
+from .utils import SQS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
 class AwsIotRulesSqsPipes(core.Construct):
@@ -53,8 +55,11 @@ class AwsIotRulesSqsPipes(core.Construct):
         function_data = configuration["lambda_handler"]
         try:
             function_runtime = getattr(lambda_.Runtime, function_data["runtime"])
-        except Exception as e:
-            raise RuntimeError(f"Wrong function runtime {function_data['runtime']} specified")
+        except Exception:
+            print(f"Wrong function runtime {function_data['runtime']} specified")
+            raise WrongRuntimePassed(
+                detail=f"Wrong function runtime {function_data['runtime']} specified", tb=traceback.format_exc()
+            )
 
         # Defining Lambda function
         self._lambda_function = lambda_.Function(

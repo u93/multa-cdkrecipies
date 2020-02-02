@@ -7,7 +7,7 @@ from aws_cdk import (
 )
 
 from .settings import SAGEMAKER_POLICY
-from .utils import SAGEMAKER_NOTEBOOK, validate_configuration, validate_file, WrongTypeException
+from .utils import SAGEMAKER_NOTEBOOK, validate_configuration, validate_file
 
 file_path = os.path.dirname(os.path.abspath(__file__))
 
