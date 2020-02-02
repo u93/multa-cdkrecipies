@@ -56,7 +56,6 @@ class AwsIotRulesSqsPipes(core.Construct):
         try:
             function_runtime = getattr(lambda_.Runtime, function_data["runtime"])
         except Exception:
-            print(f"Wrong function runtime {function_data['runtime']} specified")
             raise WrongRuntimePassed(
                 detail=f"Wrong function runtime {function_data['runtime']} specified", tb=traceback.format_exc()
             )
