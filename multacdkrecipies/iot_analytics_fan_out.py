@@ -42,9 +42,7 @@ class AwsIotAnalyticsFanOut(core.Construct):
 
             # Defining Channel Activity Property
             channel_activity_property = analytics.CfnPipeline.ChannelProperty(
-                channel_name=self._channel.channel_name,
-                name=self._channel.channel_name,
-                next=datastore.datastore_name,
+                channel_name=self._channel.channel_name, name=self._channel.channel_name, next=datastore.datastore_name,
             )
             pipeline_channel_activity = analytics.CfnPipeline.ActivityProperty(channel=channel_activity_property)
             pipeline_activities.append(pipeline_channel_activity)

@@ -44,6 +44,7 @@ setuptools.setup(
         "aws-cdk.aws-s3==1.22.0",
         "aws-cdk.aws-s3-assets==1.22.0",
         "aws-cdk.aws-s3-notifications==1.22.0",
+        "aws-cdk.aws-sagemaker==1.22.0",
         "aws-cdk.aws-sns==1.22.0",
         "aws-cdk.aws-sns-subscriptions==1.22.0",
         "aws-cdk.aws-sqs==1.22.0",

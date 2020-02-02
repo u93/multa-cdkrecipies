@@ -1,3 +1,4 @@
+import os
 import traceback
 
 from schema import Schema, And, Use, Optional, SchemaError
@@ -68,6 +69,14 @@ IOT_ANALYTICS_FAN_OUT = Schema(
     }
 )
 
+SAGEMAKER_NOTEBOOK = Schema(
+    {
+        "name": And(Use(str)),
+        "scripts": {"on_create": And(Use(str)), "on_start": And(Use(str))},
+        "instance_type": And(Use(str)),
+    }
+)
+
 
 def validate_configuration(configuration_schema, configuration_received):
     try:
@@ -75,3 +84,7 @@ def validate_configuration(configuration_schema, configuration_received):
     except SchemaError:
         print(traceback.format_exc())
         raise RuntimeError("Improper configuration passed to Multa CDK Construct!!!")
+
+
+def validate_file(file_path: str):
+    return os.path.isfile(file_path)
