@@ -61,6 +61,13 @@ IOT_ANALYTICS_FAN_IN = Schema(
     }
 )
 
+IOT_ANALYTICS_FAN_OUT = Schema(
+    {
+        "datastore_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}],
+        "channel_name": And(Use(str)),
+    }
+)
+
 
 def validate_configuration(configuration_schema, configuration_received):
     try:
