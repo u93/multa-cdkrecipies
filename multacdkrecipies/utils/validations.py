@@ -6,7 +6,12 @@ from schema import Schema, And, Use, Optional, SchemaError
 
 SNS_CONFIG_SCHEMA = Schema(
     {
-        "topic_name": And(Use(str)),
+        "topic": {
+            "topic_name": And(Use(str)),
+            Optional("alarms"): [
+                {"name": And(Use(str)), "number": And(Use(int)), "periods": And(Use(int)), "points": And(Use(int)),}
+            ],
+        },
         "lambda_handler": {
             "lambda_name": And(Use(str)),
             Optional("description"): And(Use(str)),
@@ -16,6 +21,9 @@ SNS_CONFIG_SCHEMA = Schema(
             Optional("timeout"): And(Use(int)),
             Optional("reserved_concurrent_executions"): And(Use(int)),
             Optional("environment_vars"): And(Use(dict)),
+            Optional("alarms"): [
+                {"name": And(Use(str)), "number": And(Use(int)), "periods": And(Use(int)), "points": And(Use(int)),}
+            ],
         },
         "iam_actions": And(Use(list)),
         "iot_rule": {
@@ -31,7 +39,12 @@ SNS_CONFIG_SCHEMA = Schema(
 
 SQS_CONFIG_SCHEMA = Schema(
     {
-        "queue_name": And(Use(str)),
+        "queue": {
+            "queue_name": And(Use(str)),
+            Optional("alarms"): [
+                {"name": And(Use(str)), "number": And(Use(int)), "periods": And(Use(int)), "points": And(Use(int)),}
+            ],
+        },
         "lambda_handler": {
             "lambda_name": And(Use(str)),
             Optional("description"): And(Use(str)),
@@ -41,6 +54,9 @@ SQS_CONFIG_SCHEMA = Schema(
             Optional("timeout"): And(Use(int)),
             Optional("reserved_concurrent_executions"): And(Use(int)),
             Optional("environment_vars"): And(Use(dict)),
+            Optional("alarms"): [
+                {"name": And(Use(str)), "number": And(Use(int)), "periods": And(Use(int)), "points": And(Use(int)),}
+            ],
         },
         "iam_actions": And(Use(list)),
         "iot_rule": {

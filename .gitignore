@@ -130,3 +130,5 @@ dmypy.json
 *.html
 *.xml
 idea/
+/.vscode/
+/test/

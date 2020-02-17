@@ -2,6 +2,7 @@ import traceback
 
 from aws_cdk import (
     core,
+    aws_cloudwatch as cloudwatch,
     aws_iam as iam,
     aws_iot as iot,
     aws_lambda as lambda_,
@@ -31,14 +32,16 @@ class AwsIotRulesSnsPipes(core.Construct):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
+        self.configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=SNS_CONFIG_SCHEMA, configuration_received=configuration)
+        validate_configuration(configuration_schema=SNS_CONFIG_SCHEMA, configuration_received=self.configuration)
 
         # Defining SNS Topic
-        sns_name = self.prefix + configuration["topic_name"] + "_" + "topic" + "_" + self.environment_
-        iam_role_name = self.prefix + configuration["topic_name"] + "_" + "topic_role" + "_" + self.environment_
-        iam_policy_name = self.prefix + configuration["topic_name"] + "_" + "topic_policy" + "_" + self.environment_
+        topic_data = self.configuration["topic"]
+        sns_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic" + "_" + self.environment_
+        iam_role_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic_role" + "_" + self.environment_
+        iam_policy_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic_policy" + "_" + self.environment_
 
         self._sns_topic = sns.Topic(self, id=sns_name, topic_name=sns_name, display_name=sns_name)
 
@@ -107,6 +110,45 @@ class AwsIotRulesSnsPipes(core.Construct):
         # Defining AWS IoT Rule
         rule_name = self.prefix + "_" + rule_data["rule_name"] + "_" + "topic_rule" + "_" + self.environment_
         self._iot_rule = iot.CfnTopicRule(self, id=rule_name, rule_name=rule_name, topic_rule_payload=rule_payload)
+
+    def set_alarms(self):
+        if isinstance(self.configuration["topic"].get("alarms"), list) is True:
+            sns_alarms = list()
+            for alarm_definition in self.configuration["topic"].get("alarms"):
+                try:
+                    sns_alarms.append(
+                        cloudwatch.Alarm(
+                            self,
+                            id="iot_sns_lambda_" + alarm_definition["name"],
+                            alarm_name="iot_sns_lambda_" + alarm_definition["name"],
+                            metric=self._sns_topic.metric(
+                                alarm_definition["name"]
+                            ),  # metric_number_of_notifications_failed
+                            threshold=alarm_definition["number"],
+                            evaluation_periods=alarm_definition["periods"],
+                            datapoints_to_alarm=alarm_definition["points"],
+                        )
+                    )
+                except Exception:
+                    print(traceback.format_exc())
+
+        if isinstance(self.configuration["lambda_handler"].get("alarms"), list) is True:
+            lambda_alarms = list()
+            for alarm_definition in self.configuration["lambda_handler"].get("alarms"):
+                try:
+                    lambda_alarms.append(
+                        cloudwatch.Alarm(
+                            self,
+                            id="iot_sns_lambda_" + alarm_definition["name"],
+                            alarm_name="iot_sns_lambda_" + alarm_definition["name"],
+                            metric=self._lambda_function.metric(alarm_definition["name"]),
+                            threshold=alarm_definition["number"],
+                            evaluation_periods=alarm_definition["periods"],
+                            datapoints_to_alarm=alarm_definition["points"],
+                        )
+                    )
+                except Exception:
+                    print(traceback.format_exc())
 
     @property
     def sns_topic(self):
