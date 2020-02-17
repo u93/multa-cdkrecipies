@@ -2,6 +2,7 @@ import traceback
 
 from aws_cdk import (
     core,
+    aws_cloudwatch as cloudwatch,
     aws_iam as iam,
     aws_iot as iot,
     aws_lambda as lambda_,
@@ -30,12 +31,14 @@ class AwsIotRulesSqsPipes(core.Construct):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
-        validate_configuration(configuration_schema=SQS_CONFIG_SCHEMA, configuration_received=configuration)
+        self.configuration = configuration
+        validate_configuration(configuration_schema=SQS_CONFIG_SCHEMA, configuration_received=self.configuration)
 
         # Defining SQS Topic
-        sqs_name = self.prefix + configuration["queue_name"] + "_" + "queue" + "_" + self.environment_
-        iam_role_name = self.prefix + configuration["queue_name"] + "_" + "queue_role" + "_" + self.environment_
-        iam_policy_name = self.prefix + configuration["queue_name"] + "_" + "queue_policy" + "_" + self.environment_
+        queue_data = self.configuration["queue"]
+        sqs_name = self.prefix + "_" + queue_data["queue_name"] + "_" + "queue" + "_" + self.environment_
+        iam_role_name = self.prefix + "_" + queue_data["queue_name"] + "_" + "queue_role" + "_" + self.environment_
+        iam_policy_name = self.prefix + "_" + queue_data["queue_name"] + "_" + "queue_policy" + "_" + self.environment_
 
         self._sqs_queue = sqs.Queue(self, id=sqs_name, queue_name=sqs_name)
 
@@ -52,7 +55,7 @@ class AwsIotRulesSqsPipes(core.Construct):
         policy.attach_to_role(role=role)
 
         # Validating Lambda Function Runtime
-        function_data = configuration["lambda_handler"]
+        function_data = self.configuration["lambda_handler"]
         try:
             function_runtime = getattr(lambda_.Runtime, function_data["runtime"])
         except Exception:
@@ -81,7 +84,7 @@ class AwsIotRulesSqsPipes(core.Construct):
 
         # Defining Lambda Function IAM policies to access other services
         self.iam_policies = list()
-        for iam_actions in configuration["iam_actions"]:
+        for iam_actions in self.configuration["iam_actions"]:
             self.iam_policies.append(iam_actions)
 
         policy_statement = iam.PolicyStatement(actions=self.iam_policies, resources=["*"])
@@ -91,7 +94,7 @@ class AwsIotRulesSqsPipes(core.Construct):
         action = iot.CfnTopicRule.SqsActionProperty(queue_url=self._sqs_queue.queue_url, role_arn=role.role_arn)
         action_property = iot.CfnTopicRule.ActionProperty(sqs=action)
 
-        rule_data = configuration["iot_rule"]
+        rule_data = self.configuration["iot_rule"]
         rule_payload = iot.CfnTopicRule.TopicRulePayloadProperty(
             actions=[action_property],
             rule_disabled=rule_data["rule_disabled"],
@@ -103,6 +106,43 @@ class AwsIotRulesSqsPipes(core.Construct):
         # Defining AWS IoT Rule
         rule_name = self.prefix + "_" + rule_data["rule_name"] + "_" + self.environment_
         self._iot_rule = iot.CfnTopicRule(self, id=rule_name, rule_name=rule_name, topic_rule_payload=rule_payload)
+
+    def set_alarms(self):
+        if isinstance(self.configuration["queue"].get("alarms"), list) is True:
+            sqs_alarms = list()
+            for alarm_definition in self.configuration["queue"].get("alarms"):
+                try:
+                    sqs_alarms.append(
+                        cloudwatch.Alarm(
+                            self,
+                            id="iot_sqs_lambda_" + alarm_definition["name"],
+                            alarm_name="iot_sqs_lambda_" + alarm_definition["name"],
+                            metric=self._sqs_queue.metric(alarm_definition["name"]),
+                            threshold=alarm_definition["number"],
+                            evaluation_periods=alarm_definition["periods"],
+                            datapoints_to_alarm=alarm_definition["points"],
+                        )
+                    )
+                except Exception:
+                    print(traceback.format_exc())
+
+        if isinstance(self.configuration["lambda_handler"].get("alarms"), list) is True:
+            lambda_alarms = list()
+            for alarm_definition in self.configuration["lambda_handler"].get("alarms"):
+                try:
+                    lambda_alarms.append(
+                        cloudwatch.Alarm(
+                            self,
+                            id="iot_sqs_lambda_" + alarm_definition["name"],
+                            alarm_name="iot_sqs_lambda_" + alarm_definition["name"],
+                            metric=self._lambda_function.metric(alarm_definition["name"]),
+                            threshold=alarm_definition["number"],
+                            evaluation_periods=alarm_definition["periods"],
+                            datapoints_to_alarm=alarm_definition["points"],
+                        )
+                    )
+                except Exception:
+                    print(traceback.format_exc())
 
     @property
     def sqs_queue(self):
