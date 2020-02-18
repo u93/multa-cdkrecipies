@@ -9,7 +9,7 @@ with open("./README.md") as fp:
 
 
 setuptools.setup(
-    name="multacdkrecipies",
+    name="multa-cdk-recipies",
     version=VERSION,
     url="http://cdkrecipies.s3-website-us-east-1.amazonaws.com",
     description="A CDK Python Construct for AWS IoT Infrastructure",
@@ -17,7 +17,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     author="Eugenio Efrain Breijo",
     author_email="eebf1993@gmail.com",
-    packages=["multacdkrecipies", "multacdkrecipies.utils", "multacdkrecipies.settings"],
+    packages=["multa-cdk-recipies", "multa-cdk-recipies.utils", "multa-cdk-recipies.settings"],
     install_requires=[
         "appdirs==1.4.3",
         "attrs==19.3.0",
