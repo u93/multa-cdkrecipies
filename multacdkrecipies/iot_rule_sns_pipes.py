@@ -58,41 +58,51 @@ class AwsIotRulesSnsPipes(core.Construct):
         policy.attach_to_role(role=role)
 
         # Validating Lambda Function Runtime
-        function_data = configuration["lambda_handler"]
-        try:
-            function_runtime = getattr(lambda_.Runtime, function_data["runtime"])
-        except Exception:
-            raise WrongRuntimePassed(
-                detail=f"Wrong function runtime {function_data['runtime']} specified", tb=traceback.format_exc()
+        functions_data = self.configuration["lambda_handlers"]
+        self._lambda_functions = list()
+        for lambda_function in functions_data:
+            try:
+                function_runtime = getattr(lambda_.Runtime, lambda_function["runtime"])
+            except Exception:
+                raise WrongRuntimePassed(
+                    detail=f"Wrong function runtime {lambda_function['runtime']} specified", tb=traceback.format_exc()
+                )
+
+            # Defining Lambda function
+            _lambda_function = lambda_.Function(
+                self,
+                id=self.prefix + "_" + lambda_function["lambda_name"] + "_" + "lambda" + "_" + self.environment_,
+                function_name=self.prefix
+                + "_"
+                + lambda_function["lambda_name"]
+                + "_"
+                + "lambda"
+                + "_"
+                + self.environment_,
+                code=lambda_.Code.from_asset(path=lambda_function["code_path"]),
+                handler=lambda_function["handler"],
+                runtime=function_runtime,
+                # layers=layers,
+                description=lambda_function.get("description"),
+                tracing=lambda_.Tracing.ACTIVE,
+                environment=lambda_function.get("environment_vars"),
+                timeout=core.Duration.seconds(lambda_function.get("timeout")),
+                reserved_concurrent_executions=lambda_function.get("reserved_concurrent_executions"),
             )
 
-        # Defining Lambda function
-        self._lambda_function = lambda_.Function(
-            self,
-            id=self.prefix + "_" + function_data["lambda_name"] + "_" + "lambda" + "_" + self.environment_,
-            function_name=self.prefix + "_" + function_data["lambda_name"] + "_" + "lambda" + "_" + self.environment_,
-            code=lambda_.Code.from_asset(path=function_data["code_path"]),
-            handler=function_data["handler"],
-            runtime=function_runtime,
-            # layers=layers,
-            description=function_data.get("description"),
-            tracing=lambda_.Tracing.ACTIVE,
-            environment=function_data.get("environment_vars"),
-            timeout=core.Duration.seconds(function_data.get("timeout")),
-            reserved_concurrent_executions=function_data.get("reserved_concurrent_executions"),
-        )
+            # Defining Lambda Function IAM policies to access other services
+            self.iam_policies = list()
+            for iam_actions in configuration["iam_actions"]:
+                self.iam_policies.append(iam_actions)
 
-        # Defining Lambda Function IAM policies to access other services
-        self.iam_policies = list()
-        for iam_actions in configuration["iam_actions"]:
-            self.iam_policies.append(iam_actions)
+            policy_statement = iam.PolicyStatement(actions=self.iam_policies, resources=["*"])
+            _lambda_function.add_to_role_policy(statement=policy_statement)
 
-        policy_statement = iam.PolicyStatement(actions=self.iam_policies, resources=["*"])
-        self._lambda_function.add_to_role_policy(statement=policy_statement)
+            # Defining the Lambda subscription to the specified SNS Topic in cdk.json file.
+            sns_subscription = sns_subs.LambdaSubscription(fn=_lambda_function)
+            self._sns_topic.add_subscription(sns_subscription)
 
-        # Defining the Lambda subscription to the specified SNS Topic in cdk.json file.
-        sns_subscription = sns_subs.LambdaSubscription(fn=self._lambda_function)
-        self._sns_topic.add_subscription(sns_subscription)
+            self._lambda_functions.append(_lambda_function)
 
         # Defining Topic Rule properties
         action = iot.CfnTopicRule.SnsActionProperty(target_arn=self._sns_topic.topic_arn, role_arn=role.role_arn)
@@ -119,36 +129,39 @@ class AwsIotRulesSnsPipes(core.Construct):
                     sns_alarms.append(
                         cloudwatch.Alarm(
                             self,
-                            id="iot_sns_lambda_" + alarm_definition["name"],
-                            alarm_name="iot_sns_lambda_" + alarm_definition["name"],
+                            id="iot_sns_lambda" + "_" + self.configuration["topic"]["topic_name"] + "_" + alarm_definition["name"],
+                            alarm_name="iot_sns_lambda" + "_" + self.configuration["topic"]["topic_name"] + "_" + alarm_definition["name"],
                             metric=self._sns_topic.metric(
                                 alarm_definition["name"]
                             ),  # metric_number_of_notifications_failed
                             threshold=alarm_definition["number"],
                             evaluation_periods=alarm_definition["periods"],
-                            datapoints_to_alarm=alarm_definition["points"],
+                            datapoints_to_alarm=alarm_definition["points"]
                         )
                     )
                 except Exception:
                     print(traceback.format_exc())
 
-        if isinstance(self.configuration["lambda_handler"].get("alarms"), list) is True:
-            lambda_alarms = list()
-            for alarm_definition in self.configuration["lambda_handler"].get("alarms"):
-                try:
-                    lambda_alarms.append(
-                        cloudwatch.Alarm(
-                            self,
-                            id="iot_sns_lambda_" + alarm_definition["name"],
-                            alarm_name="iot_sns_lambda_" + alarm_definition["name"],
-                            metric=self._lambda_function.metric(alarm_definition["name"]),
-                            threshold=alarm_definition["number"],
-                            evaluation_periods=alarm_definition["periods"],
-                            datapoints_to_alarm=alarm_definition["points"],
+        for lambda_function_data, lambda_function_definition in zip(
+            self.configuration["lambda_handlers"], self._lambda_functions
+        ):
+            if isinstance(lambda_function_data.get("alarms"), list) is True:
+                lambda_alarms = list()
+                for alarm_definition in lambda_function_data.get("alarms"):
+                    try:
+                        lambda_alarms.append(
+                            cloudwatch.Alarm(
+                                self,
+                                id="iot_sqs_lambda" + "_" + lambda_function_data["lambda_name"] + "_" + alarm_definition["name"],
+                                alarm_name="iot_sqs_lambda" + "_" + lambda_function_data["lambda_name"] + "_" + alarm_definition["name"],
+                                metric=lambda_function_definition.metric(alarm_definition["name"]),
+                                threshold=alarm_definition["number"],
+                                evaluation_periods=alarm_definition["periods"],
+                                datapoints_to_alarm=alarm_definition["points"],
+                            )
                         )
-                    )
-                except Exception:
-                    print(traceback.format_exc())
+                    except Exception:
+                        print(traceback.format_exc())
 
     @property
     def sns_topic(self):

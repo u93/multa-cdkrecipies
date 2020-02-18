@@ -45,7 +45,6 @@ jmespath==0.9.4
 jsii==0.21.2
 MarkupSafe==1.1.1
 mccabe==0.6.1
-multacdkrecipies==0.0.1
 pathspec==0.7.0
 publication==0.0.3
 pycodestyle==2.5.0
