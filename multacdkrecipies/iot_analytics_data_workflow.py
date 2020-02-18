@@ -40,9 +40,7 @@ class AwsIotAnalyticsDataWorkflow(core.Construct):
 
         # Defining Channel Activity Property
         channel_activity_property = analytics.CfnPipeline.ChannelProperty(
-            channel_name=self._channel.channel_name,
-            name=self._channel.channel_name,
-            next=self._datastore.datastore_name,
+            channel_name=self._channel.channel_name, name=self._channel.channel_name, next=self._datastore.datastore_name,
         )
         pipeline_channel_activity = analytics.CfnPipeline.ActivityProperty(channel=channel_activity_property)
         pipeline_activities.append(pipeline_channel_activity)
@@ -55,9 +53,7 @@ class AwsIotAnalyticsDataWorkflow(core.Construct):
         pipeline_activities.append(pipeline_datastore_activity)
 
         # Defining Pipeline
-        self._pipeline = analytics.CfnPipeline(
-            self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities
-        )
+        self._pipeline = analytics.CfnPipeline(self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities)
         self._pipeline.add_depends_on(target=self._datastore)
         self._pipeline.add_depends_on(target=self._channel)
 

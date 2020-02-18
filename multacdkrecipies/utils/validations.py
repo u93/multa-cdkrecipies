@@ -9,21 +9,33 @@ SNS_CONFIG_SCHEMA = Schema(
         "topic": {
             "topic_name": And(Use(str)),
             Optional("alarms"): [
-                {"name": And(Use(str)), "number": And(Use(int)), "periods": And(Use(int)), "points": And(Use(int)),}
+                {
+                    "name": And(Use(str)),
+                    "number": And(Use(int)),
+                    "periods": And(Use(int)),
+                    "points": And(Use(int)),
+                    "actions": And(Use(bool)),
+                }
             ],
         },
         "lambda_handlers": [
             {
                 "lambda_name": And(Use(str)),
                 Optional("description"): And(Use(str)),
-                "code_path": And(Use(str)),
+                Optional("code_path"): And(Use(str)),
                 "runtime": And(Use(str)),
                 "handler": And(Use(str)),
                 Optional("timeout"): And(Use(int)),
                 Optional("reserved_concurrent_executions"): And(Use(int)),
                 Optional("environment_vars"): And(Use(dict)),
                 Optional("alarms"): [
-                    {"name": And(Use(str)), "number": And(Use(int)), "periods": And(Use(int)), "points": And(Use(int)),}
+                    {
+                        "name": And(Use(str)),
+                        "number": And(Use(int)),
+                        "periods": And(Use(int)),
+                        "points": And(Use(int)),
+                        "actions": And(Use(bool)),
+                    }
                 ],
             },
         ],
@@ -44,21 +56,33 @@ SQS_CONFIG_SCHEMA = Schema(
         "queue": {
             "queue_name": And(Use(str)),
             Optional("alarms"): [
-                {"name": And(Use(str)), "number": And(Use(int)), "periods": And(Use(int)), "points": And(Use(int)),}
+                {
+                    "name": And(Use(str)),
+                    "number": And(Use(int)),
+                    "periods": And(Use(int)),
+                    "points": And(Use(int)),
+                    "actions": And(Use(bool)),
+                }
             ],
         },
         "lambda_handlers": [
             {
                 "lambda_name": And(Use(str)),
                 Optional("description"): And(Use(str)),
-                "code_path": And(Use(str)),
+                Optional("code_path"): And(Use(str)),
                 "runtime": And(Use(str)),
                 "handler": And(Use(str)),
                 Optional("timeout"): And(Use(int)),
                 Optional("reserved_concurrent_executions"): And(Use(int)),
                 Optional("environment_vars"): And(Use(dict)),
                 Optional("alarms"): [
-                    {"name": And(Use(str)), "number": And(Use(int)), "periods": And(Use(int)), "points": And(Use(int)),}
+                    {
+                        "name": And(Use(str)),
+                        "number": And(Use(int)),
+                        "periods": And(Use(int)),
+                        "points": And(Use(int)),
+                        "actions": And(Use(bool)),
+                    }
                 ],
             },
         ],
@@ -76,25 +100,15 @@ SQS_CONFIG_SCHEMA = Schema(
 IOT_ANALYTICS_DATA_WORKFLOW = Schema({"name": And(Use(str))})
 
 IOT_ANALYTICS_FAN_IN = Schema(
-    {
-        "channel_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}],
-        "datastore_name": And(Use(str)),
-    }
+    {"channel_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}], "datastore_name": And(Use(str)),}
 )
 
 IOT_ANALYTICS_FAN_OUT = Schema(
-    {
-        "datastore_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}],
-        "channel_name": And(Use(str)),
-    }
+    {"datastore_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}], "channel_name": And(Use(str)),}
 )
 
 SAGEMAKER_NOTEBOOK = Schema(
-    {
-        "name": And(Use(str)),
-        "scripts": {"on_create": And(Use(str)), "on_start": And(Use(str))},
-        "instance_type": And(Use(str)),
-    }
+    {"name": And(Use(str)), "scripts": {"on_create": And(Use(str)), "on_start": And(Use(str))}, "instance_type": And(Use(str)),}
 )
 
 

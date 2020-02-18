@@ -61,20 +61,14 @@ class AwsIoTAnalyticsSageMakerNotebook(core.Construct):
         )
 
         role_name = self.prefix + "_" + base_name + "sagemaker_role_" + self.environment_
-        self._role = iam.Role(
-            self, id=role_name, role_name=role_name, assumed_by=iam.ServicePrincipal(service="sagemaker.amazonaws.com")
-        )
+        self._role = iam.Role(self, id=role_name, role_name=role_name, assumed_by=iam.ServicePrincipal(service="sagemaker.amazonaws.com"))
 
         managed_policy = iam.ManagedPolicy.from_aws_managed_policy_name(managed_policy_name="AmazonSageMakerFullAccess")
         self._role.add_managed_policy(policy=managed_policy)
 
         policy_name = self.prefix + "_" + base_name + "sagemaker_policy" + self.environment_
-        ecr_statement = iam.PolicyStatement(
-            actions=SAGEMAKER_POLICY["ecr_actions"], resources=SAGEMAKER_POLICY["ecr_resources"]
-        )
-        s3_statement = iam.PolicyStatement(
-            actions=SAGEMAKER_POLICY["s3_actions"], resources=SAGEMAKER_POLICY["s3_resources"]
-        )
+        ecr_statement = iam.PolicyStatement(actions=SAGEMAKER_POLICY["ecr_actions"], resources=SAGEMAKER_POLICY["ecr_resources"])
+        s3_statement = iam.PolicyStatement(actions=SAGEMAKER_POLICY["s3_actions"], resources=SAGEMAKER_POLICY["s3_resources"])
         policy = iam.Policy(self, id=policy_name, policy_name=policy_name, statements=[ecr_statement, s3_statement])
         self._role.attach_inline_policy(policy=policy)
 

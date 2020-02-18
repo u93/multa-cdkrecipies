@@ -1,3 +1,4 @@
+import os
 import traceback
 
 from aws_cdk import (
@@ -9,6 +10,7 @@ from aws_cdk import (
     aws_lambda_event_sources as lambda_sources,
     aws_sqs as sqs,
 )
+from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
 from .utils import SQS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
@@ -36,9 +38,9 @@ class AwsIotRulesSqsPipes(core.Construct):
 
         # Defining SQS Topic
         queue_data = self.configuration["queue"]
-        sqs_name = self.prefix + "_" + queue_data["queue_name"] + "_" + "queue" + "_" + self.environment_
-        iam_role_name = self.prefix + "_" + queue_data["queue_name"] + "_" + "queue_role" + "_" + self.environment_
-        iam_policy_name = self.prefix + "_" + queue_data["queue_name"] + "_" + "queue_policy" + "_" + self.environment_
+        sqs_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_" + self.environment_
+        iam_role_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_role_" + self.environment_
+        iam_policy_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_policy_" + self.environment_
 
         self._sqs_queue = sqs.Queue(self, id=sqs_name, queue_name=sqs_name)
 
@@ -61,19 +63,25 @@ class AwsIotRulesSqsPipes(core.Construct):
             try:
                 function_runtime = getattr(lambda_.Runtime, lambda_function["runtime"])
             except Exception:
-                raise WrongRuntimePassed(
-                    detail=f"Wrong function runtime {lambda_function['runtime']} specified", tb=traceback.format_exc()
-                )
+                raise WrongRuntimePassed(detail=f"Wrong function runtime {lambda_function['runtime']} specified", tb=traceback.format_exc())
+
+            obtainer_code_path = lambda_function.get("code_path")
+            if obtainer_code_path is not None:
+                code_path = obtainer_code_path
+            elif obtainer_code_path is None and DEFAULT_LAMBDA_CODE_PATH_EXISTS is True:
+                code_path = DEFAULT_LAMBDA_CODE_PATH
+            else:
+                raise RuntimeError(f"Code path for Lambda Function {lambda_function['lambda_name']} is not valid!")
 
             # Defining Lambda function
             _lambda_function = lambda_.Function(
                 self,
-                id=self.prefix + "_" + lambda_function["lambda_name"] + "_" + self.environment_,
-                function_name=self.prefix + "_" + lambda_function["lambda_name"] + "_" + self.environment_,
-                code=lambda_.Code.from_asset(path=lambda_function["code_path"]),
+                id=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
+                function_name=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
+                code=lambda_.Code.from_asset(path=code_path),
                 handler=lambda_function["handler"],
                 runtime=function_runtime,
-                # layers=layers,
+                layers=None,
                 description=lambda_function.get("description"),
                 tracing=lambda_.Tracing.ACTIVE,
                 environment=lambda_function.get("environment_vars"),
@@ -92,11 +100,11 @@ class AwsIotRulesSqsPipes(core.Construct):
             policy_statement = iam.PolicyStatement(actions=self.iam_policies, resources=["*"])
             _lambda_function.add_to_role_policy(statement=policy_statement)
 
-            # Defining Topic Rule properties
-            action = iot.CfnTopicRule.SqsActionProperty(queue_url=self._sqs_queue.queue_url, role_arn=role.role_arn)
-            action_property = iot.CfnTopicRule.ActionProperty(sqs=action)
-
             self._lambda_functions.append(_lambda_function)
+
+        # Defining Topic Rule properties
+        action = iot.CfnTopicRule.SqsActionProperty(queue_url=self._sqs_queue.queue_url, role_arn=role.role_arn)
+        action_property = iot.CfnTopicRule.ActionProperty(sqs=action)
 
         rule_data = self.configuration["iot_rule"]
         rule_payload = iot.CfnTopicRule.TopicRulePayloadProperty(
@@ -119,20 +127,19 @@ class AwsIotRulesSqsPipes(core.Construct):
                     sqs_alarms.append(
                         cloudwatch.Alarm(
                             self,
-                            id="iot_sqs_lambda" + "_" + self.configuration["queue"]["queue_name"] + "_" + alarm_definition["name"],
-                            alarm_name="iot_sqs_lambda" + "_" + self.configuration["queue"]["queue_name"] + "_" + alarm_definition["name"],
+                            id="iot_sqs_lambda_" + self.configuration["queue"]["queue_name"] + "_" + alarm_definition["name"],
+                            alarm_name="iot_sqs_lambda_" + self.configuration["queue"]["queue_name"] + "_" + alarm_definition["name"],
                             metric=self._sqs_queue.metric(alarm_definition["name"]),
                             threshold=alarm_definition["number"],
                             evaluation_periods=alarm_definition["periods"],
                             datapoints_to_alarm=alarm_definition["points"],
+                            actions_enabled=alarm_definition["actions"],
                         )
                     )
                 except Exception:
                     print(traceback.format_exc())
 
-        for lambda_function_data, lambda_function_definition in zip(
-            self.configuration["lambda_handlers"], self._lambda_functions
-        ):
+        for lambda_function_data, lambda_function_definition in zip(self.configuration["lambda_handlers"], self._lambda_functions):
             if isinstance(lambda_function_data.get("alarms"), list) is True:
                 lambda_alarms = list()
                 for alarm_definition in lambda_function_data.get("alarms"):
@@ -140,12 +147,13 @@ class AwsIotRulesSqsPipes(core.Construct):
                         lambda_alarms.append(
                             cloudwatch.Alarm(
                                 self,
-                                id="iot_sqs_lambda" + "_" + lambda_function_data["lambda_name"] + "_" + alarm_definition["name"],
-                                alarm_name="iot_sqs_lambda" + "_" + lambda_function_data["lambda_name"] + "_" + alarm_definition["name"],
+                                id="iot_sqs_lambda_" + lambda_function_data["lambda_name"] + "_" + alarm_definition["name"],
+                                alarm_name="iot_sqs_lambda_" + lambda_function_data["lambda_name"] + "_" + alarm_definition["name"],
                                 metric=lambda_function_definition.metric(alarm_definition["name"]),
                                 threshold=alarm_definition["number"],
                                 evaluation_periods=alarm_definition["periods"],
                                 datapoints_to_alarm=alarm_definition["points"],
+                                actions_enabled=alarm_definition["actions"],
                             )
                         )
                     except Exception:

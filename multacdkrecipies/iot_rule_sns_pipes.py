@@ -9,7 +9,7 @@ from aws_cdk import (
     aws_sns as sns,
     aws_sns_subscriptions as sns_subs,
 )
-
+from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
 from .utils import SNS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
@@ -64,25 +64,25 @@ class AwsIotRulesSnsPipes(core.Construct):
             try:
                 function_runtime = getattr(lambda_.Runtime, lambda_function["runtime"])
             except Exception:
-                raise WrongRuntimePassed(
-                    detail=f"Wrong function runtime {lambda_function['runtime']} specified", tb=traceback.format_exc()
-                )
+                raise WrongRuntimePassed(detail=f"Wrong function runtime {lambda_function['runtime']} specified", tb=traceback.format_exc())
+
+            obtainer_code_path = lambda_function.get("code_path")
+            if obtainer_code_path is not None:
+                code_path = obtainer_code_path
+            elif obtainer_code_path is None and DEFAULT_LAMBDA_CODE_PATH_EXISTS is True:
+                code_path = DEFAULT_LAMBDA_CODE_PATH
+            else:
+                raise RuntimeError(f"Code path for Lambda Function {lambda_function['lambda_name']} is not valid!")
 
             # Defining Lambda function
             _lambda_function = lambda_.Function(
                 self,
-                id=self.prefix + "_" + lambda_function["lambda_name"] + "_" + "lambda" + "_" + self.environment_,
-                function_name=self.prefix
-                + "_"
-                + lambda_function["lambda_name"]
-                + "_"
-                + "lambda"
-                + "_"
-                + self.environment_,
+                id=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
+                function_name=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
                 code=lambda_.Code.from_asset(path=lambda_function["code_path"]),
                 handler=lambda_function["handler"],
                 runtime=function_runtime,
-                # layers=layers,
+                layers=None,
                 description=lambda_function.get("description"),
                 tracing=lambda_.Tracing.ACTIVE,
                 environment=lambda_function.get("environment_vars"),
@@ -118,7 +118,7 @@ class AwsIotRulesSnsPipes(core.Construct):
         )
 
         # Defining AWS IoT Rule
-        rule_name = self.prefix + "_" + rule_data["rule_name"] + "_" + "topic_rule" + "_" + self.environment_
+        rule_name = self.prefix + "_" + rule_data["rule_name"] + "_topic_rule_" + self.environment_
         self._iot_rule = iot.CfnTopicRule(self, id=rule_name, rule_name=rule_name, topic_rule_payload=rule_payload)
 
     def set_alarms(self):
@@ -129,22 +129,19 @@ class AwsIotRulesSnsPipes(core.Construct):
                     sns_alarms.append(
                         cloudwatch.Alarm(
                             self,
-                            id="iot_sns_lambda" + "_" + self.configuration["topic"]["topic_name"] + "_" + alarm_definition["name"],
-                            alarm_name="iot_sns_lambda" + "_" + self.configuration["topic"]["topic_name"] + "_" + alarm_definition["name"],
-                            metric=self._sns_topic.metric(
-                                alarm_definition["name"]
-                            ),  # metric_number_of_notifications_failed
+                            id="iot_sns_lambda_" + self.configuration["topic"]["topic_name"] + "_" + alarm_definition["name"],
+                            alarm_name="iot_sns_lambda_" + self.configuration["topic"]["topic_name"] + "_" + alarm_definition["name"],
+                            metric=self._sns_topic.metric(alarm_definition["name"]),  # metric_number_of_notifications_failed
                             threshold=alarm_definition["number"],
                             evaluation_periods=alarm_definition["periods"],
-                            datapoints_to_alarm=alarm_definition["points"]
+                            datapoints_to_alarm=alarm_definition["points"],
+                            actions_enabled=alarm_definition["actions"],
                         )
                     )
                 except Exception:
                     print(traceback.format_exc())
 
-        for lambda_function_data, lambda_function_definition in zip(
-            self.configuration["lambda_handlers"], self._lambda_functions
-        ):
+        for lambda_function_data, lambda_function_definition in zip(self.configuration["lambda_handlers"], self._lambda_functions):
             if isinstance(lambda_function_data.get("alarms"), list) is True:
                 lambda_alarms = list()
                 for alarm_definition in lambda_function_data.get("alarms"):
@@ -158,6 +155,7 @@ class AwsIotRulesSnsPipes(core.Construct):
                                 threshold=alarm_definition["number"],
                                 evaluation_periods=alarm_definition["periods"],
                                 datapoints_to_alarm=alarm_definition["points"],
+                                actions_enabled=alarm_definition["actions"],
                             )
                         )
                     except Exception:

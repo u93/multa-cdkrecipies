@@ -1,1 +1,2 @@
-from .iot_analytics import *
+from .iot_analytics_settings import *
+from .lambda_settings import *
