@@ -10,7 +10,7 @@ from aws_cdk import (
     aws_sns_subscriptions as sns_subs,
 )
 from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
-from .utils import SNS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
+from .utils import IOT_SNS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
 class AwsIotRulesSnsPipes(core.Construct):
@@ -35,7 +35,7 @@ class AwsIotRulesSnsPipes(core.Construct):
         self.configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=SNS_CONFIG_SCHEMA, configuration_received=self.configuration)
+        validate_configuration(configuration_schema=IOT_SNS_CONFIG_SCHEMA, configuration_received=self.configuration)
 
         # Defining SNS Topic
         topic_data = self.configuration["topic"]

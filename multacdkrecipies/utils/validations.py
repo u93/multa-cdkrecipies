@@ -3,8 +3,46 @@ import traceback
 
 from schema import Schema, And, Use, Optional, SchemaError
 
-
 SNS_CONFIG_SCHEMA = Schema(
+    {
+        "topic": {
+            "topic_name": And(Use(str)),
+            Optional("alarms"): [
+                {
+                    "name": And(Use(str)),
+                    "number": And(Use(int)),
+                    "periods": And(Use(int)),
+                    "points": And(Use(int)),
+                    "actions": And(Use(bool)),
+                }
+            ],
+        },
+        "lambda_handlers": [
+            {
+                "lambda_name": And(Use(str)),
+                Optional("description"): And(Use(str)),
+                Optional("code_path"): And(Use(str)),
+                "runtime": And(Use(str)),
+                "handler": And(Use(str)),
+                Optional("timeout"): And(Use(int)),
+                Optional("reserved_concurrent_executions"): And(Use(int)),
+                Optional("environment_vars"): And(Use(dict)),
+                Optional("alarms"): [
+                    {
+                        "name": And(Use(str)),
+                        "number": And(Use(int)),
+                        "periods": And(Use(int)),
+                        "points": And(Use(int)),
+                        "actions": And(Use(bool)),
+                    }
+                ],
+            },
+        ],
+        "iam_actions": And(Use(list))
+    }
+)
+
+IOT_SNS_CONFIG_SCHEMA = Schema(
     {
         "topic": {
             "topic_name": And(Use(str)),
@@ -51,7 +89,7 @@ SNS_CONFIG_SCHEMA = Schema(
 )
 
 
-SQS_CONFIG_SCHEMA = Schema(
+IOT_SQS_CONFIG_SCHEMA = Schema(
     {
         "queue": {
             "queue_name": And(Use(str)),
@@ -94,6 +132,45 @@ SQS_CONFIG_SCHEMA = Schema(
             "sql": And(Use(str)),
             "aws_iot_sql_version": And(Use(str)),
         },
+    }
+)
+
+SQS_CONFIG_SCHEMA = Schema(
+    {
+        "queue": {
+            "queue_name": And(Use(str)),
+            Optional("alarms"): [
+                {
+                    "name": And(Use(str)),
+                    "number": And(Use(int)),
+                    "periods": And(Use(int)),
+                    "points": And(Use(int)),
+                    "actions": And(Use(bool)),
+                }
+            ],
+        },
+        "lambda_handlers": [
+            {
+                "lambda_name": And(Use(str)),
+                Optional("description"): And(Use(str)),
+                Optional("code_path"): And(Use(str)),
+                "runtime": And(Use(str)),
+                "handler": And(Use(str)),
+                Optional("timeout"): And(Use(int)),
+                Optional("reserved_concurrent_executions"): And(Use(int)),
+                Optional("environment_vars"): And(Use(dict)),
+                Optional("alarms"): [
+                    {
+                        "name": And(Use(str)),
+                        "number": And(Use(int)),
+                        "periods": And(Use(int)),
+                        "points": And(Use(int)),
+                        "actions": And(Use(bool)),
+                    }
+                ],
+            },
+        ],
+        "iam_actions": And(Use(list)),
     }
 )
 

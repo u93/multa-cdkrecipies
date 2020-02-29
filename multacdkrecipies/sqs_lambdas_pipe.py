@@ -4,13 +4,12 @@ from aws_cdk import (
     core,
     aws_cloudwatch as cloudwatch,
     aws_iam as iam,
-    aws_iot as iot,
     aws_lambda as lambda_,
     aws_lambda_event_sources as lambda_sources,
     aws_sqs as sqs,
 )
 from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
-from .utils import IOT_SQS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
+from .utils import SQS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
 class AwsIotRulesSqsPipes(core.Construct):
@@ -33,7 +32,7 @@ class AwsIotRulesSqsPipes(core.Construct):
         self.prefix = prefix
         self.environment_ = environment
         self.configuration = configuration
-        validate_configuration(configuration_schema=IOT_SQS_CONFIG_SCHEMA, configuration_received=self.configuration)
+        validate_configuration(configuration_schema=SQS_CONFIG_SCHEMA, configuration_received=self.configuration)
 
         # Defining SQS Topic
         queue_data = self.configuration["queue"]
@@ -101,23 +100,6 @@ class AwsIotRulesSqsPipes(core.Construct):
 
             self._lambda_functions.append(_lambda_function)
 
-        # Defining Topic Rule properties
-        action = iot.CfnTopicRule.SqsActionProperty(queue_url=self._sqs_queue.queue_url, role_arn=role.role_arn)
-        action_property = iot.CfnTopicRule.ActionProperty(sqs=action)
-
-        rule_data = self.configuration["iot_rule"]
-        rule_payload = iot.CfnTopicRule.TopicRulePayloadProperty(
-            actions=[action_property],
-            rule_disabled=rule_data["rule_disabled"],
-            sql=rule_data["sql"],
-            aws_iot_sql_version=rule_data["aws_iot_sql_version"],
-            description=rule_data.get("description"),
-        )
-
-        # Defining AWS IoT Rule
-        rule_name = self.prefix + "_" + rule_data["rule_name"] + "_" + self.environment_
-        self._iot_rule = iot.CfnTopicRule(self, id=rule_name, rule_name=rule_name, topic_rule_payload=rule_payload)
-
     def set_alarms(self):
         if isinstance(self.configuration["queue"].get("alarms"), list) is True:
             sqs_alarms = list()
@@ -165,7 +147,3 @@ class AwsIotRulesSqsPipes(core.Construct):
     @property
     def lambda_functions(self):
         return self._lambda_functions
-
-    @property
-    def iot_rule(self):
-        return self._iot_rule

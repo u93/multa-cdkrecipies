@@ -17,4 +17,4 @@ _EOF_
 aws s3 cp index.html s3://cdkrecipies/multacdkrecipies/ > /dev/null
 aws s3 cp ./dist/multacdkrecipies-${VERSION}.tar.gz s3://cdkrecipies/multacdkrecipies/ > /dev/null
 
-rm -rf ./dist/*
+rm -rf dist/*
