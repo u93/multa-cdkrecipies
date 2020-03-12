@@ -42,6 +42,22 @@ APIGATEWAY_LAMBDA_SCHEMA = Schema(
                         "lambda_authorizer": And(Use(str))
                     }
                 ]
+            },
+            "http_handler": {
+                "resources": [
+                    {
+                        "method": And(Use(str)),
+                        "lambda_authorizer": And(Use(str))
+                    }
+                ]
+            },
+            "service_handler": {
+                "resources": [
+                    {
+                        "method": And(Use(str)),
+                        "lambda_authorizer": And(Use(str))
+                    }
+                ]
             }
         }
     }
