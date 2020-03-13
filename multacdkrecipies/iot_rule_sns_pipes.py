@@ -79,7 +79,7 @@ class AwsIotRulesSnsPipes(core.Construct):
                 self,
                 id=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
                 function_name=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
-                code=lambda_.Code.from_asset(path=lambda_function["code_path"]),
+                code=lambda_.Code.from_asset(path=code_path),
                 handler=lambda_function["handler"],
                 runtime=function_runtime,
                 layers=None,

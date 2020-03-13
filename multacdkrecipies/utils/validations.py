@@ -41,7 +41,26 @@ APIGATEWAY_LAMBDA_SCHEMA = Schema(
                         "method": And(Use(str)),
                         "lambda_authorizer": And(Use(str))
                     }
-                ]
+                ],
+                "handler": {
+                    "lambda_name": And(Use(str)),
+                    Optional("description"): And(Use(str)),
+                    Optional("code_path"): And(Use(str)),
+                    "runtime": And(Use(str)),
+                    "handler": And(Use(str)),
+                    Optional("timeout"): And(Use(int)),
+                    Optional("reserved_concurrent_executions"): And(Use(int)),
+                    Optional("environment_vars"): And(Use(dict)),
+                    Optional("alarms"): [
+                        {
+                            "name": And(Use(str)),
+                            "number": And(Use(int)),
+                            "periods": And(Use(int)),
+                            "points": And(Use(int)),
+                            "actions": And(Use(bool)),
+                        }
+                    ],
+                }
             },
             "http_handler": {
                 "resources": [
@@ -49,7 +68,8 @@ APIGATEWAY_LAMBDA_SCHEMA = Schema(
                         "method": And(Use(str)),
                         "lambda_authorizer": And(Use(str))
                     }
-                ]
+                ],
+                "handler": {}
             },
             "service_handler": {
                 "resources": [
@@ -57,7 +77,8 @@ APIGATEWAY_LAMBDA_SCHEMA = Schema(
                         "method": And(Use(str)),
                         "lambda_authorizer": And(Use(str))
                     }
-                ]
+                ],
+                "handler": {}
             }
         }
     }

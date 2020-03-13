@@ -12,7 +12,7 @@ from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
 from .utils import SNS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
-class AwsIotRulesSnsPipes(core.Construct):
+class AwsSnsPipes(core.Construct):
     """
     AWS CDK Construct that defines a pipe where a Rules captures an MQTT Message sent to or from AWS IoT MQTT Broker,
     then the message is sent to an SNS Topic and a Lambda function subscribed to the topic can process it and take
@@ -78,7 +78,7 @@ class AwsIotRulesSnsPipes(core.Construct):
                 self,
                 id=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
                 function_name=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
-                code=lambda_.Code.from_asset(path=lambda_function["code_path"]),
+                code=lambda_.Code.from_asset(path=code_path),
                 handler=lambda_function["handler"],
                 runtime=function_runtime,
                 layers=None,

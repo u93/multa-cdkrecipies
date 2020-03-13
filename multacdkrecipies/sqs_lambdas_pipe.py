@@ -12,7 +12,7 @@ from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
 from .utils import SQS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
-class AwsIotRulesSqsPipes(core.Construct):
+class AwsSqsPipes(core.Construct):
     """
     AWS CDK Construct that defines a pipe where a Rules captures an MQTT Message sent to or from AWS IoT MQTT Broker,
     then the message is sent to an SQS Queue and a Lambda function subscribed to the topic can process it and take
