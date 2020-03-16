@@ -44,16 +44,15 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         self._authorizer_lambda_functions = list()
 
         # Define IN-ACCOUNT Lambda Authorizers
-        for lambda_function in lambda_authorizers["imported"]:
+        for lambda_function in lambda_authorizers.get("imported", list()):
             self._authorizer_lambda_functions.append(lambda_.Function.from_function_arn(lambda_function["lambda_arn"]))
 
         # Define NEW-FUNCTION Lambda Authorizers
-        for lambda_function in lambda_authorizers["origin"]:
+        for lambda_function in lambda_authorizers.get("origin", list()):
             try:
                 function_runtime = getattr(lambda_.Runtime, lambda_function["runtime"])
             except Exception:
-                raise WrongRuntimePassed(detail=f"Wrong function runtime {lambda_function['runtime']} specified",
-                                         tb=traceback.format_exc())
+                raise WrongRuntimePassed(detail=f"Wrong function runtime {lambda_function['runtime']} specified", tb=traceback.format_exc())
 
             obtainer_code_path = lambda_function.get("code_path")
             if obtainer_code_path is not None:
@@ -78,14 +77,15 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                 timeout=core.Duration.seconds(lambda_function.get("timeout")),
                 reserved_concurrent_executions=lambda_function.get("reserved_concurrent_executions"),
             )
-
-            # Defining Lambda Function IAM policies to access other services
-            self.iam_policies = list()
-            for iam_actions in configuration["iam_actions"]:
-                self.iam_policies.append(iam_actions)
-
-            policy_statement = iam.PolicyStatement(actions=self.iam_policies, resources=["*"])
-            _lambda_function.add_to_role_policy(statement=policy_statement)
             self._authorizer_lambda_functions.append(_lambda_function)
+
+        # Defining Lambda Function IAM policies to access other services
+        self.iam_policies = list()
+        for iam_actions in configuration["iam_actions"]:
+            self.iam_policies.append(iam_actions)
+
+        for add_authorizer_function in self._authorizer_lambda_functions:
+            policy_statement = iam.PolicyStatement(actions=self.iam_policies, resources=["*"])
+            add_authorizer_function.add_to_role_policy(statement=policy_statement)
 
         # Define API Methods

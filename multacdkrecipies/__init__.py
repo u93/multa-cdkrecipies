@@ -1,3 +1,6 @@
+from .api_gateway_lambda_simple_web_service import AwsApiGatewayLambdaSWS
+from .api_gateway_lambda_robust_api import AwsApiGatewayLambdaPipes
+from .api_gateway_lambda_async_backend import AwsApiGatewayLambdaPipesAsync
 from .iot_rule_sns_pipes import AwsIotRulesSnsPipes
 from .iot_rule_sqs_pipes import AwsIotRulesSqsPipes
 from .iot_analytics_data_workflow import AwsIotAnalyticsDataWorkflow
