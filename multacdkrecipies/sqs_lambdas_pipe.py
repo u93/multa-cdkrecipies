@@ -1,3 +1,4 @@
+from copy import deepcopy
 import traceback
 
 from aws_cdk import (
@@ -6,8 +7,8 @@ from aws_cdk import (
     aws_iam as iam,
     aws_lambda as lambda_,
     aws_lambda_event_sources as lambda_sources,
-    aws_sqs as sqs,
 )
+from .common import base_queue_cdk
 from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
 from .utils import SQS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
 
@@ -34,25 +35,25 @@ class AwsSqsPipes(core.Construct):
         self.configuration = configuration
         validate_configuration(configuration_schema=SQS_CONFIG_SCHEMA, configuration_received=self.configuration)
 
-        # Defining SQS Topic
-        queue_data = self.configuration["queue"]
-        sqs_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_" + self.environment_
-        iam_role_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_role_" + self.environment_
-        iam_policy_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_policy_" + self.environment_
+        # Defining SQS Queue
+        queue_data = deepcopy(self.configuration["queue"])
+        # iam_role_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_role_" + self.environment_
+        # iam_policy_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_policy_" + self.environment_
+        queue_data["queue_name"] = self.prefix + "_" + queue_data["queue_name"] + "_queue_" + self.environment_
 
-        self._sqs_queue = sqs.Queue(self, id=sqs_name, queue_name=sqs_name)
+        self._sqs_queue = base_queue_cdk(construct=self, **queue_data)
 
-        # Defining IAM Role
-        # Defining Service Principal
-        principal = iam.ServicePrincipal(service="iot.amazonaws.com")
-
-        # Defining IAM Role
-        role = iam.Role(self, id=iam_role_name, role_name=iam_role_name, assumed_by=principal)
-
-        # Defining Policy Statement, Policy and Attaching to Role
-        policy_statements = iam.PolicyStatement(actions=["sqs:SendMessage"], resources=[self._sqs_queue.queue_arn])
-        policy = iam.Policy(self, id=iam_policy_name, policy_name=iam_policy_name, statements=[policy_statements])
-        policy.attach_to_role(role=role)
+        # # Defining IAM Role
+        # # Defining Service Principal
+        # principal = iam.ServicePrincipal(service="iot.amazonaws.com")
+        #
+        # # Defining IAM Role
+        # role = iam.Role(self, id=iam_role_name, role_name=iam_role_name, assumed_by=principal)
+        #
+        # # Defining Policy Statement, Policy and Attaching to Role
+        # policy_statements = iam.PolicyStatement(actions=["sqs:SendMessage"], resources=[self._sqs_queue.queue_arn])
+        # policy = iam.Policy(self, id=iam_policy_name, policy_name=iam_policy_name, statements=[policy_statements])
+        # policy.attach_to_role(role=role)
 
         # Validating Lambda Function Runtime
         functions_data = self.configuration["lambda_handlers"]

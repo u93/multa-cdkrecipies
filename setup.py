@@ -17,7 +17,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     author="Eugenio Efrain Breijo",
     author_email="eebf1993@gmail.com",
-    packages=["multacdkrecipies", "multacdkrecipies.utils", "multacdkrecipies.settings"],
+    packages=["multacdkrecipies", "multacdkrecipies.utils", "multacdkrecipies.settings", "multacdkrecipies.common"],
     install_requires=[
         "appdirs==1.4.3",
         "attrs==19.3.0",

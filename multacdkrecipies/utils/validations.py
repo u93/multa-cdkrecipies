@@ -18,7 +18,9 @@ APIGATEWAY_LAMBDA_SCHEMA = Schema(
                         "handler": And(Use(str)),
                         Optional("timeout"): And(Use(int)),
                         Optional("reserved_concurrent_executions"): And(Use(int)),
-                        Optional("environment_vars"): And(Use(dict)),
+                        Optional("environment_vars"): {
+                            And(Use(str)): And(Use(str))
+                        },
                         Optional("alarms"): [
                             {
                                 "name": And(Use(str)),
@@ -41,7 +43,9 @@ APIGATEWAY_LAMBDA_SCHEMA = Schema(
                     "handler": And(Use(str)),
                     Optional("timeout"): And(Use(int)),
                     Optional("reserved_concurrent_executions"): And(Use(int)),
-                    Optional("environment_vars"): And(Use(dict)),
+                    Optional("environment_vars"): {
+                        And(Use(str)): And(Use(str))
+                    },
                     Optional("alarms"): [
                         {
                             "name": And(Use(str)),
@@ -74,7 +78,9 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                     "handler": And(Use(str)),
                     Optional("timeout"): And(Use(int)),
                     Optional("reserved_concurrent_executions"): And(Use(int)),
-                    Optional("environment_vars"): And(Use(dict)),
+                    Optional("environment_vars"): {
+                        And(Use(str)): And(Use(str))
+                    },
                     Optional("alarms"): [
                         {
                             "name": And(Use(str)),
@@ -102,7 +108,9 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                         "handler": And(Use(str)),
                         Optional("timeout"): And(Use(int)),
                         Optional("reserved_concurrent_executions"): And(Use(int)),
-                        Optional("environment_vars"): And(Use(dict)),
+                        Optional("environment_vars"): {
+                            And(Use(str)): And(Use(str))
+                        },
                         Optional("alarms"): [
                             {
                                 "name": And(Use(str)),
@@ -143,7 +151,9 @@ SNS_CONFIG_SCHEMA = Schema(
                 "handler": And(Use(str)),
                 Optional("timeout"): And(Use(int)),
                 Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): And(Use(dict)),
+                Optional("environment_vars"): {
+                    And(Use(str)): And(Use(str))
+                },
                 Optional("alarms"): [
                     {
                         "name": And(Use(str)),
@@ -182,7 +192,9 @@ IOT_SNS_CONFIG_SCHEMA = Schema(
                 "handler": And(Use(str)),
                 Optional("timeout"): And(Use(int)),
                 Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): And(Use(dict)),
+                Optional("environment_vars"): {
+                    And(Use(str)): And(Use(str))
+                },
                 Optional("alarms"): [
                     {
                         "name": And(Use(str)),
@@ -210,6 +222,8 @@ IOT_SQS_CONFIG_SCHEMA = Schema(
     {
         "queue": {
             "queue_name": And(Use(str)),
+            Optional("queue_delivery_delay"): And(Use(int)),
+            Optional("queue_message_visibility"): And(Use(int)),
             Optional("alarms"): [
                 {
                     "name": And(Use(str)),
@@ -229,7 +243,9 @@ IOT_SQS_CONFIG_SCHEMA = Schema(
                 "handler": And(Use(str)),
                 Optional("timeout"): And(Use(int)),
                 Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): And(Use(dict)),
+                Optional("environment_vars"): {
+                    And(Use(str)): And(Use(str))
+                },
                 Optional("alarms"): [
                     {
                         "name": And(Use(str)),
@@ -256,6 +272,8 @@ SQS_CONFIG_SCHEMA = Schema(
     {
         "queue": {
             "queue_name": And(Use(str)),
+            Optional("queue_delivery_delay"): And(Use(int)),
+            Optional("queue_message_visibility"): And(Use(int)),
             Optional("alarms"): [
                 {
                     "name": And(Use(str)),
@@ -275,7 +293,9 @@ SQS_CONFIG_SCHEMA = Schema(
                 "handler": And(Use(str)),
                 Optional("timeout"): And(Use(int)),
                 Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): And(Use(dict)),
+                Optional("environment_vars"): {
+                    And(Use(str)): And(Use(str))
+                },
                 Optional("alarms"): [
                     {
                         "name": And(Use(str)),

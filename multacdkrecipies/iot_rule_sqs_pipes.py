@@ -1,3 +1,4 @@
+from copy import deepcopy
 import traceback
 
 from aws_cdk import (
@@ -7,8 +8,8 @@ from aws_cdk import (
     aws_iot as iot,
     aws_lambda as lambda_,
     aws_lambda_event_sources as lambda_sources,
-    aws_sqs as sqs,
 )
+from .common import base_queue_cdk
 from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
 from .utils import IOT_SQS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
 
@@ -35,13 +36,13 @@ class AwsIotRulesSqsPipes(core.Construct):
         self.configuration = configuration
         validate_configuration(configuration_schema=IOT_SQS_CONFIG_SCHEMA, configuration_received=self.configuration)
 
-        # Defining SQS Topic
-        queue_data = self.configuration["queue"]
-        sqs_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_" + self.environment_
+        # Defining SQS Queue
+        queue_data = deepcopy(self.configuration["queue"])
         iam_role_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_role_" + self.environment_
         iam_policy_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_policy_" + self.environment_
+        queue_data["queue_name"] = self.prefix + "_" + queue_data["queue_name"] + "_queue_" + self.environment_
 
-        self._sqs_queue = sqs.Queue(self, id=sqs_name, queue_name=sqs_name)
+        self._sqs_queue = base_queue_cdk(construct=self, **queue_data)
 
         # Defining IAM Role
         # Defining Service Principal

@@ -39,22 +39,22 @@ class AwsSnsPipes(core.Construct):
         # Defining SNS Topic
         topic_data = self.configuration["topic"]
         sns_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic" + "_" + self.environment_
-        iam_role_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic_role" + "_" + self.environment_
-        iam_policy_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic_policy" + "_" + self.environment_
+        # iam_role_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic_role" + "_" + self.environment_
+        # iam_policy_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic_policy" + "_" + self.environment_
 
         self._sns_topic = sns.Topic(self, id=sns_name, topic_name=sns_name, display_name=sns_name)
 
-        # Defining IAM Role
-        # Defining Service Principal
-        principal = iam.ServicePrincipal(service="iot.amazonaws.com")
-
-        # Defining IAM Role
-        role = iam.Role(self, id=iam_role_name, role_name=iam_role_name, assumed_by=principal)
-
-        # Defining Policy Statement, Policy and Attaching to Role
-        policy_statements = iam.PolicyStatement(actions=["SNS:Publish"], resources=[self._sns_topic.topic_arn])
-        policy = iam.Policy(self, id=iam_policy_name, policy_name=iam_policy_name, statements=[policy_statements])
-        policy.attach_to_role(role=role)
+        # # Defining IAM Role
+        # # Defining Service Principal
+        # principal = iam.ServicePrincipal(service="iot.amazonaws.com")
+        #
+        # # Defining IAM Role
+        # role = iam.Role(self, id=iam_role_name, role_name=iam_role_name, assumed_by=principal)
+        #
+        # # Defining Policy Statement, Policy and Attaching to Role
+        # policy_statements = iam.PolicyStatement(actions=["SNS:Publish"], resources=[self._sns_topic.topic_arn])
+        # policy = iam.Policy(self, id=iam_policy_name, policy_name=iam_policy_name, statements=[policy_statements])
+        # policy.attach_to_role(role=role)
 
         # Validating Lambda Function Runtime
         functions_data = self.configuration["lambda_handlers"]
