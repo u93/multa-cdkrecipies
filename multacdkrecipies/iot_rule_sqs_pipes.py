@@ -6,12 +6,10 @@ from aws_cdk import (
     aws_cloudwatch as cloudwatch,
     aws_iam as iam,
     aws_iot as iot,
-    aws_lambda as lambda_,
     aws_lambda_event_sources as lambda_sources,
 )
-from .common import base_queue_cdk
-from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
-from .utils import IOT_SQS_CONFIG_SCHEMA, validate_configuration, WrongRuntimePassed
+from .common import base_queue_cdk, base_lambda_function
+from .utils import IOT_SQS_CONFIG_SCHEMA, validate_configuration
 
 
 class AwsIotRulesSqsPipes(core.Construct):
@@ -60,47 +58,10 @@ class AwsIotRulesSqsPipes(core.Construct):
         functions_data = self.configuration["lambda_handlers"]
         self._lambda_functions = list()
         for lambda_function in functions_data:
-            try:
-                function_runtime = getattr(lambda_.Runtime, lambda_function["runtime"])
-            except Exception:
-                raise WrongRuntimePassed(detail=f"Wrong function runtime {lambda_function['runtime']} specified", tb=traceback.format_exc())
-
-            obtainer_code_path = lambda_function.get("code_path")
-            if obtainer_code_path is not None:
-                code_path = obtainer_code_path
-            elif obtainer_code_path is None and DEFAULT_LAMBDA_CODE_PATH_EXISTS is True:
-                code_path = DEFAULT_LAMBDA_CODE_PATH
-            else:
-                raise RuntimeError(f"Code path for Lambda Function {lambda_function['lambda_name']} is not valid!")
-
-            # Defining Lambda function
-            _lambda_function = lambda_.Function(
-                self,
-                id=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
-                function_name=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
-                code=lambda_.Code.from_asset(path=code_path),
-                handler=lambda_function["handler"],
-                runtime=function_runtime,
-                layers=None,
-                description=lambda_function.get("description"),
-                tracing=lambda_.Tracing.ACTIVE,
-                environment=lambda_function.get("environment_vars"),
-                timeout=core.Duration.seconds(lambda_function.get("timeout")),
-                reserved_concurrent_executions=lambda_function.get("reserved_concurrent_executions"),
-            )
-
-            # Defining the Lambda subscription to the specified SQS Queue in cdk.json file.
-            _lambda_function.add_event_source(lambda_sources.SqsEventSource(queue=self._sqs_queue, batch_size=10))
-
-            # Defining Lambda Function IAM policies to access other services
-            self.iam_policies = list()
-            for iam_actions in self.configuration["iam_actions"]:
-                self.iam_policies.append(iam_actions)
-
-            policy_statement = iam.PolicyStatement(actions=self.iam_policies, resources=["*"])
-            _lambda_function.add_to_role_policy(statement=policy_statement)
-
+            _lambda_function = base_lambda_function(self, **lambda_function)
             self._lambda_functions.append(_lambda_function)
+
+            _lambda_function.add_event_source(lambda_sources.SqsEventSource(queue=self._sqs_queue, batch_size=10))
 
         # Defining Topic Rule properties
         action = iot.CfnTopicRule.SqsActionProperty(queue_url=self._sqs_queue.queue_url, role_arn=role.role_arn)

@@ -1,16 +1,12 @@
-import traceback
-
 from aws_cdk import (
     core,
     aws_apigateway as api_gateway,
     aws_certificatemanager as cert_manager,
     aws_cloudwatch as cloudwatch,
-    aws_iam as iam,
     aws_lambda as lambda_,
 )
-
-from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
-from .utils import APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, validate_configuration, WrongRuntimePassed
+from .common import base_lambda_function
+from .utils import APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, validate_configuration
 
 
 class AwsApiGatewayLambdaSWS(core.Construct):
@@ -50,46 +46,8 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         # Define NEW-FUNCTION Lambda Authorizers
         defined_lambda_authorizer = lambda_authorizers.get("origin")
         if defined_lambda_authorizer is not None:
-            try:
-                function_runtime = getattr(lambda_.Runtime, defined_lambda_authorizer["runtime"])
-            except Exception:
-                raise WrongRuntimePassed(
-                    detail=f"Wrong function runtime {defined_lambda_authorizer['runtime']} specified", tb=traceback.format_exc()
-                )
-
-            obtainer_code_path = defined_lambda_authorizer.get("code_path")
-            if obtainer_code_path is not None:
-                code_path = obtainer_code_path
-            elif obtainer_code_path is None and DEFAULT_LAMBDA_CODE_PATH_EXISTS is True:
-                code_path = DEFAULT_LAMBDA_CODE_PATH
-            else:
-                raise RuntimeError(f"Code path for Lambda Function {defined_lambda_authorizer['lambda_name']} is not valid!")
-
-            # Defining Lambda function
-            _lambda_function = lambda_.Function(
-                self,
-                id=self.prefix + "_" + defined_lambda_authorizer["lambda_name"] + "_auth_" + self.environment_,
-                function_name=self.prefix + "_" + defined_lambda_authorizer["lambda_name"] + "_auth_" + self.environment_,
-                code=lambda_.Code.from_asset(path=code_path),
-                handler=defined_lambda_authorizer["handler"],
-                runtime=function_runtime,
-                layers=None,
-                description=defined_lambda_authorizer.get("description"),
-                tracing=lambda_.Tracing.ACTIVE,
-                environment=defined_lambda_authorizer.get("environment_vars"),
-                timeout=core.Duration.seconds(defined_lambda_authorizer.get("timeout")),
-                reserved_concurrent_executions=defined_lambda_authorizer.get("reserved_concurrent_executions"),
-            )
+            _lambda_function = base_lambda_function(self, **defined_lambda_authorizer)
             self._authorizer_lambda_functions.append(_lambda_function)
-
-            # Defining Lambda Function IAM policies to access other services
-            self.auth_iam_policies = list()
-            for iam_actions in api_configuration["lambda_authorizer"]["origin"]["iam_actions"]:
-                self.auth_iam_policies.append(iam_actions)
-
-            for added_authorizer_function in self._authorizer_lambda_functions:
-                policy_statement = iam.PolicyStatement(actions=self.auth_iam_policies, resources=["*"])
-                added_authorizer_function.add_to_role_policy(statement=policy_statement)
 
         # Define API Gateway Lambda Handler
         lambda_handlers = api_configuration["resource"]["handler"]
@@ -102,46 +60,8 @@ class AwsApiGatewayLambdaSWS(core.Construct):
 
         defined_lambda_handler = lambda_handlers.get("origin")
         if defined_lambda_handler is not None:
-            try:
-                function_runtime = getattr(lambda_.Runtime, defined_lambda_handler["runtime"])
-            except Exception:
-                raise WrongRuntimePassed(
-                    detail=f"Wrong function runtime {defined_lambda_handler['runtime']} specified", tb=traceback.format_exc()
-                )
-
-            obtainer_code_path = defined_lambda_handler.get("code_path")
-            if obtainer_code_path is not None:
-                code_path = obtainer_code_path
-            elif obtainer_code_path is None and DEFAULT_LAMBDA_CODE_PATH_EXISTS is True:
-                code_path = DEFAULT_LAMBDA_CODE_PATH
-            else:
-                raise RuntimeError(f"Code path for Lambda Function {defined_lambda_handler['lambda_name']} is not valid!")
-
-            # Defining Lambda function
-            _lambda_function = lambda_.Function(
-                self,
-                id=self.prefix + "_" + defined_lambda_handler["lambda_name"] + "_handler_" + self.environment_,
-                function_name=self.prefix + "_" + defined_lambda_handler["lambda_name"] + "_handler_" + self.environment_,
-                code=lambda_.Code.from_asset(path=code_path),
-                handler=defined_lambda_handler["handler"],
-                runtime=function_runtime,
-                layers=None,
-                description=defined_lambda_handler.get("description"),
-                tracing=lambda_.Tracing.ACTIVE,
-                environment=defined_lambda_handler.get("environment_vars"),
-                timeout=core.Duration.seconds(defined_lambda_handler.get("timeout")),
-                reserved_concurrent_executions=defined_lambda_handler.get("reserved_concurrent_executions"),
-            )
+            _lambda_function = base_lambda_function(self, **defined_lambda_handler)
             self._handler_lambda_functions.append(_lambda_function)
-
-            # Defining Lambda Function IAM policies to access other services
-            self.handler_iam_policies = list()
-            for iam_actions in api_configuration["resource"]["handler"]["origin"]["iam_actions"]:
-                self.handler_iam_policies.append(iam_actions)
-
-            for added_authorizer_function in self._handler_lambda_functions:
-                policy_statement = iam.PolicyStatement(actions=self.handler_iam_policies, resources=["*"])
-                added_authorizer_function.add_to_role_policy(statement=policy_statement)
 
         # Define Gateway
         try:

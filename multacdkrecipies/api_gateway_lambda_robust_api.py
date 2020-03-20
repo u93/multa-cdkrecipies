@@ -6,8 +6,6 @@ from aws_cdk import (
     aws_cloudwatch as cloudwatch,
     aws_iam as iam,
     aws_lambda as lambda_,
-    aws_sns as sns,
-    aws_sns_subscriptions as sns_subs,
 )
 
 from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS

@@ -1,7 +1,7 @@
 import os
 import traceback
 
-from schema import Schema, And, Or, Use, Optional, SchemaError
+from schema import Schema, And, Use, Optional, SchemaError
 
 
 APIGATEWAY_LAMBDA_SCHEMA = Schema(
@@ -21,6 +21,7 @@ APIGATEWAY_LAMBDA_SCHEMA = Schema(
                         Optional("environment_vars"): {
                             And(Use(str)): And(Use(str))
                         },
+                        "iam_actions": [And(Use(str))],
                         Optional("alarms"): [
                             {
                                 "name": And(Use(str)),
@@ -46,6 +47,7 @@ APIGATEWAY_LAMBDA_SCHEMA = Schema(
                     Optional("environment_vars"): {
                         And(Use(str)): And(Use(str))
                     },
+                    "iam_actions": [And(Use(str))],
                     Optional("alarms"): [
                         {
                             "name": And(Use(str)),
@@ -81,6 +83,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                     Optional("environment_vars"): {
                         And(Use(str)): And(Use(str))
                     },
+                    "iam_actions": [And(Use(str))],
                     Optional("alarms"): [
                         {
                             "name": And(Use(str)),
@@ -90,7 +93,6 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                             "actions": And(Use(bool)),
                         }
                     ],
-                    "iam_actions": [And(Use(str))]
                 },
             },
             "resource": {
@@ -111,6 +113,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                         Optional("environment_vars"): {
                             And(Use(str)): And(Use(str))
                         },
+                        "iam_actions": [And(Use(str))],
                         Optional("alarms"): [
                             {
                                 "name": And(Use(str)),
@@ -120,7 +123,6 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                                 "actions": And(Use(bool)),
                             }
                         ],
-                        "iam_actions": [And(Use(str))]
                     },
                 },
             },
@@ -154,6 +156,7 @@ SNS_CONFIG_SCHEMA = Schema(
                 Optional("environment_vars"): {
                     And(Use(str)): And(Use(str))
                 },
+                "iam_actions": [And(Use(str))],
                 Optional("alarms"): [
                     {
                         "name": And(Use(str)),
@@ -165,7 +168,6 @@ SNS_CONFIG_SCHEMA = Schema(
                 ],
             },
         ],
-        "iam_actions": And(Use(list)),
     }
 )
 
@@ -195,6 +197,7 @@ IOT_SNS_CONFIG_SCHEMA = Schema(
                 Optional("environment_vars"): {
                     And(Use(str)): And(Use(str))
                 },
+                "iam_actions": [And(Use(str))],
                 Optional("alarms"): [
                     {
                         "name": And(Use(str)),
@@ -206,7 +209,6 @@ IOT_SNS_CONFIG_SCHEMA = Schema(
                 ],
             },
         ],
-        "iam_actions": And(Use(list)),
         "iot_rule": {
             "rule_name": And(Use(str)),
             Optional("description"): And(Use(str)),
@@ -246,6 +248,7 @@ IOT_SQS_CONFIG_SCHEMA = Schema(
                 Optional("environment_vars"): {
                     And(Use(str)): And(Use(str))
                 },
+                "iam_actions": [And(Use(str))],
                 Optional("alarms"): [
                     {
                         "name": And(Use(str)),
@@ -257,7 +260,6 @@ IOT_SQS_CONFIG_SCHEMA = Schema(
                 ],
             },
         ],
-        "iam_actions": And(Use(list)),
         "iot_rule": {
             "rule_name": And(Use(str)),
             Optional("description"): And(Use(str)),
@@ -296,6 +298,7 @@ SQS_CONFIG_SCHEMA = Schema(
                 Optional("environment_vars"): {
                     And(Use(str)): And(Use(str))
                 },
+                "iam_actions": [And(Use(str))],
                 Optional("alarms"): [
                     {
                         "name": And(Use(str)),
@@ -307,7 +310,6 @@ SQS_CONFIG_SCHEMA = Schema(
                 ],
             },
         ],
-        "iam_actions": And(Use(list)),
     }
 )
 
