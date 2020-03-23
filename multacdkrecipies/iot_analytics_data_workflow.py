@@ -22,9 +22,12 @@ class AwsIotAnalyticsDataWorkflow(core.Construct):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
-        validate_configuration(configuration_schema=IOT_ANALYTICS_DATA_WORKFLOW, configuration_received=configuration)
+        self._configuration = configuration
 
-        base_name = configuration["name"]
+        # Validating that the payload passed is correct
+        validate_configuration(configuration_schema=IOT_ANALYTICS_DATA_WORKFLOW, configuration_received=self._configuration)
+
+        base_name = self._configuration["name"]
         datastore_name = self.prefix + "_" + base_name + "_datastore_" + self.environment_
         channel_name = self.prefix + "_" + base_name + "_channel_" + self.environment_
         pipeline_name = self.prefix + "_" + base_name + "_pipeline_" + self.environment_
@@ -56,6 +59,10 @@ class AwsIotAnalyticsDataWorkflow(core.Construct):
         self._pipeline = analytics.CfnPipeline(self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities)
         self._pipeline.add_depends_on(target=self._datastore)
         self._pipeline.add_depends_on(target=self._channel)
+
+    @property
+    def configuration(self):
+        return self._configuration
 
     @property
     def datastore(self):

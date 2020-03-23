@@ -1,12 +1,10 @@
-import traceback
+from copy import deepcopy
 
 from aws_cdk import (
     core,
-    aws_cloudwatch as cloudwatch,
-    aws_sns as sns,
     aws_sns_subscriptions as sns_subs,
 )
-from .common import base_lambda_function
+from .common import base_alarm, base_lambda_function, base_topic
 from .utils import SNS_CONFIG_SCHEMA, validate_configuration
 
 
@@ -29,33 +27,17 @@ class AwsSnsPipes(core.Construct):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
-        self.configuration = configuration
+        self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=SNS_CONFIG_SCHEMA, configuration_received=self.configuration)
+        validate_configuration(configuration_schema=SNS_CONFIG_SCHEMA, configuration_received=self._configuration)
 
         # Defining SNS Topic
-        topic_data = self.configuration["topic"]
-        sns_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic" + "_" + self.environment_
-        # iam_role_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic_role" + "_" + self.environment_
-        # iam_policy_name = self.prefix + "_" + topic_data["topic_name"] + "_" + "topic_policy" + "_" + self.environment_
-
-        self._sns_topic = sns.Topic(self, id=sns_name, topic_name=sns_name, display_name=sns_name)
-
-        # # Defining IAM Role
-        # # Defining Service Principal
-        # principal = iam.ServicePrincipal(service="iot.amazonaws.com")
-        #
-        # # Defining IAM Role
-        # role = iam.Role(self, id=iam_role_name, role_name=iam_role_name, assumed_by=principal)
-        #
-        # # Defining Policy Statement, Policy and Attaching to Role
-        # policy_statements = iam.PolicyStatement(actions=["SNS:Publish"], resources=[self._sns_topic.topic_arn])
-        # policy = iam.Policy(self, id=iam_policy_name, policy_name=iam_policy_name, statements=[policy_statements])
-        # policy.attach_to_role(role=role)
+        topic_data = deepcopy(self._configuration["topic"])
+        self._sns_topic = base_topic(self, **topic_data)
 
         # Validating Lambda Function Runtime
-        functions_data = self.configuration["lambda_handlers"]
+        functions_data = self._configuration["lambda_handlers"]
         self._lambda_functions = list()
         for lambda_function in functions_data:
             _lambda_function = base_lambda_function(self, **lambda_function)
@@ -66,44 +48,23 @@ class AwsSnsPipes(core.Construct):
             self._sns_topic.add_subscription(sns_subscription)
 
     def set_alarms(self):
-        if isinstance(self.configuration["topic"].get("alarms"), list) is True:
+        if isinstance(self._configuration["topic"].get("alarms"), list) is True:
             sns_alarms = list()
-            for alarm_definition in self.configuration["topic"].get("alarms"):
-                try:
-                    sns_alarms.append(
-                        cloudwatch.Alarm(
-                            self,
-                            id="iot_sns_lambda_" + self.configuration["topic"]["topic_name"] + "_" + alarm_definition["name"],
-                            alarm_name="iot_sns_lambda_" + self.configuration["topic"]["topic_name"] + "_" + alarm_definition["name"],
-                            metric=self._sns_topic.metric(alarm_definition["name"]),  # metric_number_of_notifications_failed
-                            threshold=alarm_definition["number"],
-                            evaluation_periods=alarm_definition["periods"],
-                            datapoints_to_alarm=alarm_definition["points"],
-                            actions_enabled=alarm_definition["actions"],
-                        )
-                    )
-                except Exception:
-                    print(traceback.format_exc())
+            for alarm_definition in self._configuration["topic"].get("alarms"):
+                sns_alarms.append(
+                    base_alarm(self, resource_name=self._configuration["topic"]["topic_name"], base_resource=self._sns_topic, **alarm_definition)
+                )
 
-        for lambda_function_data, lambda_function_definition in zip(self.configuration["lambda_handlers"], self._lambda_functions):
+        for lambda_function_data, lambda_function_definition in zip(self._configuration["lambda_handlers"], self._lambda_functions):
             if isinstance(lambda_function_data.get("alarms"), list) is True:
                 lambda_alarms = list()
                 for alarm_definition in lambda_function_data.get("alarms"):
-                    try:
-                        lambda_alarms.append(
-                            cloudwatch.Alarm(
-                                self,
-                                id="iot_sqs_lambda" + "_" + lambda_function_data["lambda_name"] + "_" + alarm_definition["name"],
-                                alarm_name="iot_sqs_lambda" + "_" + lambda_function_data["lambda_name"] + "_" + alarm_definition["name"],
-                                metric=lambda_function_definition.metric(alarm_definition["name"]),
-                                threshold=alarm_definition["number"],
-                                evaluation_periods=alarm_definition["periods"],
-                                datapoints_to_alarm=alarm_definition["points"],
-                                actions_enabled=alarm_definition["actions"],
-                            )
-                        )
-                    except Exception:
-                        print(traceback.format_exc())
+                    lambda_alarms.append(
+                        base_alarm(self, resource_name=lambda_function_data.get("lambda_name"), base_resource=lambda_function_definition, **alarm_definition))
+
+    @property
+    def configuration(self):
+        return self._configuration
 
     @property
     def sns_topic(self):
@@ -112,3 +73,5 @@ class AwsSnsPipes(core.Construct):
     @property
     def lambda_function(self):
         return self._lambda_function
+
+

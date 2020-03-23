@@ -28,13 +28,15 @@ class AwsIoTAnalyticsSageMakerNotebook(core.Construct):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
+        self._configuration = configuration
+
+        # Validating that the payload passed is correct
         validate_configuration(configuration_schema=SAGEMAKER_NOTEBOOK, configuration_received=configuration)
 
-        base_name = configuration["name"]
-
+        base_name = self._configuration["name"]
         on_create_list = list()
-        if validate_file(file_path=configuration["scripts"]["on_create"]):
-            on_create_file = configuration["scripts"]["on_create"]
+        if validate_file(file_path=self._configuration["scripts"]["on_create"]):
+            on_create_file = self._configuration["scripts"]["on_create"]
         else:
             os.path.dirname(os.path.abspath(__file__))
             on_create_file = file_path + "/scripts/iot_analytics_notebook/on_create.sh"
@@ -43,8 +45,8 @@ class AwsIoTAnalyticsSageMakerNotebook(core.Construct):
             on_create_list.append(on_create_contents)
 
         on_start_list = list()
-        if validate_file(file_path=configuration["scripts"]["on_create"]):
-            on_start_file = configuration["scripts"]["on_start"]
+        if validate_file(file_path=self._configuration["scripts"]["on_create"]):
+            on_start_file = self._configuration["scripts"]["on_start"]
         else:
             on_start_file = file_path + "/scripts/iot_analytics_notebook/on_start.sh"
         with open(on_start_file) as on_start:
@@ -79,8 +81,12 @@ class AwsIoTAnalyticsSageMakerNotebook(core.Construct):
             notebook_instance_name=sagemaker_notebook_name,
             lifecycle_config_name=self._lifecycle_configuration.notebook_instance_lifecycle_config_name,
             role_arn=self._role.role_arn,
-            instance_type=configuration["instance_type"],
+            instance_type=self._configuration["instance_type"],
         )
+
+    @property
+    def configuration(self):
+        return self._configuration
 
     @property
     def lifecycle_configuration(self):

@@ -2,10 +2,9 @@ from aws_cdk import (
     core,
     aws_apigateway as api_gateway,
     aws_certificatemanager as cert_manager,
-    aws_cloudwatch as cloudwatch,
     aws_lambda as lambda_,
 )
-from .common import base_lambda_function
+from .common import base_alarm, base_lambda_function
 from .utils import APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, validate_configuration
 
 
@@ -28,11 +27,11 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
-        self.configuration = configuration
+        self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self.configuration)
-        api_configuration = self.configuration["api"]
+        validate_configuration(configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self._configuration)
+        api_configuration = self._configuration["api"]
 
         # Define Lambda Authorizers
         lambda_authorizers = api_configuration["lambda_authorizer"]
@@ -65,16 +64,16 @@ class AwsApiGatewayLambdaSWS(core.Construct):
 
         # Define Gateway
         try:
-            desired_handler = self._handler_lambda_functions[0]
-        except IndexError:
-            print("Unable to find defined Lambda Handler! Please verify configuration payload...")
-            raise RuntimeError("Unable to find defined Lambda Handler! Please verify configuration payload...")
-
-        try:
             desired_auth_handler = self._authorizer_lambda_functions[0]
         except IndexError:
             print("Unable to find defined Auth Lambda Handler! Please verify configuration payload...")
             raise RuntimeError("Unable to find defined Auth Lambda Handler! Please verify configuration payload...")
+
+        try:
+            desired_handler = self._handler_lambda_functions[0]
+        except IndexError:
+            print("Unable to find defined Lambda Handler! Please verify configuration payload...")
+            raise RuntimeError("Unable to find defined Lambda Handler! Please verify configuration payload...")
 
         custom_domain = api_configuration["resource"].get("custom_domain")
         if custom_domain is not None:
@@ -86,7 +85,7 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         else:
             domain_options = None
 
-        gateway = api_gateway.LambdaRestApi(
+        self._lambda_rest_api = api_gateway.LambdaRestApi(
             self,
             id=api_configuration["apigateway_name"],
             rest_api_name=api_configuration["apigateway_name"],
@@ -103,7 +102,7 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         )
 
         # Define Gateway Resource and Methods
-        resource = gateway.root.add_resource(api_configuration["resource"]["name"])
+        resource = self._lambda_rest_api.root.add_resource(api_configuration["resource"]["name"])
         gateway_methods = api_configuration["resource"]["methods"]
         for method in gateway_methods:
             resource.add_method(http_method=method, authorizer=gateway_authorizer)
@@ -111,3 +110,41 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         allowed_origins = api_configuration["resource"].get("allowed_origins")
         if allowed_origins is not None:
             resource.add_cors_preflight(allow_origins=allowed_origins, allow_methods=gateway_methods)
+
+    def set_alarms(self):
+        if isinstance(self._configuration["api"]["lambda_authorizer"].get("alarms"), list) is True:
+            authorizer_alarms = list()
+            for alarm_definition in self._configuration["api"]["lambda_authorizer"].get("alarms"):
+                authorizer_alarms.append(
+                    base_alarm(
+                        self,
+                        resource_name="lambda_authorizer",
+                        base_resource=self._authorizer_lambda_functions[0],
+                        **alarm_definition
+                    )
+                )
+
+        if isinstance(self._configuration["api"]["resource"]["handler"].get("alarms"), list) is True:
+            authorizer_alarms = list()
+            for alarm_definition in self._configuration["api"]["resource"]["handler"].get("alarms"):
+                authorizer_alarms.append(
+                    base_alarm(
+                        self,
+                        resource_name="lambda_api_handler",
+                        base_resource=self._handler_lambda_functions[0],
+                        **alarm_definition
+                    )
+                )
+
+    @property
+    def lambda_rest_api(self):
+        return self._lambda_rest_api
+
+    @property
+    def lambda_authorizer_function(self):
+        return self._authorizer_lambda_functions[0]
+
+    @property
+    def lambda_handler_function(self):
+        return self._handler_lambda_functions[0]
+

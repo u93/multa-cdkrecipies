@@ -5,8 +5,8 @@ from aws_cdk import (
 )
 
 
-def base_queue_cdk(construct, **kwargs):
-    queue_name = kwargs["queue_name"]
+def base_queue(construct, **kwargs):
+    queue_name = construct.prefix + "_" + kwargs["queue_name"] + "_queue_" + construct.environment_
     queue_delivery_delay = kwargs.get("queue_delivery_delay")
     queue_visibility_timeout = kwargs.get("queue_visibility_timeout")
     queue = sqs.Queue(

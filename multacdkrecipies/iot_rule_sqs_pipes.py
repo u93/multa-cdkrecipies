@@ -1,14 +1,12 @@
 from copy import deepcopy
-import traceback
 
 from aws_cdk import (
     core,
-    aws_cloudwatch as cloudwatch,
     aws_iam as iam,
     aws_iot as iot,
     aws_lambda_event_sources as lambda_sources,
 )
-from .common import base_queue_cdk, base_lambda_function
+from .common import base_alarm, base_iot_rule, base_lambda_function, base_queue, base_sqs_role
 from .utils import IOT_SQS_CONFIG_SCHEMA, validate_configuration
 
 
@@ -31,31 +29,20 @@ class AwsIotRulesSqsPipes(core.Construct):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
-        self.configuration = configuration
-        validate_configuration(configuration_schema=IOT_SQS_CONFIG_SCHEMA, configuration_received=self.configuration)
+        self._configuration = configuration
+
+        # Validating that the payload passed is correct
+        validate_configuration(configuration_schema=IOT_SQS_CONFIG_SCHEMA, configuration_received=self._configuration)
 
         # Defining SQS Queue
-        queue_data = deepcopy(self.configuration["queue"])
-        iam_role_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_role_" + self.environment_
-        iam_policy_name = self.prefix + "_" + queue_data["queue_name"] + "_queue_policy_" + self.environment_
-        queue_data["queue_name"] = self.prefix + "_" + queue_data["queue_name"] + "_queue_" + self.environment_
-
-        self._sqs_queue = base_queue_cdk(construct=self, **queue_data)
+        queue_data = deepcopy(self._configuration["queue"])
+        self._sqs_queue = base_queue(construct=self, **queue_data)
 
         # Defining IAM Role
-        # Defining Service Principal
-        principal = iam.ServicePrincipal(service="iot.amazonaws.com")
-
-        # Defining IAM Role
-        role = iam.Role(self, id=iam_role_name, role_name=iam_role_name, assumed_by=principal)
-
-        # Defining Policy Statement, Policy and Attaching to Role
-        policy_statements = iam.PolicyStatement(actions=["sqs:SendMessage"], resources=[self._sqs_queue.queue_arn])
-        policy = iam.Policy(self, id=iam_policy_name, policy_name=iam_policy_name, statements=[policy_statements])
-        policy.attach_to_role(role=role)
+        role = base_sqs_role(self, resource_name=queue_data["queue_name"], principal_resource="iot")
 
         # Validating Lambda Function Runtime
-        functions_data = self.configuration["lambda_handlers"]
+        functions_data = self._configuration["lambda_handlers"]
         self._lambda_functions = list()
         for lambda_function in functions_data:
             _lambda_function = base_lambda_function(self, **lambda_function)
@@ -67,58 +54,27 @@ class AwsIotRulesSqsPipes(core.Construct):
         action = iot.CfnTopicRule.SqsActionProperty(queue_url=self._sqs_queue.queue_url, role_arn=role.role_arn)
         action_property = iot.CfnTopicRule.ActionProperty(sqs=action)
 
-        rule_data = self.configuration["iot_rule"]
-        rule_payload = iot.CfnTopicRule.TopicRulePayloadProperty(
-            actions=[action_property],
-            rule_disabled=rule_data["rule_disabled"],
-            sql=rule_data["sql"],
-            aws_iot_sql_version=rule_data["aws_iot_sql_version"],
-            description=rule_data.get("description"),
-        )
-
-        # Defining AWS IoT Rule
-        rule_name = self.prefix + "_" + rule_data["rule_name"] + "_" + self.environment_
-        self._iot_rule = iot.CfnTopicRule(self, id=rule_name, rule_name=rule_name, topic_rule_payload=rule_payload)
+        rule_data = self._configuration["iot_rule"]
+        self._iot_rule = base_iot_rule(self, action_property=action_property, **rule_data)
 
     def set_alarms(self):
-        if isinstance(self.configuration["queue"].get("alarms"), list) is True:
+        if isinstance(self._configuration["queue"].get("alarms"), list) is True:
             sqs_alarms = list()
-            for alarm_definition in self.configuration["queue"].get("alarms"):
-                try:
-                    sqs_alarms.append(
-                        cloudwatch.Alarm(
-                            self,
-                            id="iot_sqs_lambda_" + self.configuration["queue"]["queue_name"] + "_" + alarm_definition["name"],
-                            alarm_name="iot_sqs_lambda_" + self.configuration["queue"]["queue_name"] + "_" + alarm_definition["name"],
-                            metric=self._sqs_queue.metric(alarm_definition["name"]),
-                            threshold=alarm_definition["number"],
-                            evaluation_periods=alarm_definition["periods"],
-                            datapoints_to_alarm=alarm_definition["points"],
-                            actions_enabled=alarm_definition["actions"],
-                        )
-                    )
-                except Exception:
-                    print(traceback.format_exc())
+            for alarm_definition in self._configuration["queue"].get("alarms"):
+                sqs_alarms.append(
+                    base_alarm(self, resource_name=self._configuration["queue"]["queue_name"], base_resource=self._sqs_queue, **alarm_definition)
+                )
 
-        for lambda_function_data, lambda_function_definition in zip(self.configuration["lambda_handlers"], self._lambda_functions):
+        for lambda_function_data, lambda_function_definition in zip(self._configuration["lambda_handlers"], self._lambda_functions):
             if isinstance(lambda_function_data.get("alarms"), list) is True:
                 lambda_alarms = list()
                 for alarm_definition in lambda_function_data.get("alarms"):
-                    try:
-                        lambda_alarms.append(
-                            cloudwatch.Alarm(
-                                self,
-                                id="iot_sqs_lambda_" + lambda_function_data["lambda_name"] + "_" + alarm_definition["name"],
-                                alarm_name="iot_sqs_lambda_" + lambda_function_data["lambda_name"] + "_" + alarm_definition["name"],
-                                metric=lambda_function_definition.metric(alarm_definition["name"]),
-                                threshold=alarm_definition["number"],
-                                evaluation_periods=alarm_definition["periods"],
-                                datapoints_to_alarm=alarm_definition["points"],
-                                actions_enabled=alarm_definition["actions"],
-                            )
-                        )
-                    except Exception:
-                        print(traceback.format_exc())
+                    lambda_alarms.append(
+                        base_alarm(self, resource_name=lambda_function_data.get("lambda_name"), base_resource=lambda_function_definition, **alarm_definition))
+
+    @property
+    def configuration(self):
+        return self._configuration
 
     @property
     def sqs_queue(self):

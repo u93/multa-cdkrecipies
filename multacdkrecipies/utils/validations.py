@@ -71,7 +71,9 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
             "lambda_authorizer": {
-                Optional("imported"): {"lambda_arn": And(Use(str))},
+                Optional("imported"): {
+                    "lambda_arn": And(Use(str)),
+                },
                 Optional("origin"): {
                     "lambda_name": And(Use(str)),
                     Optional("description"): And(Use(str)),
@@ -84,16 +86,16 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                         And(Use(str)): And(Use(str))
                     },
                     "iam_actions": [And(Use(str))],
-                    Optional("alarms"): [
-                        {
-                            "name": And(Use(str)),
-                            "number": And(Use(int)),
-                            "periods": And(Use(int)),
-                            "points": And(Use(int)),
-                            "actions": And(Use(bool)),
-                        }
-                    ],
                 },
+                Optional("alarms"): [
+                    {
+                        "name": And(Use(str)),
+                        "number": And(Use(int)),
+                        "periods": And(Use(int)),
+                        "points": And(Use(int)),
+                        "actions": And(Use(bool)),
+                    }
+                ],
             },
             "resource": {
                 "name": And(Use(str)),
@@ -101,7 +103,18 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                 Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
                 "methods": [And(Use(str))],
                 "handler": {
-                    Optional("imported"): {"lambda_arn": And(Use(str))},
+                    Optional("imported"): {
+                        "lambda_arn": And(Use(str)),
+                        Optional("alarms"): [
+                            {
+                                "name": And(Use(str)),
+                                "number": And(Use(int)),
+                                "periods": And(Use(int)),
+                                "points": And(Use(int)),
+                                "actions": And(Use(bool)),
+                            }
+                        ],
+                    },
                     Optional("origin"): {
                         "lambda_name": And(Use(str)),
                         Optional("description"): And(Use(str)),
@@ -114,16 +127,16 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                             And(Use(str)): And(Use(str))
                         },
                         "iam_actions": [And(Use(str))],
-                        Optional("alarms"): [
-                            {
-                                "name": And(Use(str)),
-                                "number": And(Use(int)),
-                                "periods": And(Use(int)),
-                                "points": And(Use(int)),
-                                "actions": And(Use(bool)),
-                            }
-                        ],
                     },
+                    Optional("alarms"): [
+                        {
+                            "name": And(Use(str)),
+                            "number": And(Use(int)),
+                            "periods": And(Use(int)),
+                            "points": And(Use(int)),
+                            "actions": And(Use(bool)),
+                        }
+                    ],
                 },
             },
         }

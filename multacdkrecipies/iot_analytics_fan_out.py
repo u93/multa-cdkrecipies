@@ -22,14 +22,17 @@ class AwsIotAnalyticsFanOut(core.Construct):
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
-        validate_configuration(configuration_schema=IOT_ANALYTICS_FAN_OUT, configuration_received=configuration)
+        self._configuration = configuration
+
+        # Validating that the payload passed is correct
+        validate_configuration(configuration_schema=IOT_ANALYTICS_FAN_OUT, configuration_received=self._configuration)
 
         # Defining Channel
-        channel_name = self.prefix + "_" + configuration["channel_name"] + "_channel_" + self.environment_
+        channel_name = self.prefix + "_" + self._configuration["channel_name"] + "_channel_" + self.environment_
         self._channel = analytics.CfnChannel(self, id=channel_name, channel_name=channel_name)
 
         self._datastore_pipes = list()
-        for datastore_pipe in configuration["datastore_pipe_definition"]:
+        for datastore_pipe in self._configuration["datastore_pipe_definition"]:
             extra_activities = datastore_pipe["extra_activities"]
             base_name = datastore_pipe["name"]
 
@@ -64,6 +67,10 @@ class AwsIotAnalyticsFanOut(core.Construct):
             pipeline.add_depends_on(target=self._channel)
 
             self._datastore_pipes.append(dict(datastore=datastore, pipeline=pipeline))
+
+    @property
+    def configuration(self):
+        return self._configuration
 
     @property
     def channel(self):
