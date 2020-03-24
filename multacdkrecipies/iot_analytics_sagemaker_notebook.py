@@ -25,6 +25,15 @@ class AwsIoTAnalyticsSageMakerNotebook(core.Construct):
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
+        """
+
+        :param scope:
+        :param id:
+        :param prefix:
+        :param environment:
+        :param configuration:
+        :param kwargs:
+        """
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment

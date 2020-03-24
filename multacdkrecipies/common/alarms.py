@@ -1,11 +1,17 @@
 import traceback
 
-from aws_cdk import (
-    aws_cloudwatch as cloudwatch,
-)
+from aws_cdk import aws_cloudwatch as cloudwatch
 
 
 def base_alarm(construct, resource_name: str, base_resource, **kwargs):
+    """
+
+    :param construct:
+    :param resource_name:
+    :param base_resource:
+    :param kwargs:
+    :return:
+    """
     try:
         alarm = cloudwatch.Alarm(
             construct,

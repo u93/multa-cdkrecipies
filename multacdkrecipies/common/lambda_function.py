@@ -11,11 +11,16 @@ from ..utils import WrongRuntimePassed
 
 
 def base_lambda_function(construct, **kwargs):
+    """
+
+    :param construct:
+    :param kwargs:
+    :return:
+    """
     try:
         function_runtime = getattr(lambda_.Runtime, kwargs["runtime"])
     except Exception:
-        raise WrongRuntimePassed(detail=f"Wrong function runtime {kwargs['runtime']} specified",
-                                 tb=traceback.format_exc())
+        raise WrongRuntimePassed(detail=f"Wrong function runtime {kwargs['runtime']} specified", tb=traceback.format_exc())
 
     obtainer_code_path = kwargs.get("code_path")
     if obtainer_code_path is not None:

@@ -1,11 +1,18 @@
 import traceback
 
-from aws_cdk import (
-    aws_iam as iam,
-)
+from aws_cdk import aws_iam as iam
 
 
 def base_role(construct, resource_name: str, principal_resource: str, actions, resources):
+    """
+
+    :param construct:
+    :param resource_name:
+    :param principal_resource:
+    :param actions:
+    :param resources:
+    :return:
+    """
     try:
         # Defining IAM Role
         # Defining Service Principal
@@ -31,6 +38,12 @@ def base_sns_role(construct, resource_name: str, principal_resource: str, **kwar
     """
     No base_resource is required because the high level of customization, just base_resoruce is enough.
     Instead we use specific functions to accommodate the role creation for specific resources.
+
+    :param construct:
+    :param resource_name:
+    :param principal_resource:
+    :param kwargs:
+    :return:
     """
     try:
         actions = ["sns:Publish"]
@@ -46,6 +59,12 @@ def base_sqs_role(construct, resource_name: str, principal_resource: str, **kwar
     """
     No base_resource is required because the high level of customization, just base_resoruce is enough.
     Instead we use specific functions to accommodate the role creation for specific resources.
+
+    :param construct:
+    :param resource_name:
+    :param principal_resource:
+    :param kwargs:
+    :return:
     """
     try:
         actions = ["sqs:SendMessage"]

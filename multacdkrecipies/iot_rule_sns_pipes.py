@@ -2,7 +2,6 @@ from copy import deepcopy
 
 from aws_cdk import (
     core,
-    aws_iam as iam,
     aws_iot as iot,
     aws_sns_subscriptions as sns_subs,
 )
@@ -26,6 +25,15 @@ class AwsIotRulesSnsPipes(core.Construct):
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
+        """
+
+        :param scope:
+        :param id:
+        :param prefix:
+        :param environment:
+        :param configuration:
+        :param kwargs:
+        """
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
@@ -60,11 +68,17 @@ class AwsIotRulesSnsPipes(core.Construct):
         self._iot_rule = base_iot_rule(self, action_property=action_property, **rule_data)
 
     def set_alarms(self):
+        """
+
+        :return:
+        """
         if isinstance(self._configuration["topic"].get("alarms"), list) is True:
             sns_alarms = list()
             for alarm_definition in self._configuration["topic"].get("alarms"):
                 sns_alarms.append(
-                    base_alarm(self, resource_name=self._configuration["topic"]["topic_name"], base_resource=self._sns_topic, **alarm_definition)
+                    base_alarm(
+                        self, resource_name=self._configuration["topic"]["topic_name"], base_resource=self._sns_topic, **alarm_definition
+                    )
                 )
 
         for lambda_function_data, lambda_function_definition in zip(self._configuration["lambda_handlers"], self._lambda_functions):
@@ -72,20 +86,42 @@ class AwsIotRulesSnsPipes(core.Construct):
                 lambda_alarms = list()
                 for alarm_definition in lambda_function_data.get("alarms"):
                     lambda_alarms.append(
-                        base_alarm(self, resource_name=lambda_function_data.get("lambda_name"), base_resource=lambda_function_definition, **alarm_definition))
+                        base_alarm(
+                            self,
+                            resource_name=lambda_function_data.get("lambda_name"),
+                            base_resource=lambda_function_definition,
+                            **alarm_definition,
+                        )
+                    )
 
     @property
     def configuration(self):
+        """
+
+        :return:
+        """
         return self._configuration
 
     @property
     def sns_topic(self):
+        """
+
+        :return:
+        """
         return self._sns_topic
 
     @property
     def lambda_function(self):
+        """
+
+        :return:
+        """
         return self._lambda_function
 
     @property
     def iot_rule(self):
+        """
+
+        :return:
+        """
         return self._iot_rule

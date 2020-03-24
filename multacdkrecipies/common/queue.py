@@ -1,20 +1,20 @@
 import traceback
 
-from aws_cdk import (
-    aws_sqs as sqs,
-)
+from aws_cdk import aws_sqs as sqs
 
 
 def base_queue(construct, **kwargs):
+    """
+
+    :param construct:
+    :param kwargs:
+    :return:
+    """
     queue_name = construct.prefix + "_" + kwargs["queue_name"] + "_queue_" + construct.environment_
     queue_delivery_delay = kwargs.get("queue_delivery_delay")
     queue_visibility_timeout = kwargs.get("queue_visibility_timeout")
     queue = sqs.Queue(
-        construct,
-        id=queue_name,
-        queue_name=queue_name,
-        delivery_delay=queue_delivery_delay,
-        visibility_timeout=queue_visibility_timeout
+        construct, id=queue_name, queue_name=queue_name, delivery_delay=queue_delivery_delay, visibility_timeout=queue_visibility_timeout
     )
 
     return queue

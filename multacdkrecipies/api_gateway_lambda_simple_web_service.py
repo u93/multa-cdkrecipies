@@ -24,6 +24,15 @@ class AwsApiGatewayLambdaSWS(core.Construct):
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
+        """
+
+        :param scope:
+        :param id:
+        :param prefix:
+        :param environment:
+        :param configuration:
+        :param kwargs:
+        """
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
@@ -117,10 +126,7 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             for alarm_definition in self._configuration["api"]["lambda_authorizer"].get("alarms"):
                 authorizer_alarms.append(
                     base_alarm(
-                        self,
-                        resource_name="lambda_authorizer",
-                        base_resource=self._authorizer_lambda_functions[0],
-                        **alarm_definition
+                        self, resource_name="lambda_authorizer", base_resource=self._authorizer_lambda_functions[0], **alarm_definition
                     )
                 )
 
@@ -129,10 +135,7 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             for alarm_definition in self._configuration["api"]["resource"]["handler"].get("alarms"):
                 authorizer_alarms.append(
                     base_alarm(
-                        self,
-                        resource_name="lambda_api_handler",
-                        base_resource=self._handler_lambda_functions[0],
-                        **alarm_definition
+                        self, resource_name="lambda_api_handler", base_resource=self._handler_lambda_functions[0], **alarm_definition
                     )
                 )
 
@@ -147,4 +150,3 @@ class AwsApiGatewayLambdaSWS(core.Construct):
     @property
     def lambda_handler_function(self):
         return self._handler_lambda_functions[0]
-

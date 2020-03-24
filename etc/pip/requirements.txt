@@ -6,6 +6,7 @@ aws-cdk.aws-applicationautoscaling==1.30.0
 aws-cdk.aws-autoscaling==1.30.0
 aws-cdk.aws-autoscaling-common==1.30.0
 aws-cdk.aws-autoscaling-hooktargets==1.30.0
+aws-cdk.aws-batch==1.30.0
 aws-cdk.aws-certificatemanager==1.30.0
 aws-cdk.aws-cloudformation==1.30.0
 aws-cdk.aws-cloudfront==1.30.0
@@ -18,6 +19,7 @@ aws-cdk.aws-ecs==1.30.0
 aws-cdk.aws-elasticloadbalancing==1.30.0
 aws-cdk.aws-elasticloadbalancingv2==1.30.0
 aws-cdk.aws-events==1.30.0
+aws-cdk.aws-glue==1.30.0
 aws-cdk.aws-iam==1.30.0
 aws-cdk.aws-iot==1.30.0
 aws-cdk.aws-iotanalytics==1.30.0
@@ -49,7 +51,8 @@ black==19.10b0
 boto3==1.12.24
 botocore==1.15.24
 cattrs==1.0.0
-Click==7.1.1
+click==7.1.1
+constructs==1.1.2
 contextlib2==0.5.5
 docutils==0.16
 entrypoints==0.3
@@ -59,7 +62,6 @@ jmespath==0.9.5
 jsii==1.1.0
 MarkupSafe==1.1.1
 mccabe==0.6.1
-multacdkrecipies==0.0.1
 pathspec==0.7.0
 publication==0.0.3
 pycodestyle==2.5.0

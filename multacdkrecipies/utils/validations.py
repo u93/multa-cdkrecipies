@@ -18,9 +18,7 @@ APIGATEWAY_LAMBDA_SCHEMA = Schema(
                         "handler": And(Use(str)),
                         Optional("timeout"): And(Use(int)),
                         Optional("reserved_concurrent_executions"): And(Use(int)),
-                        Optional("environment_vars"): {
-                            And(Use(str)): And(Use(str))
-                        },
+                        Optional("environment_vars"): {And(Use(str)): And(Use(str))},
                         "iam_actions": [And(Use(str))],
                         Optional("alarms"): [
                             {
@@ -44,9 +42,7 @@ APIGATEWAY_LAMBDA_SCHEMA = Schema(
                     "handler": And(Use(str)),
                     Optional("timeout"): And(Use(int)),
                     Optional("reserved_concurrent_executions"): And(Use(int)),
-                    Optional("environment_vars"): {
-                        And(Use(str)): And(Use(str))
-                    },
+                    Optional("environment_vars"): {And(Use(str)): And(Use(str))},
                     "iam_actions": [And(Use(str))],
                     Optional("alarms"): [
                         {
@@ -71,9 +67,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
             "lambda_authorizer": {
-                Optional("imported"): {
-                    "lambda_arn": And(Use(str)),
-                },
+                Optional("imported"): {"lambda_arn": And(Use(str)),},
                 Optional("origin"): {
                     "lambda_name": And(Use(str)),
                     Optional("description"): And(Use(str)),
@@ -82,9 +76,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                     "handler": And(Use(str)),
                     Optional("timeout"): And(Use(int)),
                     Optional("reserved_concurrent_executions"): And(Use(int)),
-                    Optional("environment_vars"): {
-                        And(Use(str)): And(Use(str))
-                    },
+                    Optional("environment_vars"): {And(Use(str)): And(Use(str))},
                     "iam_actions": [And(Use(str))],
                 },
                 Optional("alarms"): [
@@ -123,9 +115,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                         "handler": And(Use(str)),
                         Optional("timeout"): And(Use(int)),
                         Optional("reserved_concurrent_executions"): And(Use(int)),
-                        Optional("environment_vars"): {
-                            And(Use(str)): And(Use(str))
-                        },
+                        Optional("environment_vars"): {And(Use(str)): And(Use(str))},
                         "iam_actions": [And(Use(str))],
                     },
                     Optional("alarms"): [
@@ -166,9 +156,7 @@ SNS_CONFIG_SCHEMA = Schema(
                 "handler": And(Use(str)),
                 Optional("timeout"): And(Use(int)),
                 Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): {
-                    And(Use(str)): And(Use(str))
-                },
+                Optional("environment_vars"): {And(Use(str)): And(Use(str))},
                 "iam_actions": [And(Use(str))],
                 Optional("alarms"): [
                     {
@@ -207,9 +195,7 @@ IOT_SNS_CONFIG_SCHEMA = Schema(
                 "handler": And(Use(str)),
                 Optional("timeout"): And(Use(int)),
                 Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): {
-                    And(Use(str)): And(Use(str))
-                },
+                Optional("environment_vars"): {And(Use(str)): And(Use(str))},
                 "iam_actions": [And(Use(str))],
                 Optional("alarms"): [
                     {
@@ -258,9 +244,7 @@ IOT_SQS_CONFIG_SCHEMA = Schema(
                 "handler": And(Use(str)),
                 Optional("timeout"): And(Use(int)),
                 Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): {
-                    And(Use(str)): And(Use(str))
-                },
+                Optional("environment_vars"): {And(Use(str)): And(Use(str))},
                 "iam_actions": [And(Use(str))],
                 Optional("alarms"): [
                     {
@@ -308,9 +292,7 @@ SQS_CONFIG_SCHEMA = Schema(
                 "handler": And(Use(str)),
                 Optional("timeout"): And(Use(int)),
                 Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): {
-                    And(Use(str)): And(Use(str))
-                },
+                Optional("environment_vars"): {And(Use(str)): And(Use(str))},
                 "iam_actions": [And(Use(str))],
                 Optional("alarms"): [
                     {
@@ -342,6 +324,12 @@ SAGEMAKER_NOTEBOOK = Schema(
 
 
 def validate_configuration(configuration_schema, configuration_received):
+    """
+
+    :param configuration_schema:
+    :param configuration_received:
+    :return:
+    """
     try:
         configuration_schema.validate(configuration_received)
     except SchemaError:
@@ -350,4 +338,9 @@ def validate_configuration(configuration_schema, configuration_received):
 
 
 def validate_file(file_path: str):
+    """
+
+    :param file_path:
+    :return:
+    """
     return os.path.isfile(file_path)

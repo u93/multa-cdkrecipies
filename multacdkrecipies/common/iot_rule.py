@@ -1,11 +1,16 @@
 import traceback
 
-from aws_cdk import (
-    aws_iot as iot,
-)
+from aws_cdk import aws_iot as iot
 
 
 def base_iot_rule(construct, action_property, **kwargs):
+    """
+
+    :param construct:
+    :param action_property:
+    :param kwargs:
+    :return:
+    """
     rule_payload = iot.CfnTopicRule.TopicRulePayloadProperty(
         actions=[action_property],
         rule_disabled=kwargs["rule_disabled"],

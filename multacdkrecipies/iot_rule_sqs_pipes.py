@@ -2,7 +2,6 @@ from copy import deepcopy
 
 from aws_cdk import (
     core,
-    aws_iam as iam,
     aws_iot as iot,
     aws_lambda_event_sources as lambda_sources,
 )
@@ -26,6 +25,15 @@ class AwsIotRulesSqsPipes(core.Construct):
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
+        """
+
+        :param scope:
+        :param id:
+        :param prefix:
+        :param environment:
+        :param configuration:
+        :param kwargs:
+        """
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
@@ -58,11 +66,17 @@ class AwsIotRulesSqsPipes(core.Construct):
         self._iot_rule = base_iot_rule(self, action_property=action_property, **rule_data)
 
     def set_alarms(self):
+        """
+
+        :return:
+        """
         if isinstance(self._configuration["queue"].get("alarms"), list) is True:
             sqs_alarms = list()
             for alarm_definition in self._configuration["queue"].get("alarms"):
                 sqs_alarms.append(
-                    base_alarm(self, resource_name=self._configuration["queue"]["queue_name"], base_resource=self._sqs_queue, **alarm_definition)
+                    base_alarm(
+                        self, resource_name=self._configuration["queue"]["queue_name"], base_resource=self._sqs_queue, **alarm_definition
+                    )
                 )
 
         for lambda_function_data, lambda_function_definition in zip(self._configuration["lambda_handlers"], self._lambda_functions):
@@ -70,20 +84,42 @@ class AwsIotRulesSqsPipes(core.Construct):
                 lambda_alarms = list()
                 for alarm_definition in lambda_function_data.get("alarms"):
                     lambda_alarms.append(
-                        base_alarm(self, resource_name=lambda_function_data.get("lambda_name"), base_resource=lambda_function_definition, **alarm_definition))
+                        base_alarm(
+                            self,
+                            resource_name=lambda_function_data.get("lambda_name"),
+                            base_resource=lambda_function_definition,
+                            **alarm_definition,
+                        )
+                    )
 
     @property
     def configuration(self):
+        """
+
+        :return:
+        """
         return self._configuration
 
     @property
     def sqs_queue(self):
+        """
+
+        :return:
+        """
         return self._sqs_queue
 
     @property
     def lambda_functions(self):
+        """
+
+        :return:
+        """
         return self._lambda_functions
 
     @property
     def iot_rule(self):
+        """
+
+        :return:
+        """
         return self._iot_rule

@@ -1,8 +1,11 @@
 #!/bin/bash
 
+ACTION=${1}
+
 python setup.py sdist > /dev/null
 
-cat << _EOF_
+if [ "${ACTION}" == "DEVELOPMENT" ]; then
+  cat << _EOF_
 <!-- index.html -->
 
 <html>
@@ -14,7 +17,17 @@ cat << _EOF_
 </html>
 _EOF_
 
-aws s3 cp index.html s3://cdkrecipies/multacdkrecipies/ > /dev/null
-aws s3 cp ./dist/multacdkrecipies-${VERSION}.tar.gz s3://cdkrecipies/multacdkrecipies/ > /dev/null
+  aws s3 cp index.html s3://cdkrecipies/multacdkrecipies/ > /dev/null
+  aws s3 cp ./dist/multacdkrecipies-${VERSION}.tar.gz s3://cdkrecipies/multacdkrecipies/ > /dev/null
 
-rm -rf dist/*
+  rm -rf dist/*
+
+elif [ "${ACTION}" == "PRODUCION" ]; then
+
+  echo "Entering in PRODUCION deployment!"
+
+else
+
+  echo "Wrong input for build/deploy script"
+
+fi

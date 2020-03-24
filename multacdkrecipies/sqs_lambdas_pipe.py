@@ -24,6 +24,15 @@ class AwsSqsPipes(core.Construct):
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
+        """
+
+        :param scope:
+        :param id:
+        :param prefix:
+        :param environment:
+        :param configuration:
+        :param kwargs:
+        """
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
@@ -46,11 +55,17 @@ class AwsSqsPipes(core.Construct):
             _lambda_function.add_event_source(lambda_sources.SqsEventSource(queue=self._sqs_queue, batch_size=10))
 
     def set_alarms(self):
+        """
+
+        :return:
+        """
         if isinstance(self._configuration["queue"].get("alarms"), list) is True:
             sqs_alarms = list()
             for alarm_definition in self._configuration["queue"].get("alarms"):
                 sqs_alarms.append(
-                    base_alarm(self, resource_name=self._configuration["queue"]["queue_name"], base_resource=self._sqs_queue, **alarm_definition)
+                    base_alarm(
+                        self, resource_name=self._configuration["queue"]["queue_name"], base_resource=self._sqs_queue, **alarm_definition
+                    )
                 )
 
         for lambda_function_data, lambda_function_definition in zip(self._configuration["lambda_handlers"], self._lambda_functions):
@@ -58,7 +73,13 @@ class AwsSqsPipes(core.Construct):
                 lambda_alarms = list()
                 for alarm_definition in lambda_function_data.get("alarms"):
                     lambda_alarms.append(
-                        base_alarm(self, resource_name=lambda_function_data.get("lambda_name"), base_resource=lambda_function_definition, **alarm_definition))
+                        base_alarm(
+                            self,
+                            resource_name=lambda_function_data.get("lambda_name"),
+                            base_resource=lambda_function_definition,
+                            **alarm_definition,
+                        )
+                    )
 
     @property
     def configuration(self):
