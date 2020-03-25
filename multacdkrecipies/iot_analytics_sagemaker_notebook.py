@@ -14,25 +14,19 @@ file_path = os.path.dirname(os.path.abspath(__file__))
 
 class AwsIoTAnalyticsSageMakerNotebook(core.Construct):
     """
-    AWS CDK Construct that defines a pipe where a Rules captures an MQTT Message sent to or from AWS IoT MQTT Broker,
-    then the message is sent to an SQS Queue and a Lambda function subscribed to the topic can process it and take
-    proper actions. The construct takes a few inputs.
-
-    Attributes:
-        prefix (str): The prefix set on the name of each resource created in the stack. Just for organization purposes.
-        environment_ (str): The environment that all resources will use. Also for organizational and testing purposes.
-
+    AWS CDK Construct that defines a Sagemaker Notebook for data analysis as well all the AWS IAM permissions that
+    it requires. Also defines the scripts that the Notebook will run On Create and On Start. if the script paths are
+    not defined or do not exist they will be taken from the project defined basic scripts.
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         """
-
-        :param scope:
-        :param id:
-        :param prefix:
-        :param environment:
-        :param configuration:
-        :param kwargs:
+        :param scope: Stack class, used by CDK.
+        :param id: ID of the construct, used by CDK.
+        :param prefix: Prefix of the construct, used for naming purposes.
+        :param environment: Environment of the construct, used for naming purposes.
+        :param configuration: Configuration of the construct. In this case SAGEMAKER_NOTEBOOK.
+        :param kwargs: Other parameters that could be used by the construct.
         """
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
@@ -95,16 +89,28 @@ class AwsIoTAnalyticsSageMakerNotebook(core.Construct):
 
     @property
     def configuration(self):
+        """
+        :return: Construct configuration.
+        """
         return self._configuration
 
     @property
     def lifecycle_configuration(self):
+        """
+        :return: Construct lifecycle configuration.
+        """
         return self._lifecycle_configuration
 
     @property
     def role(self):
+        """
+        :return: Construct IAM Role.
+        """
         return self._role
 
     @property
     def sagemaker_notebook(self):
+        """
+        :return: Construct Sagemaker Notebook.
+        """
         return self._sagemaker_notebook

@@ -1,15 +1,13 @@
-import traceback
-
 from aws_cdk import aws_iot as iot
 
 
 def base_iot_rule(construct, action_property, **kwargs):
     """
-
-    :param construct:
-    :param action_property:
-    :param kwargs:
-    :return:
+    Function that generates an IoT Rule.
+    :param construct: Custom construct that will use this function. From the external construct is usually 'self'.
+    :param action_property: Action property for the resources that the Rule will interact.
+    :param kwargs: Consist of required 'rule_name', 'rule_disabled', 'sql', 'aws_iot_sql_version' and optional 'description'.
+    :return: IoT Rule Construct.
     """
     rule_payload = iot.CfnTopicRule.TopicRulePayloadProperty(
         actions=[action_property],

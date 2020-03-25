@@ -10,28 +10,22 @@ from .utils import APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, validate_configu
 
 class AwsApiGatewayLambdaSWS(core.Construct):
     """
-    AWS CDK Construct that defines a pipe where a Rules captures an MQTT Message sent to or from AWS IoT MQTT Broker,
-    then the message is sent to an SNS Topic and a Lambda function subscribed to the topic can process it and take
-    proper actions. The construct takes a few inputs.
-
-    Attributes:
-        prefix (str): The prefix set on the name of each resource created in the stack. Just for organization purposes.
-        environment_ (str): The environment that all resources will use. Also for organizational and testing purposes.
-        _sns_topic (object): SNS Topic representation in CDK.
-        _lambda_function (object): Lambda Function representation in CDK.
-        _iot_rule (object): IoT Topic Rule representation in CDK.
-
+    AWS CDK Construct that defines a Simple Web Service formed by a RestAPI that has a Lambda Authorizer function
+    that can be imported or created (if both are passed as configuration, the first of the imported has higher
+    priority compared to the new one)... Also has a Lambda handler function that will respond to at least one
+    method (GET, POST) that can be imported or created (if both are passed as configuration, the first of the imported has higher
+    priority compared to the new one)... Custom domain with certificate configuration can also be passed to the RestAPI
+    with also the possibility to configure CORS for the API.
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         """
-
-        :param scope:
-        :param id:
-        :param prefix:
-        :param environment:
-        :param configuration:
-        :param kwargs:
+        :param scope: Stack class, used by CDK.
+        :param id: ID of the construct, used by CDK.
+        :param prefix: Prefix of the construct, used for naming purposes.
+        :param environment: Environment of the construct, used for naming purposes.
+        :param configuration: Configuration of the construct. In this case APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA.
+        :param kwargs: Other parameters that could be used by the construct.
         """
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
@@ -121,6 +115,10 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             resource.add_cors_preflight(allow_origins=allowed_origins, allow_methods=gateway_methods)
 
     def set_alarms(self):
+        """
+        Function that set alarms for the resources involved in the construct. Except API Gateway resource.
+        :return: None
+        """
         if isinstance(self._configuration["api"]["lambda_authorizer"].get("alarms"), list) is True:
             authorizer_alarms = list()
             for alarm_definition in self._configuration["api"]["lambda_authorizer"].get("alarms"):
@@ -140,13 +138,29 @@ class AwsApiGatewayLambdaSWS(core.Construct):
                 )
 
     @property
+    def configuration(self):
+        """
+        :return: Construct configuration.
+        """
+        return self._configuration
+
+    @property
     def lambda_rest_api(self):
+        """
+        :return: Construct SNS Topic.
+        """
         return self._lambda_rest_api
 
     @property
     def lambda_authorizer_function(self):
+        """
+        :return: Construct SNS Topic.
+        """
         return self._authorizer_lambda_functions[0]
 
     @property
     def lambda_handler_function(self):
+        """
+        :return: Construct SNS Topic.
+        """
         return self._handler_lambda_functions[0]

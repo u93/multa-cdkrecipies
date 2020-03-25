@@ -5,11 +5,11 @@ from aws_cdk import aws_cloudwatch as cloudwatch
 
 def base_alarm(construct, resource_name: str, base_resource, **kwargs):
     """
-
-    :param construct:
-    :param resource_name:
-    :param base_resource:
-    :param kwargs:
+    Function that generates a Cloudwatch Alarm.
+    :param construct: Custom construct that will use this function. From the external construct is usually 'self'.
+    :param resource_name: The resource that the Alarm is generated for. Used for naming purposes.
+    :param base_resource: Resource construct object from which the metrics will be generated.
+    :param kwargs: Consist of required 'name' (name of the metric according to CDK), 'number' (value to compare the metrics), 'periods'(compared periods) 'points' (points to alarm), 'actions_enabled' (enable or not actions).
     :return:
     """
     try:

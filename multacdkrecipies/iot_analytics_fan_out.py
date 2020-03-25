@@ -8,25 +8,18 @@ from .utils import IOT_ANALYTICS_FAN_OUT, validate_configuration
 
 class AwsIotAnalyticsFanOut(core.Construct):
     """
-    AWS CDK Construct that defines a pipe where a Rules captures an MQTT Message sent to or from AWS IoT MQTT Broker,
-    then the message is sent to an SQS Queue and a Lambda function subscribed to the topic can process it and take
-    proper actions. The construct takes a few inputs.
-
-    Attributes:
-        prefix (str): The prefix set on the name of each resource created in the stack. Just for organization purposes.
-        environment_ (str): The environment that all resources will use. Also for organizational and testing purposes.
-
+    AWS CDK Construct that defines an AWS Analytics Pipeline with a Fan-Out approach where one channel ingests all the
+    information and distributes over several Pipelines that each one is attach to a Datastore.
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         """
-
-        :param scope:
-        :param id:
-        :param prefix:
-        :param environment:
-        :param configuration:
-        :param kwargs:
+        :param scope: Stack class, used by CDK.
+        :param id: ID of the construct, used by CDK.
+        :param prefix: Prefix of the construct, used for naming purposes.
+        :param environment: Environment of the construct, used for naming purposes.
+        :param configuration: Configuration of the construct. In this case IOT_ANALYTICS_FAN_OUT.
+        :param kwargs: Other parameters that could be used by the construct.
         """
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
@@ -79,12 +72,21 @@ class AwsIotAnalyticsFanOut(core.Construct):
 
     @property
     def configuration(self):
+        """
+        :return: Construct configuration.
+        """
         return self._configuration
 
     @property
     def channel(self):
+        """
+        :return: Construct IoT Analytics Channel.
+        """
         return self._channel
 
     @property
     def datastore_pipes(self):
+        """
+        :return: List of elements where each one is a dictionary that contains Datastores and Pipelines.
+        """
         return self._datastore_pipes

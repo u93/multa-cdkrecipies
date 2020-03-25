@@ -3,15 +3,15 @@ import traceback
 from aws_cdk import aws_iam as iam
 
 
-def base_role(construct, resource_name: str, principal_resource: str, actions, resources):
+def base_role(construct, resource_name: str, principal_resource: str, actions: list, resources: list):
     """
-
-    :param construct:
-    :param resource_name:
-    :param principal_resource:
-    :param actions:
-    :param resources:
-    :return:
+    Function that generates an IAM Role with a Policy.
+    :param construct: Custom construct that will use this function. From the external construct is usually 'self'.
+    :param resource_name: Name of the resource. Used for naming purposes.
+    :param principal_resource: Resource used to define a Service Principal. Has to match an AWS Resource. For example, 'iot' -> 'iot.amazonaws.com'.
+    :param actions: Action list containing AWS IAM defined actions. For example 'sns:Publish'
+    :param resources: List of resources ARNs defined by AWS.
+    :return: IAM Role with an IAM Policy attached.
     """
     try:
         # Defining IAM Role
@@ -36,14 +36,12 @@ def base_role(construct, resource_name: str, principal_resource: str, actions, r
 
 def base_sns_role(construct, resource_name: str, principal_resource: str, **kwargs):
     """
-    No base_resource is required because the high level of customization, just base_resoruce is enough.
-    Instead we use specific functions to accommodate the role creation for specific resources.
-
-    :param construct:
-    :param resource_name:
-    :param principal_resource:
-    :param kwargs:
-    :return:
+    Function that generates an IAM Role with a Policy for SNS Publishing.
+    :param construct: Custom construct that will use this function. From the external construct is usually 'self'.
+    :param resource_name: Name of the resource. Used for naming purposes.
+    :param principal_resource: Resource used to define a Service Principal. Has to match an AWS Resource. For example, 'iot' -> 'iot.amazonaws.com'.
+    :param kwargs: Other parameters that could be used by the construct.
+    :return: IAM Role with an IAM Policy attached.
     """
     try:
         actions = ["sns:Publish"]
@@ -57,14 +55,12 @@ def base_sns_role(construct, resource_name: str, principal_resource: str, **kwar
 
 def base_sqs_role(construct, resource_name: str, principal_resource: str, **kwargs):
     """
-    No base_resource is required because the high level of customization, just base_resoruce is enough.
-    Instead we use specific functions to accommodate the role creation for specific resources.
-
-    :param construct:
-    :param resource_name:
-    :param principal_resource:
-    :param kwargs:
-    :return:
+    Function that generates an IAM Role with a Policy for SQS Send Message.
+    :param construct: Custom construct that will use this function. From the external construct is usually 'self'.
+    :param resource_name: Name of the resource. Used for naming purposes.
+    :param principal_resource: Resource used to define a Service Principal. Has to match an AWS Resource. For example, 'iot' -> 'iot.amazonaws.com'.
+    :param kwargs: Other parameters that could be used by the construct.
+    :return: IAM Role with an IAM Policy attached.
     """
     try:
         actions = ["sqs:SendMessage"]

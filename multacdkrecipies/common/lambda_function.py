@@ -12,10 +12,12 @@ from ..utils import WrongRuntimePassed
 
 def base_lambda_function(construct, **kwargs):
     """
-
-    :param construct:
-    :param kwargs:
-    :return:
+    Function that generates a Lambda Function. Using the parameter 'code_path' it gets the code from a path set for
+    the user or a preset path. The function gets all the allowed IAM actions and will have access to all resources for
+    a matter of simplicity.
+    :param construct: Custom construct that will use this function. From the external construct is usually 'self'.
+    :param kwargs: Consist of required 'lambda_name', 'handler', 'runtime', 'iam_actions' and optionals 'code_path', 'description', 'environment_vars', 'timeout', 'reserved_concurrent_executions'.
+    :return: Lambda Function Construct.
     """
     try:
         function_runtime = getattr(lambda_.Runtime, kwargs["runtime"])

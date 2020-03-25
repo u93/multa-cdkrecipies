@@ -12,27 +12,19 @@ from .utils import IOT_SNS_CONFIG_SCHEMA, validate_configuration
 class AwsIotRulesSnsPipes(core.Construct):
     """
     AWS CDK Construct that defines a pipe where a Rules captures an MQTT Message sent to or from AWS IoT MQTT Broker,
-    then the message is sent to an SNS Topic and a Lambda function subscribed to the topic can process it and take
-    proper actions. The construct takes a few inputs.
-
-    Attributes:
-        prefix (str): The prefix set on the name of each resource created in the stack. Just for organization purposes.
-        environment_ (str): The environment that all resources will use. Also for organizational and testing purposes.
-        _sns_topic (object): SNS Topic representation in CDK.
-        _lambda_function (object): Lambda Function representation in CDK.
-        _iot_rule (object): IoT Topic Rule representation in CDK.
-
+    then the message is sent to an SNS Topic and a Lambda function or functions subscribed to the topic can process it
+    and take proper actions. The construct allows to set alerts on both resources the SNS Topic and the
+    Lambda Functions.
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         """
-
-        :param scope:
-        :param id:
-        :param prefix:
-        :param environment:
-        :param configuration:
-        :param kwargs:
+        :param scope: Stack class, used by CDK.
+        :param id: ID of the construct, used by CDK.
+        :param prefix: Prefix of the construct, used for naming purposes.
+        :param environment: Environment of the construct, used for naming purposes.
+        :param configuration: Configuration of the construct. In this case IOT_SNS_CONFIG_SCHEMA.
+        :param kwargs: Other parameters that could be used by the construct.
         """
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
@@ -69,8 +61,8 @@ class AwsIotRulesSnsPipes(core.Construct):
 
     def set_alarms(self):
         """
-
-        :return:
+        Function that set alarms for the resources involved in the construct. Except the IoT Rule.
+        :return: None
         """
         if isinstance(self._configuration["topic"].get("alarms"), list) is True:
             sns_alarms = list()
@@ -97,31 +89,27 @@ class AwsIotRulesSnsPipes(core.Construct):
     @property
     def configuration(self):
         """
-
-        :return:
+        :return: Construct configuration.
         """
         return self._configuration
 
     @property
     def sns_topic(self):
         """
-
-        :return:
+        :return: Construct SNS Topic.
         """
         return self._sns_topic
 
     @property
-    def lambda_function(self):
+    def lambda_functions(self):
         """
-
-        :return:
+        :return: List of Constructs Lambda Functions.
         """
-        return self._lambda_function
+        return self._lambda_functions
 
     @property
     def iot_rule(self):
         """
-
-        :return:
+        :return: Construct IoT Rule.
         """
         return self._iot_rule

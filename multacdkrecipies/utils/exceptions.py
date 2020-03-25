@@ -1,6 +1,6 @@
 class WrongTypeException(Exception):
     """
-
+    Designed to be raised when the wrong type of element is passed.
     """
 
     def __init__(self, detail=None, *args, **kwargs):
@@ -10,7 +10,7 @@ class WrongTypeException(Exception):
 
 class WrongRuntimePassed(Exception):
     """
-
+    Designed to be raised when the wrong RUNTIME is passed to a Lambda Function.
     """
 
     def __init__(self, detail=None, tb=None, *args, **kwargs):
