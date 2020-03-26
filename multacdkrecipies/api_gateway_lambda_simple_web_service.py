@@ -92,7 +92,8 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             domain_name = custom_domain["domain_name"]
             certificate_arn = custom_domain["certificate_arn"]
             domain_options = api_gateway.DomainNameOptions(
-                certificate=cert_manager.Certificate.from_certificate_arn(certificate_arn), domain_name=domain_name
+                certificate=cert_manager.Certificate.from_certificate_arn(self, id=domain_name, certificate_arn=certificate_arn),
+                domain_name=domain_name,
             )
         else:
             domain_options = None
