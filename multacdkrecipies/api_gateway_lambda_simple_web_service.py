@@ -67,7 +67,16 @@ class AwsApiGatewayLambdaSWS(core.Construct):
 
         # Define Gateway
         try:
-            desired_auth_handler = self._authorizer_lambda_functions[0]
+            if len(self._authorizer_lambda_functions) == 0:
+                gateway_authorizer = None
+                print("No Authorizer Function passed, skipping API Gateway Auth")
+            else:
+                desired_auth_handler = self._authorizer_lambda_functions[0]
+                # Define Gateway Token Authorizer
+                authorizer_name = api_configuration["apigateway_name"] + "_" + "authorizer"
+                gateway_authorizer = api_gateway.TokenAuthorizer(
+                    self, id=authorizer_name, authorizer_name=authorizer_name, handler=desired_auth_handler
+                )
         except IndexError:
             print("Unable to find defined Auth Lambda Handler! Please verify configuration payload...")
             raise RuntimeError("Unable to find defined Auth Lambda Handler! Please verify configuration payload...")
@@ -96,12 +105,6 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             domain_name=domain_options,
             handler=desired_handler,
             proxy=False,
-        )
-
-        # Define Gateway Token Authorizer
-        authorizer_name = api_configuration["apigateway_name"] + "_" + "authorizer"
-        gateway_authorizer = api_gateway.TokenAuthorizer(
-            self, id=authorizer_name, authorizer_name=authorizer_name, handler=desired_auth_handler
         )
 
         # Define Gateway Resource and Methods
