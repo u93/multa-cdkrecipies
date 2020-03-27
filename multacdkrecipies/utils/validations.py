@@ -322,6 +322,8 @@ SAGEMAKER_NOTEBOOK = Schema(
     {"name": And(Use(str)), "scripts": {"on_create": And(Use(str)), "on_start": And(Use(str))}, "instance_type": And(Use(str)),}
 )
 
+SSM_PARAMETER_STRING = Schema({"name": And(Use(str)), Optional("description"): And(Use(str)), "string_value": And(Use(dict))})
+
 
 def validate_configuration(configuration_schema, configuration_received):
     """

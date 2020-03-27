@@ -2,7 +2,7 @@ import os
 import setuptools
 
 
-VERSION = os.environ.get("VERSION", "0.1.0")
+VERSION = os.environ.get("VERSION", "0.2.0")
 
 with open("./README.md") as fp:
     long_description = fp.read()
