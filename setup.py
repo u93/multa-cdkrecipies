@@ -20,7 +20,7 @@ setuptools.setup(
     maintainer="Eugenio Efrain Breijo",
     maintainer_email="eebf1993@gmail.com",
     url="https://github.com/u93/multacdkrecipies",
-    packages=["multacdkrecipies", "multacdkrecipies.utils", "multacdkrecipies.settings", "multacdkrecipies.common"],
+    packages=["multacdkrecipies", "multacdkrecipies.utils", "multacdkrecipies.settings", "multacdkrecipies.common", "multacdkrecipies.scripts"],
     install_requires=[
         "appdirs==1.4.3",
         "attrs==19.3.0",

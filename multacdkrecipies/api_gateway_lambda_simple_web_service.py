@@ -33,7 +33,9 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self._configuration)
+        validate_configuration(
+            configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self._configuration
+        )
         api_configuration = self._configuration["api"]
 
         # Define Lambda Authorizers
@@ -43,7 +45,9 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         # Define IN-ACCOUNT Lambda Authorizers
         in_account_lambda_authorizer = lambda_authorizers.get("imported")
         if in_account_lambda_authorizer is not None:
-            self._authorizer_lambda_functions.append(lambda_.Function.from_function_arn(in_account_lambda_authorizer["lambda_arn"]))
+            self._authorizer_lambda_functions.append(
+                lambda_.Function.from_function_arn(in_account_lambda_authorizer["lambda_arn"])
+            )
 
         # Define NEW-FUNCTION Lambda Authorizers
         defined_lambda_authorizer = lambda_authorizers.get("origin")
@@ -98,6 +102,10 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         else:
             domain_options = None
 
+        if api_configuration["proxy"] is False and api_configuration.get("resource").get("methods") is None:
+            print("Unable to check which method to use for the API! Use proxy: True or define methods...")
+            raise RuntimeError("Unable to check which method to use for the API! Use proxy: True or define methods...")
+
         self._lambda_rest_api = api_gateway.LambdaRestApi(
             self,
             id=api_configuration["apigateway_name"],
@@ -105,18 +113,23 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             description=api_configuration["apigateway_description"],
             domain_name=domain_options,
             handler=desired_handler,
-            proxy=False,
+            proxy=api_configuration["proxy"],
         )
 
         # Define Gateway Resource and Methods
         resource = self._lambda_rest_api.root.add_resource(api_configuration["resource"]["name"])
-        gateway_methods = api_configuration["resource"]["methods"]
-        for method in gateway_methods:
-            resource.add_method(http_method=method, authorizer=gateway_authorizer)
-
         allowed_origins = api_configuration["resource"].get("allowed_origins")
-        if allowed_origins is not None:
-            resource.add_cors_preflight(allow_origins=allowed_origins, allow_methods=gateway_methods)
+        if api_configuration["proxy"] is False:
+            gateway_methods = api_configuration["resource"]["methods"]
+            for method in gateway_methods:
+                resource.add_method(http_method=method, authorizer=gateway_authorizer)
+                resource.add_proxy
+
+            if allowed_origins is not None:
+                resource.add_cors_preflight(allow_origins=allowed_origins, allow_methods=gateway_methods)
+        else:
+            if allowed_origins is not None:
+                resource.add_cors_preflight(allow_origins=allowed_origins)
 
     def set_alarms(self):
         """
@@ -128,7 +141,10 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             for alarm_definition in self._configuration["api"]["lambda_authorizer"].get("alarms"):
                 authorizer_alarms.append(
                     base_alarm(
-                        self, resource_name="lambda_authorizer", base_resource=self._authorizer_lambda_functions[0], **alarm_definition
+                        self,
+                        resource_name="lambda_authorizer",
+                        base_resource=self._authorizer_lambda_functions[0],
+                        **alarm_definition,
                     )
                 )
 
@@ -137,7 +153,10 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             for alarm_definition in self._configuration["api"]["resource"]["handler"].get("alarms"):
                 authorizer_alarms.append(
                     base_alarm(
-                        self, resource_name="lambda_api_handler", base_resource=self._handler_lambda_functions[0], **alarm_definition
+                        self,
+                        resource_name="lambda_api_handler",
+                        base_resource=self._handler_lambda_functions[0],
+                        **alarm_definition,
                     )
                 )
 

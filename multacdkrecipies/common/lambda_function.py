@@ -22,7 +22,8 @@ def base_lambda_function(construct, **kwargs):
     try:
         function_runtime = getattr(lambda_.Runtime, kwargs["runtime"])
     except Exception:
-        raise WrongRuntimePassed(detail=f"Wrong function runtime {kwargs['runtime']} specified", tb=traceback.format_exc())
+        print(f"Wrong function runtime {kwargs['runtime']} specified")
+        raise WrongRuntimePassed(tb=traceback.format_exc())
 
     obtainer_code_path = kwargs.get("code_path")
     if obtainer_code_path is not None:
@@ -30,17 +31,18 @@ def base_lambda_function(construct, **kwargs):
     elif obtainer_code_path is None and DEFAULT_LAMBDA_CODE_PATH_EXISTS is True:
         code_path = DEFAULT_LAMBDA_CODE_PATH
     else:
-        raise RuntimeError(f"Code path for Lambda Function {kwargs['lambda_name']} is not valid!")
+        print(f"Code path for Lambda Function {kwargs['lambda_name']} is not valid!")
+        raise RuntimeError
 
     # Defining Lambda function
     _lambda_function = lambda_.Function(
         construct,
-        id=construct.prefix + "_" + kwargs["lambda_name"] + "_lambda_" + construct.environment_,
-        function_name=construct.prefix + "_" + kwargs["lambda_name"] + "_lambda_" + construct.environment_,
+        id=construct.prefix + "_" + kwargs["lambda_name"] + construct.environment_,
+        function_name=construct.prefix + "_" + kwargs["lambda_name"] + construct.environment_,
         code=lambda_.Code.from_asset(path=code_path),
         handler=kwargs["handler"],
         runtime=function_runtime,
-        layers=None,
+        layers=kwargs.get("layers"),
         description=kwargs.get("description"),
         tracing=lambda_.Tracing.ACTIVE,
         environment=kwargs.get("environment_vars"),

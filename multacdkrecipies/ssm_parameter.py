@@ -3,7 +3,7 @@ from aws_cdk import (
     core,
     aws_ssm as ssm,
 )
-from .utils import SSM_PARAMETER_STRING, validate_configuration
+from .utils import SSM_PARAMETER_STRING_SCHEMA, validate_configuration
 
 
 class AwsSsmString(core.Construct):
@@ -18,7 +18,7 @@ class AwsSsmString(core.Construct):
         :param id: ID of the construct, used by CDK.
         :param prefix: Prefix of the construct, used for naming purposes.
         :param environment: Environment of the construct, used for naming purposes.
-        :param configuration: Configuration of the construct. In this case SQS_CONFIG_SCHEMA.
+        :param configuration: Configuration of the construct. In this case SSM_PARAMETER_STRING.
         :param kwargs: Other parameters that could be used by the construct.
         """
         super().__init__(scope, id, **kwargs)
@@ -27,7 +27,7 @@ class AwsSsmString(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=SSM_PARAMETER_STRING, configuration_received=self._configuration)
+        validate_configuration(configuration_schema=SSM_PARAMETER_STRING_SCHEMA, configuration_received=self._configuration)
 
         self._parameter_string = ssm.StringParameter(
             self,

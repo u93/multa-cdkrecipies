@@ -3,7 +3,7 @@ from aws_cdk import (
     aws_iotanalytics as analytics,
 )
 
-from .utils import IOT_ANALYTICS_FAN_IN, validate_configuration
+from .utils import IOT_ANALYTICS_FAN_IN_SCHEMA, validate_configuration
 
 
 class AwsIotAnalyticsFanIn(core.Construct):
@@ -27,7 +27,7 @@ class AwsIotAnalyticsFanIn(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=IOT_ANALYTICS_FAN_IN, configuration_received=configuration)
+        validate_configuration(configuration_schema=IOT_ANALYTICS_FAN_IN_SCHEMA, configuration_received=configuration)
 
         # Defining Datastore
         datastore_name = self.prefix + "_" + self._configuration["datastore_name"] + "_datastore_" + self.environment_
@@ -64,7 +64,9 @@ class AwsIotAnalyticsFanIn(core.Construct):
 
             # Defining Pipeline
             pipeline_name = self.prefix + "_" + base_name + "_pipeline_" + self.environment_
-            pipeline = analytics.CfnPipeline(self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities)
+            pipeline = analytics.CfnPipeline(
+                self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities
+            )
             pipeline.add_depends_on(target=self._datastore)
             pipeline.add_depends_on(target=channel)
 

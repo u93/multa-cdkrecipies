@@ -7,7 +7,7 @@ from aws_cdk import (
 )
 
 from .settings import SAGEMAKER_POLICY
-from .utils import SAGEMAKER_NOTEBOOK, validate_configuration, validate_file
+from .utils import SAGEMAKER_NOTEBOOK_SCHEMA, validate_configuration, validate_file
 
 file_path = os.path.dirname(os.path.abspath(__file__))
 
@@ -34,14 +34,13 @@ class AwsIoTAnalyticsSageMakerNotebook(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=SAGEMAKER_NOTEBOOK, configuration_received=configuration)
+        validate_configuration(configuration_schema=SAGEMAKER_NOTEBOOK_SCHEMA, configuration_received=configuration)
 
         base_name = self._configuration["name"]
         on_create_list = list()
         if validate_file(file_path=self._configuration["scripts"]["on_create"]):
             on_create_file = self._configuration["scripts"]["on_create"]
         else:
-            os.path.dirname(os.path.abspath(__file__))
             on_create_file = file_path + "/scripts/iot_analytics_notebook/on_create.sh"
         with open(on_create_file) as on_create:
             on_create_contents = {"content": core.Fn.base64(on_create.read())}
@@ -66,7 +65,9 @@ class AwsIoTAnalyticsSageMakerNotebook(core.Construct):
         )
 
         role_name = self.prefix + "_" + base_name + "sagemaker_role_" + self.environment_
-        self._role = iam.Role(self, id=role_name, role_name=role_name, assumed_by=iam.ServicePrincipal(service="sagemaker.amazonaws.com"))
+        self._role = iam.Role(
+            self, id=role_name, role_name=role_name, assumed_by=iam.ServicePrincipal(service="sagemaker.amazonaws.com")
+        )
 
         managed_policy = iam.ManagedPolicy.from_aws_managed_policy_name(managed_policy_name="AmazonSageMakerFullAccess")
         self._role.add_managed_policy(policy=managed_policy)

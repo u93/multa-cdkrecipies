@@ -3,6 +3,27 @@ import traceback
 
 from schema import Schema, And, Use, Optional, SchemaError
 
+LAMBDA_BASE_SCHEMA = {
+    "lambda_name": And(Use(str)),
+    Optional("description"): And(Use(str)),
+    Optional("code_path"): And(Use(str)),
+    "runtime": And(Use(str)),
+    "handler": And(Use(str)),
+    Optional("layers"): And(Use(list)),
+    Optional("timeout"): And(Use(int)),
+    Optional("reserved_concurrent_executions"): And(Use(int)),
+    Optional("environment_vars"): {And(Use(str)): And(Use(str))},
+    "iam_actions": [And(Use(str))],
+    Optional("alarms"): [
+        {
+            "name": And(Use(str)),
+            "number": And(Use(int)),
+            "periods": And(Use(int)),
+            "points": And(Use(int)),
+            "actions": And(Use(bool)),
+        }
+    ],
+}
 
 APIGATEWAY_LAMBDA_SCHEMA = Schema(
     {
@@ -66,6 +87,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
         "api": {
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
+            "proxy": And(Use(bool)),
             "lambda_authorizer": {
                 Optional("imported"): {"lambda_arn": And(Use(str)),},
                 Optional("origin"): {
@@ -93,7 +115,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                 "name": And(Use(str)),
                 Optional("allowed_origins"): [And(Use(str))],
                 Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
-                "methods": [And(Use(str))],
+                Optional("methods"): [And(Use(str))],
                 "handler": {
                     Optional("imported"): {
                         "lambda_arn": And(Use(str)),
@@ -147,28 +169,7 @@ SNS_CONFIG_SCHEMA = Schema(
                 }
             ],
         },
-        "lambda_handlers": [
-            {
-                "lambda_name": And(Use(str)),
-                Optional("description"): And(Use(str)),
-                Optional("code_path"): And(Use(str)),
-                "runtime": And(Use(str)),
-                "handler": And(Use(str)),
-                Optional("timeout"): And(Use(int)),
-                Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): {And(Use(str)): And(Use(str))},
-                "iam_actions": [And(Use(str))],
-                Optional("alarms"): [
-                    {
-                        "name": And(Use(str)),
-                        "number": And(Use(int)),
-                        "periods": And(Use(int)),
-                        "points": And(Use(int)),
-                        "actions": And(Use(bool)),
-                    }
-                ],
-            },
-        ],
+        "lambda_handlers": [LAMBDA_BASE_SCHEMA],
     }
 )
 
@@ -186,28 +187,7 @@ IOT_SNS_CONFIG_SCHEMA = Schema(
                 }
             ],
         },
-        "lambda_handlers": [
-            {
-                "lambda_name": And(Use(str)),
-                Optional("description"): And(Use(str)),
-                Optional("code_path"): And(Use(str)),
-                "runtime": And(Use(str)),
-                "handler": And(Use(str)),
-                Optional("timeout"): And(Use(int)),
-                Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): {And(Use(str)): And(Use(str))},
-                "iam_actions": [And(Use(str))],
-                Optional("alarms"): [
-                    {
-                        "name": And(Use(str)),
-                        "number": And(Use(int)),
-                        "periods": And(Use(int)),
-                        "points": And(Use(int)),
-                        "actions": And(Use(bool)),
-                    }
-                ],
-            },
-        ],
+        "lambda_handlers": [LAMBDA_BASE_SCHEMA,],
         "iot_rule": {
             "rule_name": And(Use(str)),
             Optional("description"): And(Use(str)),
@@ -235,28 +215,7 @@ IOT_SQS_CONFIG_SCHEMA = Schema(
                 }
             ],
         },
-        "lambda_handlers": [
-            {
-                "lambda_name": And(Use(str)),
-                Optional("description"): And(Use(str)),
-                Optional("code_path"): And(Use(str)),
-                "runtime": And(Use(str)),
-                "handler": And(Use(str)),
-                Optional("timeout"): And(Use(int)),
-                Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): {And(Use(str)): And(Use(str))},
-                "iam_actions": [And(Use(str))],
-                Optional("alarms"): [
-                    {
-                        "name": And(Use(str)),
-                        "number": And(Use(int)),
-                        "periods": And(Use(int)),
-                        "points": And(Use(int)),
-                        "actions": And(Use(bool)),
-                    }
-                ],
-            },
-        ],
+        "lambda_handlers": [LAMBDA_BASE_SCHEMA,],
         "iot_rule": {
             "rule_name": And(Use(str)),
             Optional("description"): And(Use(str)),
@@ -283,46 +242,42 @@ SQS_CONFIG_SCHEMA = Schema(
                 }
             ],
         },
-        "lambda_handlers": [
-            {
-                "lambda_name": And(Use(str)),
-                Optional("description"): And(Use(str)),
-                Optional("code_path"): And(Use(str)),
-                "runtime": And(Use(str)),
-                "handler": And(Use(str)),
-                Optional("timeout"): And(Use(int)),
-                Optional("reserved_concurrent_executions"): And(Use(int)),
-                Optional("environment_vars"): {And(Use(str)): And(Use(str))},
-                "iam_actions": [And(Use(str))],
-                Optional("alarms"): [
-                    {
-                        "name": And(Use(str)),
-                        "number": And(Use(int)),
-                        "periods": And(Use(int)),
-                        "points": And(Use(int)),
-                        "actions": And(Use(bool)),
-                    }
-                ],
-            },
-        ],
+        "lambda_handlers": [LAMBDA_BASE_SCHEMA,],
     }
 )
 
-IOT_ANALYTICS_DATA_WORKFLOW = Schema({"name": And(Use(str))})
+IOT_ANALYTICS_DATA_WORKFLOW_SCHEMA = Schema({"name": And(Use(str))})
 
-IOT_ANALYTICS_FAN_IN = Schema(
+IOT_ANALYTICS_FAN_IN_SCHEMA = Schema(
     {"channel_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}], "datastore_name": And(Use(str)),}
 )
 
-IOT_ANALYTICS_FAN_OUT = Schema(
+IOT_ANALYTICS_FAN_OUT_SCHEMA = Schema(
     {"datastore_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}], "channel_name": And(Use(str)),}
 )
 
-SAGEMAKER_NOTEBOOK = Schema(
+LAMBDA_LAYER_SCHEMA = Schema(
+    {
+        "layer_name": And(Use(str)),
+        Optional("description"): And(Use(str)),
+        Optional("license"): And(Use(str)),
+        Optional("paths"): {
+            "python_requirements_path": And(Use(str)),
+            "layer_directory_path": And(Use(str)),
+            "layer_code_path": And(Use(str)),
+        },
+        "layer_runtimes": [And(Use(str))],
+        Optional("exclude"): [And(Use(str))],
+    }
+)
+
+SAGEMAKER_NOTEBOOK_SCHEMA = Schema(
     {"name": And(Use(str)), "scripts": {"on_create": And(Use(str)), "on_start": And(Use(str))}, "instance_type": And(Use(str)),}
 )
 
-SSM_PARAMETER_STRING = Schema({"name": And(Use(str)), Optional("description"): And(Use(str)), "string_value": And(Use(dict))})
+SSM_PARAMETER_STRING_SCHEMA = Schema(
+    {"name": And(Use(str)), Optional("description"): And(Use(str)), "string_value": And(Use(dict))}
+)
 
 
 def validate_configuration(configuration_schema, configuration_received):
@@ -335,8 +290,9 @@ def validate_configuration(configuration_schema, configuration_received):
     try:
         configuration_schema.validate(configuration_received)
     except SchemaError:
+        print("Improper configuration passed to Multa CDK Construct!!!")
         print(traceback.format_exc())
-        raise RuntimeError("Improper configuration passed to Multa CDK Construct!!!")
+        raise RuntimeError
 
 
 def validate_file(file_path: str):
