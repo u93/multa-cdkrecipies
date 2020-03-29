@@ -31,15 +31,10 @@ class AwsIotPolicy(core.Construct):
         # Validating that the payload passed is correct
         validate_configuration(configuration_schema=IOT_POLICY, configuration_received=self._configuration)
 
-        # _iot_policy_props = iot_.CfnPolicyProps(
-        #     policy_name=self.prefix + "_" + self._configuration["name"] + self.environment_,
-        #     policy_document=json.dumps(self._configuration["policy_document"]),
-        # )
-
         self._iot_policy = iot_.CfnPolicy(
             self,
-            id=self.prefix + "_" + self._configuration["name"] + self.environment_,
-            policy_name=self.prefix + "_" + self._configuration["name"] + self.environment_,
+            id=self.prefix + "_" + self._configuration["name"] + "_" + self.environment_,
+            policy_name=self.prefix + "_" + self._configuration["name"] + "_" + self.environment_,
             policy_document=self._configuration["policy_document"],
         )
 
