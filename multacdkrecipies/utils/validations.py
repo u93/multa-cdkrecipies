@@ -258,6 +258,8 @@ IOT_ANALYTICS_FAN_OUT_SCHEMA = Schema(
     {"datastore_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}], "channel_name": And(Use(str)),}
 )
 
+IOT_POLICY = Schema({"name": And(Use(str)), "policy_document": And(Use(dict))})
+
 LAMBDA_LAYER_SCHEMA = Schema(
     {
         "layer_name": And(Use(str)),

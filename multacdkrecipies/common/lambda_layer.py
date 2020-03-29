@@ -36,7 +36,7 @@ def base_lambda_layer(construct, **kwargs):
     _lambda_layer = lambda_.LayerVersion(
         construct,
         id=construct.prefix + "_" + kwargs["layer_name"] + "_" + construct.environment_,
-        layer_version_name=construct.prefix + "_" + kwargs["layer_name"] + construct.environment_,
+        layer_version_name=construct.prefix + "_" + kwargs["layer_name"] + "_" + construct.environment_,
         description=kwargs.get("description"),
         code=lambda_.Code.from_asset(path=layer_code_path, exclude=kwargs.get("exclude", ["aws_cdk"])),
         compatible_runtimes=layer_runtimes,
