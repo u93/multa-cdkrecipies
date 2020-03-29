@@ -9,7 +9,7 @@ LAMBDA_BASE_SCHEMA = {
     Optional("code_path"): And(Use(str)),
     "runtime": And(Use(str)),
     "handler": And(Use(str)),
-    Optional("layers"): And(Use(list)),
+    Optional("layers"): [And(Use(str))],
     Optional("timeout"): And(Use(int)),
     Optional("reserved_concurrent_executions"): And(Use(int)),
     Optional("environment_vars"): {And(Use(str)): And(Use(str))},
@@ -95,6 +95,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                     Optional("description"): And(Use(str)),
                     Optional("code_path"): And(Use(str)),
                     "runtime": And(Use(str)),
+                    Optional("layers"): [And(Use(str))],
                     "handler": And(Use(str)),
                     Optional("timeout"): And(Use(int)),
                     Optional("reserved_concurrent_executions"): And(Use(int)),
@@ -133,6 +134,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                         "lambda_name": And(Use(str)),
                         Optional("description"): And(Use(str)),
                         Optional("code_path"): And(Use(str)),
+                        Optional("layers"): [And(Use(str))],
                         "runtime": And(Use(str)),
                         "handler": And(Use(str)),
                         Optional("timeout"): And(Use(int)),
@@ -282,10 +284,9 @@ SSM_PARAMETER_STRING_SCHEMA = Schema(
 
 def validate_configuration(configuration_schema, configuration_received):
     """
-
-    :param configuration_schema:
-    :param configuration_received:
-    :return:
+    Validates the configuration passed to CDK Constructs.
+    :param configuration_schema: Base Multa Recipe Schema in the project.
+    :param configuration_received: Configuration passed by external application.
     """
     try:
         configuration_schema.validate(configuration_received)
@@ -297,8 +298,8 @@ def validate_configuration(configuration_schema, configuration_received):
 
 def validate_file(file_path: str):
     """
-
-    :param file_path:
-    :return:
+    Validates if file exists
+    :param file_path: Full path to the file that wants to be validated.
+    :return: True or False depending if the file exists or don't.
     """
     return os.path.isfile(file_path)

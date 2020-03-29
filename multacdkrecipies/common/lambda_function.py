@@ -34,15 +34,25 @@ def base_lambda_function(construct, **kwargs):
         print(f"Code path for Lambda Function {kwargs['lambda_name']} is not valid!")
         raise RuntimeError
 
+    function_layers = list()
+    for layer_arn in kwargs.get("layers", list()):
+        try:
+            layer = lambda_.LayerVersion.from_layer_version_arn(construct, id=layer_arn, layer_version_arn=layer_arn)
+        except Exception:
+            print(f"Error using Lambda Layer ARN {layer_arn}")
+            raise RuntimeError
+        else:
+            function_layers.append(layer)
+
     # Defining Lambda function
     _lambda_function = lambda_.Function(
         construct,
-        id=construct.prefix + "_" + kwargs["lambda_name"] + construct.environment_,
-        function_name=construct.prefix + "_" + kwargs["lambda_name"] + construct.environment_,
+        id=construct.prefix + "_" + kwargs["lambda_name"] + "_" + construct.environment_,
+        function_name=construct.prefix + "_" + kwargs["lambda_name"] + "_" + construct.environment_,
         code=lambda_.Code.from_asset(path=code_path),
         handler=kwargs["handler"],
         runtime=function_runtime,
-        layers=kwargs.get("layers"),
+        layers=function_layers,
         description=kwargs.get("description"),
         tracing=lambda_.Tracing.ACTIVE,
         environment=kwargs.get("environment_vars"),
