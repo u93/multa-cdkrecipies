@@ -37,7 +37,9 @@ def base_lambda_function(construct, **kwargs):
     function_layers = list()
     for layer_arn in kwargs.get("layers", list()):
         try:
-            layer = lambda_.LayerVersion.from_layer_version_arn(construct, id=layer_arn, layer_version_arn=layer_arn)
+            layer = lambda_.LayerVersion.from_layer_version_arn(
+                construct, id=layer_arn + "_" + kwargs["lambda_name"], layer_version_arn=layer_arn
+            )
         except Exception:
             print(f"Error using Lambda Layer ARN {layer_arn}")
             raise RuntimeError

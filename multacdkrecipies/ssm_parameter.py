@@ -32,7 +32,7 @@ class AwsSsmString(core.Construct):
         self._parameter_string = ssm.StringParameter(
             self,
             id="/" + self.prefix + "/" + self.environment_ + "/" + self._configuration["name"] + "/appConfig",
-            parameter_name="/" + self.prefix + "/" + self.environment_ + "/" + self._configuration["name"],
+            parameter_name="/" + self.prefix + "/" + self.environment_ + "/" + self._configuration["name"] + "/appConfig",
             description=self._configuration.get("description"),
             string_value=json.dumps(self._configuration["string_value"]),
             type=ssm.ParameterType.STRING,

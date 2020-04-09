@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ACTION=${1}
+export VERSION=${2}
 
 black -t py37 -l 130 ./multacdkrecipies > /dev/null
 python setup.py sdist > /dev/null
