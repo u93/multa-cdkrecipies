@@ -258,6 +258,19 @@ IOT_ANALYTICS_FAN_OUT_SCHEMA = Schema(
     {"datastore_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}], "channel_name": And(Use(str)),}
 )
 
+IOT_ANALYTICS_SIMPLE_PIPELINE = Schema(
+    {
+        "analytics_resource_name": And(Use(str)),
+        "iot_rule": {
+            "rule_name": And(Use(str)),
+            Optional("description"): And(Use(str)),
+            "rule_disabled": And(Use(bool)),
+            "sql": And(Use(str)),
+            "aws_iot_sql_version": And(Use(str)),
+        },
+    }
+)
+
 IOT_POLICY = Schema({"name": And(Use(str)), "policy_document": And(Use(dict))})
 
 LAMBDA_LAYER_SCHEMA = Schema(
