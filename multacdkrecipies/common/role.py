@@ -83,7 +83,8 @@ def base_iot_analytics_role(construct, resource_name: str, principal_resource: s
     """
     try:
         actions = ["iotanalytics:BatchPutMessage"]
-        resource_arn = core.Stack.format_arn(service="iotanalytics", resource="channel", resource_name=resource_name)
+        stack_object = core.Stack.of(construct)
+        resource_arn = stack_object.format_arn(service="iotanalytics", resource="channel", resource_name=resource_name)
 
         resources = [resource_arn]
         role = base_role(construct, resource_name, principal_resource, actions=actions, resources=resources)
