@@ -67,7 +67,9 @@ class AwsIotAnalyticsSimplePipeline(core.Construct):
         pipeline_activities.append(pipeline_datastore_activity)
 
         # Defining Pipeline
-        self._pipeline = analytics.CfnPipeline(self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities)
+        self._pipeline = analytics.CfnPipeline(
+            self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities
+        )
         self._pipeline.add_depends_on(target=self._datastore)
         self._pipeline.add_depends_on(target=self._channel)
 

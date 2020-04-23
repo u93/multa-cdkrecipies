@@ -34,7 +34,9 @@ def base_iot_analytics_pipeline(construct, activities: dict, resource_dependenci
     pipeline_activities.append(_channel_activity)
     pipeline_activities.append(_datastore_activity)
 
-    pipeline = iotanl_.CfnPipeline(construct, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities)
+    pipeline = iotanl_.CfnPipeline(
+        construct, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities
+    )
     for dependency in resource_dependencies:
         pipeline.add_depends_on(target=dependency)
 

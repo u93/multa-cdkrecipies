@@ -71,7 +71,9 @@ class AwsIotAnalyticsFanIn(core.Construct):
 
             # Defining Pipeline
             pipeline_name = self.prefix + "_" + base_name + "_pipeline_" + self.environment_
-            pipeline = analytics.CfnPipeline(self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities)
+            pipeline = analytics.CfnPipeline(
+                self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities
+            )
             pipeline.add_depends_on(target=self._datastore)
             pipeline.add_depends_on(target=channel)
 

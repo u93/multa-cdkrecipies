@@ -12,7 +12,11 @@ def base_iot_analytics_channel(construct, **kwargs):
     retention_days = kwargs.get("retention_period", 1)
     unlimited_storage = True if retention_days is not None else True
 
-    retention_period_property = iotanl_.CfnChannel.RetentionPeriodProperty(number_of_days=retention_days, unlimited=unlimited_storage)
-    channel = iotanl_.CfnChannel(construct, id=channel_name, channel_name=channel_name, retention_period=retention_period_property)
+    retention_period_property = iotanl_.CfnChannel.RetentionPeriodProperty(
+        number_of_days=retention_days, unlimited=unlimited_storage
+    )
+    channel = iotanl_.CfnChannel(
+        construct, id=channel_name, channel_name=channel_name, retention_period=retention_period_property
+    )
 
     return channel

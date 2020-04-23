@@ -12,7 +12,9 @@ def base_iot_analytics_datastore(construct, **kwargs):
     retention_days = kwargs.get("retention_period", 1)
     unlimited_storage = True if retention_days is not None else True
 
-    retention_period_property = iotanl_.CfnDatastore.RetentionPeriodProperty(number_of_days=retention_days, unlimited=unlimited_storage)
+    retention_period_property = iotanl_.CfnDatastore.RetentionPeriodProperty(
+        number_of_days=retention_days, unlimited=unlimited_storage
+    )
     datastore = iotanl_.CfnDatastore(
         construct, id=datastore_name, datastore_name=datastore_name, retention_period=retention_period_property
     )

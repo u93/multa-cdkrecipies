@@ -33,7 +33,9 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self._configuration)
+        validate_configuration(
+            configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self._configuration
+        )
         api_configuration = self._configuration["api"]
 
         # Define Lambda Authorizers
@@ -43,7 +45,9 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         # Define IN-ACCOUNT Lambda Authorizers
         in_account_lambda_authorizer = lambda_authorizers.get("imported")
         if in_account_lambda_authorizer is not None:
-            self._authorizer_lambda_functions.append(lambda_.Function.from_function_arn(in_account_lambda_authorizer["lambda_arn"]))
+            self._authorizer_lambda_functions.append(
+                lambda_.Function.from_function_arn(in_account_lambda_authorizer["lambda_arn"])
+            )
 
         # Define NEW-FUNCTION Lambda Authorizers
         defined_lambda_authorizer = lambda_authorizers.get("origin")
@@ -137,7 +141,10 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             for alarm_definition in self._configuration["api"]["lambda_authorizer"].get("alarms"):
                 authorizer_alarms.append(
                     base_alarm(
-                        self, resource_name="lambda_authorizer", base_resource=self._authorizer_lambda_functions[0], **alarm_definition,
+                        self,
+                        resource_name="lambda_authorizer",
+                        base_resource=self._authorizer_lambda_functions[0],
+                        **alarm_definition,
                     )
                 )
 
@@ -146,7 +153,10 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             for alarm_definition in self._configuration["api"]["resource"]["handler"].get("alarms"):
                 authorizer_alarms.append(
                     base_alarm(
-                        self, resource_name="lambda_api_handler", base_resource=self._handler_lambda_functions[0], **alarm_definition,
+                        self,
+                        resource_name="lambda_api_handler",
+                        base_resource=self._handler_lambda_functions[0],
+                        **alarm_definition,
                     )
                 )
 
