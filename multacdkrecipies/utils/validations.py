@@ -248,14 +248,36 @@ SQS_CONFIG_SCHEMA = Schema(
     }
 )
 
-IOT_ANALYTICS_DATA_WORKFLOW_SCHEMA = Schema({"name": And(Use(str))})
+IOT_ANALYTICS_DATA_WORKFLOW_SCHEMA = Schema(
+    {
+        "name": And(Use(str)),
+        Optional("retention_periods"): {Optional("channel"): And(Use(int)), Optional("datastore"): And(Use(int)),},
+    }
+)
 
 IOT_ANALYTICS_FAN_IN_SCHEMA = Schema(
-    {"channel_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}], "datastore_name": And(Use(str)),}
+    {
+        "channel_pipe_definition": [
+            {
+                Optional("extra_activities"): And(Use(list)),
+                "name": And(Use(str)),
+                Optional("channel_retention_period"): And(Use(int))
+            }
+        ],
+        "datastore_definition": {"name": And(Use(str)), Optional("datastore_retention_period"): And(Use(int))},
+    }
 )
 
 IOT_ANALYTICS_FAN_OUT_SCHEMA = Schema(
-    {"datastore_pipe_definition": [{"extra_activities": And(Use(list)), "name": And(Use(str))}], "channel_name": And(Use(str)),}
+    {
+        "channel_definition": {"name": And(Use(str)), Optional("channel_retention_period"): And(Use(int))},
+        "datastore_pipe_definition": [
+            {
+                Optional("extra_activities"): And(Use(list)),
+                "name": And(Use(str)),
+                Optional("datastore_retention_period"): And(Use(int))}
+        ],
+    }
 )
 
 IOT_ANALYTICS_SIMPLE_PIPELINE = Schema(

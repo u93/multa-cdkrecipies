@@ -1,11 +1,8 @@
 from aws_cdk import (
     core,
-    aws_iotanalytics as analytics,
 )
 
 from .common import (
-    base_iot_rule,
-    base_iot_analytics_role,
     base_iot_analytics_channel,
     base_iot_analytics_datastore,
     base_iot_analytics_pipeline,
@@ -37,45 +34,35 @@ class AwsIotAnalyticsFanOut(core.Construct):
         validate_configuration(configuration_schema=IOT_ANALYTICS_FAN_OUT_SCHEMA, configuration_received=self._configuration)
 
         # Defining Channel
-        channel_name = self.prefix + "_" + self._configuration["channel_name"] + "_channel_" + self.environment_
-        self._channel = analytics.CfnChannel(self, id=channel_name, channel_name=channel_name)
+        channel_data = self._configuration["channel"]
+        channel_name = self.prefix + "_" + channel_data["name"] + "_channel_" + self.environment_
+        channel_retention_period = channel_data.get("channel_retention_period")
+        self._channel = base_iot_analytics_channel(
+            self, channel_name=channel_name, retention_period=channel_retention_period
+        )
 
         self._datastore_pipes = list()
         for datastore_pipe in self._configuration["datastore_pipe_definition"]:
-            extra_activities = datastore_pipe["extra_activities"]
+            extra_activities = datastore_pipe.get("extra_activities")
             base_name = datastore_pipe["name"]
 
             # Defining Datastore
             datastore_name = self.prefix + "_" + base_name + "_datastore_" + self.environment_
-            datastore = analytics.CfnDatastore(self, id=datastore_name, datastore_name=datastore_name)
+            datastore_retention_period = datastore_pipe.get("datastore_retention_period")
+            datastore = base_iot_analytics_datastore(
+                self, datastore_name=datastore_name, retention_period=datastore_retention_period
+            )
 
             # Defining Pipeline Properties
-            pipeline_activities = list()
-
-            # Defining Channel Activity Property
-            channel_activity_property = analytics.CfnPipeline.ChannelProperty(
-                channel_name=self._channel.channel_name, name=self._channel.channel_name, next=datastore.datastore_name,
-            )
-            pipeline_channel_activity = analytics.CfnPipeline.ActivityProperty(channel=channel_activity_property)
-            pipeline_activities.append(pipeline_channel_activity)
-
-            # Defining Datastore Activity Property
-            datastore_activity_property = analytics.CfnPipeline.DatastoreProperty(
-                datastore_name=datastore.datastore_name, name=datastore.datastore_name
-            )
-            pipeline_datastore_activity = analytics.CfnPipeline.ActivityProperty(datastore=datastore_activity_property)
-            pipeline_activities.append(pipeline_datastore_activity)
-
-            # Appending extra Pipeline Activities
-            pipeline_activities.extend(extra_activities)
+            pipeline_name = self.prefix + "_" + base_name + "_pipeline_" + self.environment_
+            activities_dict = dict(channel=self._channel, datastore=datastore)
+            resources_dependencies = [self._channel, datastore]
 
             # Defining Pipeline
-            pipeline_name = self.prefix + "_" + base_name + "_pipeline_" + self.environment_
-            pipeline = analytics.CfnPipeline(
-                self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities
+            pipeline = base_iot_analytics_pipeline(
+                self, activities=activities_dict, resource_dependencies=resources_dependencies,
+                pipeline_name=pipeline_name
             )
-            pipeline.add_depends_on(target=datastore)
-            pipeline.add_depends_on(target=self._channel)
 
             self._datastore_pipes.append(dict(datastore=datastore, pipeline=pipeline))
 

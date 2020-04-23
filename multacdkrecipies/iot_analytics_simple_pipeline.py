@@ -1,7 +1,6 @@
 from aws_cdk import (
     core,
     aws_iot as iot,
-    aws_iotanalytics as analytics,
 )
 
 from .common import (
@@ -59,7 +58,7 @@ class AwsIotAnalyticsSimplePipeline(core.Construct):
         activities_dict = dict(channel=self._channel, datastore=self._datastore)
         resources_dependencies = [self._channel, self._datastore]
 
-        # Defining Channel Activity Property
+        # Defining Pipeline
         self._pipeline = base_iot_analytics_pipeline(
             self, activities=activities_dict, resource_dependencies=resources_dependencies, pipeline_name=pipeline_name
         )
