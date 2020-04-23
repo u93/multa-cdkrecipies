@@ -55,16 +55,11 @@ class AwsSqsPipes(core.Construct):
             for alarm_definition in self._configuration["queue"].get("alarms"):
                 sqs_alarms.append(
                     base_alarm(
-                        self,
-                        resource_name=self._configuration["queue"]["queue_name"],
-                        base_resource=self._sqs_queue,
-                        **alarm_definition,
+                        self, resource_name=self._configuration["queue"]["queue_name"], base_resource=self._sqs_queue, **alarm_definition,
                     )
                 )
 
-        for lambda_function_data, lambda_function_definition in zip(
-            self._configuration["lambda_handlers"], self._lambda_functions
-        ):
+        for lambda_function_data, lambda_function_definition in zip(self._configuration["lambda_handlers"], self._lambda_functions):
             if isinstance(lambda_function_data.get("alarms"), list) is True:
                 lambda_alarms = list()
                 for alarm_definition in lambda_function_data.get("alarms"):

@@ -15,13 +15,7 @@ LAMBDA_BASE_SCHEMA = {
     Optional("environment_vars"): {And(Use(str)): And(Use(str))},
     "iam_actions": [And(Use(str))],
     Optional("alarms"): [
-        {
-            "name": And(Use(str)),
-            "number": And(Use(int)),
-            "periods": And(Use(int)),
-            "points": And(Use(int)),
-            "actions": And(Use(bool)),
-        }
+        {"name": And(Use(str)), "number": And(Use(int)), "periods": And(Use(int)), "points": And(Use(int)), "actions": And(Use(bool)),}
     ],
 }
 
@@ -261,6 +255,7 @@ IOT_ANALYTICS_FAN_OUT_SCHEMA = Schema(
 IOT_ANALYTICS_SIMPLE_PIPELINE = Schema(
     {
         "analytics_resource_name": And(Use(str)),
+        Optional("retention_periods"): {Optional("channel"): And(Use(int)), Optional("datastore"): And(Use(int)),},
         "iot_rule": {
             "rule_name": And(Use(str)),
             Optional("description"): And(Use(str)),
@@ -292,9 +287,7 @@ SAGEMAKER_NOTEBOOK_SCHEMA = Schema(
     {"name": And(Use(str)), "scripts": {"on_create": And(Use(str)), "on_start": And(Use(str))}, "instance_type": And(Use(str)),}
 )
 
-SSM_PARAMETER_STRING_SCHEMA = Schema(
-    {"name": And(Use(str)), Optional("description"): And(Use(str)), "string_value": And(Use(dict))}
-)
+SSM_PARAMETER_STRING_SCHEMA = Schema({"name": And(Use(str)), Optional("description"): And(Use(str)), "string_value": And(Use(dict))})
 
 
 def validate_configuration(configuration_schema, configuration_received):

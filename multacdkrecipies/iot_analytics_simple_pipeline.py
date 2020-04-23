@@ -4,13 +4,19 @@ from aws_cdk import (
     aws_iotanalytics as analytics,
 )
 
-from .common import base_iot_rule, base_iot_analytics_role
+from .common import (
+    base_iot_rule,
+    base_iot_analytics_role,
+    base_iot_analytics_channel,
+    base_iot_analytics_datastore,
+    base_iot_analytics_pipeline,
+)
 from .utils import IOT_ANALYTICS_SIMPLE_PIPELINE, validate_configuration
 
 
 class AwsIotAnalyticsSimplePipeline(core.Construct):
     """
-    AWS CDK Construct that defines an AWS Analytics Simple Pipeline where an IoT Topic Rule routes meesages directly
+    AWS CDK Construct that defines an AWS Analytics Simple Pipeline where an IoT Topic Rule routes messages directly
     to an IoT Analytics Channel of a simple Data Flow approach where one channel ingests all the information and
     distributes over a Pipeline that is attached to a common Datastore.
     """
@@ -61,9 +67,7 @@ class AwsIotAnalyticsSimplePipeline(core.Construct):
         pipeline_activities.append(pipeline_datastore_activity)
 
         # Defining Pipeline
-        self._pipeline = analytics.CfnPipeline(
-            self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities
-        )
+        self._pipeline = analytics.CfnPipeline(self, id=pipeline_name, pipeline_name=pipeline_name, pipeline_activities=pipeline_activities)
         self._pipeline.add_depends_on(target=self._datastore)
         self._pipeline.add_depends_on(target=self._channel)
 

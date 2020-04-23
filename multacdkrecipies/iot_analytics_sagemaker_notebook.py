@@ -65,9 +65,7 @@ class AwsIoTAnalyticsSageMakerNotebook(core.Construct):
         )
 
         role_name = self.prefix + "_" + base_name + "sagemaker_role_" + self.environment_
-        self._role = iam.Role(
-            self, id=role_name, role_name=role_name, assumed_by=iam.ServicePrincipal(service="sagemaker.amazonaws.com")
-        )
+        self._role = iam.Role(self, id=role_name, role_name=role_name, assumed_by=iam.ServicePrincipal(service="sagemaker.amazonaws.com"))
 
         managed_policy = iam.ManagedPolicy.from_aws_managed_policy_name(managed_policy_name="AmazonSageMakerFullAccess")
         self._role.add_managed_policy(policy=managed_policy)

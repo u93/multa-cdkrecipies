@@ -59,9 +59,7 @@ class AwsApiGatewayLambdaPipesAsync(core.Construct):
             try:
                 function_runtime = getattr(lambda_.Runtime, lambda_function["runtime"])
             except Exception:
-                raise WrongRuntimePassed(
-                    detail=f"Wrong function runtime {lambda_function['runtime']} specified", tb=traceback.format_exc()
-                )
+                raise WrongRuntimePassed(detail=f"Wrong function runtime {lambda_function['runtime']} specified", tb=traceback.format_exc())
 
             obtainer_code_path = lambda_function.get("code_path")
             if obtainer_code_path is not None:
