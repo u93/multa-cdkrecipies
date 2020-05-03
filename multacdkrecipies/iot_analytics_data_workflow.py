@@ -1,6 +1,4 @@
-from aws_cdk import (
-    core,
-)
+from aws_cdk import core
 
 from .common import (
     base_iot_analytics_channel,
@@ -50,9 +48,7 @@ class AwsIotAnalyticsDataWorkflow(core.Construct):
 
         # Defining Channel
         channel_retention_period = retention_periods.get("channel")
-        self._channel = base_iot_analytics_channel(
-            self, channel_name=channel_name, retention_period=channel_retention_period
-        )
+        self._channel = base_iot_analytics_channel(self, channel_name=channel_name, retention_period=channel_retention_period)
 
         # Defining Pipeline Properties
         activities_dict = dict(channel=self._channel, datastore=self._datastore)

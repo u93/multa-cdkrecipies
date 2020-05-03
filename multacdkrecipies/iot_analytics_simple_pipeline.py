@@ -70,8 +70,11 @@ class AwsIotAnalyticsSimplePipeline(core.Construct):
         action = iot.CfnTopicRule.IotAnalyticsActionProperty(channel_name=self._channel.channel_name, role_arn=role.role_arn)
         action_property = iot.CfnTopicRule.ActionProperty(iot_analytics=action)
 
-        rule_data = self._configuration["iot_rule"]
-        self._iot_rule = base_iot_rule(self, action_property=action_property, **rule_data)
+        rules_data = self._configuration["iot_rules"]
+        self._iot_rule_list = list()
+        for rule in rules_data:
+            iot_rule = base_iot_rule(self, action_property=action_property, **rule)
+            self._iot_rule_list.append(iot_rule)
 
     @property
     def configuration(self):
@@ -102,8 +105,8 @@ class AwsIotAnalyticsSimplePipeline(core.Construct):
         return self._pipeline
 
     @property
-    def iot_rule(self):
+    def iot_rule_list(self):
         """
         :return: Construct IoT Topic Rule.
         """
-        return self._iot_rule
+        return self._iot_rule_list

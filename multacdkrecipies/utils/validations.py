@@ -157,6 +157,81 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
     }
 )
 
+USER_POOL_DYNAMODB_SCHEMA = Schema(
+    {
+        "organization": {
+            "table_name": And(Use(str)),
+            "partition_key": And(Use(str)),
+            Optional("sort_key"): {"name": And(Use(str)), "type": And(Use(str)),},
+            Optional("stream"): {"enabled": And(Use(bool)), Optional("function"): LAMBDA_BASE_SCHEMA},
+            Optional("ttl_attribute"): And(Use(str)),
+            Optional("billing_mode"): And(Use(str)),
+            Optional("read_capacity"): And(Use(str)),
+            Optional("write_capacity"): And(Use(str)),
+        },
+        "users_attributes": {
+            "table_name": And(Use(str)),
+            "partition_key": And(Use(str)),
+            Optional("sort_key"): And(Use(str)),
+            Optional("stream"): {"enabled": And(Use(bool)), Optional("function"): LAMBDA_BASE_SCHEMA},
+            Optional("ttl_attribute"): And(Use(str)),
+            Optional("billing_mode"): And(Use(str)),
+            Optional("read_capacity"): And(Use(str)),
+            Optional("write_capacity"): And(Use(str)),
+        },
+        "user_pool": {
+            "pool_name": And(Use(str)),
+            Optional("email"): {"from": And(Use(str)), Optional("reply_to"): And(Use(str))},
+            "password_policy": {
+                Optional("minimum_length"): And(Use(int)),
+                Optional("temporary_password_duration"): And(Use(int)),
+                Optional("require"): {
+                    Optional("lower_case"): And(Use(bool)),
+                    Optional("upper_case"): And(Use(bool)),
+                    Optional("digits"): And(Use(bool)),
+                    Optional("symbols"): And(Use(bool)),
+                },
+            },
+            "sign_up": {
+                "enabled": And(Use(bool)),
+                "user_verification": {
+                    Optional("email"): {"subject": And(Use(str)), "body": And(Use(str)), "style": And(Use(str)),},
+                    Optional("sms"): {"body": And(Use(str)),},
+                },
+            },
+            "invitation": {
+                Optional("email"): {"subject": And(Use(str)), "body": And(Use(str)),},
+                Optional("sms"): {"body": And(Use(str)),},
+            },
+            "sign_in": {"order": [And(Use(str))]},
+            "attributes": {
+                "standard": [And(Use(str))],
+                Optional("custom"): [
+                    {
+                        "name": And(Use(str)),
+                        "type": And(Use(str)),
+                        Optional("mutable"): And(Use(bool)),
+                        Optional("minimum_length"): And(Use(int)),
+                        Optional("maximum_length"): And(Use(int)),
+                    }
+                ],
+            },
+            "triggers": {
+                Optional("create_auth_challenge"): LAMBDA_BASE_SCHEMA,
+                Optional("custom_message"): LAMBDA_BASE_SCHEMA,
+                Optional("define_auth_challenge"): LAMBDA_BASE_SCHEMA,
+                Optional("post_authentication"): LAMBDA_BASE_SCHEMA,
+                Optional("post_confirmation"): LAMBDA_BASE_SCHEMA,
+                Optional("pre_authentication"): LAMBDA_BASE_SCHEMA,
+                Optional("pre_sign_up"): LAMBDA_BASE_SCHEMA,
+                Optional("pre_token_generation"): LAMBDA_BASE_SCHEMA,
+                Optional("user_migration"): LAMBDA_BASE_SCHEMA,
+                Optional("verify_auth_challenge_response"): LAMBDA_BASE_SCHEMA,
+            },
+        },
+    }
+)
+
 SNS_CONFIG_SCHEMA = Schema(
     {
         "topic": {
@@ -261,7 +336,7 @@ IOT_ANALYTICS_FAN_IN_SCHEMA = Schema(
             {
                 Optional("extra_activities"): And(Use(list)),
                 "name": And(Use(str)),
-                Optional("channel_retention_period"): And(Use(int))
+                Optional("channel_retention_period"): And(Use(int)),
             }
         ],
         "datastore_definition": {"name": And(Use(str)), Optional("datastore_retention_period"): And(Use(int))},
@@ -275,7 +350,8 @@ IOT_ANALYTICS_FAN_OUT_SCHEMA = Schema(
             {
                 Optional("extra_activities"): And(Use(list)),
                 "name": And(Use(str)),
-                Optional("datastore_retention_period"): And(Use(int))}
+                Optional("datastore_retention_period"): And(Use(int)),
+            }
         ],
     }
 )
@@ -284,13 +360,15 @@ IOT_ANALYTICS_SIMPLE_PIPELINE = Schema(
     {
         "analytics_resource_name": And(Use(str)),
         Optional("retention_periods"): {Optional("channel"): And(Use(int)), Optional("datastore"): And(Use(int)),},
-        "iot_rule": {
-            "rule_name": And(Use(str)),
-            Optional("description"): And(Use(str)),
-            "rule_disabled": And(Use(bool)),
-            "sql": And(Use(str)),
-            "aws_iot_sql_version": And(Use(str)),
-        },
+        "iot_rules": [
+            {
+                "rule_name": And(Use(str)),
+                Optional("description"): And(Use(str)),
+                "rule_disabled": And(Use(bool)),
+                "sql": And(Use(str)),
+                "aws_iot_sql_version": And(Use(str)),
+            },
+        ],
     }
 )
 

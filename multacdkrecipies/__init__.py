@@ -13,6 +13,7 @@ from .lambda_layer_python_virtualenv import AwsLambdaLayerVenv
 from .sns_lambdas_pipe import AwsSnsPipes
 from .sqs_lambdas_pipe import AwsSqsPipes
 from .ssm_parameter import AwsSsmString
+from .user_pool_dynamo import AwsUserPoolCognitoDynamo
 
 from .settings import *
 from .utils import *

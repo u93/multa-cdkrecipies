@@ -1,6 +1,4 @@
-from aws_cdk import (
-    core,
-)
+from aws_cdk import core
 
 from .common import (
     base_iot_analytics_channel,
@@ -37,9 +35,7 @@ class AwsIotAnalyticsFanOut(core.Construct):
         channel_data = self._configuration["channel"]
         channel_name = self.prefix + "_" + channel_data["name"] + "_channel_" + self.environment_
         channel_retention_period = channel_data.get("channel_retention_period")
-        self._channel = base_iot_analytics_channel(
-            self, channel_name=channel_name, retention_period=channel_retention_period
-        )
+        self._channel = base_iot_analytics_channel(self, channel_name=channel_name, retention_period=channel_retention_period)
 
         self._datastore_pipes = list()
         for datastore_pipe in self._configuration["datastore_pipe_definition"]:
@@ -60,8 +56,7 @@ class AwsIotAnalyticsFanOut(core.Construct):
 
             # Defining Pipeline
             pipeline = base_iot_analytics_pipeline(
-                self, activities=activities_dict, resource_dependencies=resources_dependencies,
-                pipeline_name=pipeline_name
+                self, activities=activities_dict, resource_dependencies=resources_dependencies, pipeline_name=pipeline_name
             )
 
             self._datastore_pipes.append(dict(datastore=datastore, pipeline=pipeline))

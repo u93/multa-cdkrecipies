@@ -1,4 +1,6 @@
 from .alarms import base_alarm
+from .cognito_user_pool import base_cognito_user_pool
+from .dynamo_table import base_dynamodb_table
 from .iot_analytics_channel import base_iot_analytics_channel
 from .iot_analytics_datastore import base_iot_analytics_datastore
 from .iot_analytics_pipeline import base_iot_analytics_pipeline

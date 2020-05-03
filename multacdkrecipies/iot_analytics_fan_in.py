@@ -1,6 +1,4 @@
-from aws_cdk import (
-    core,
-)
+from aws_cdk import core
 
 from .common import (
     base_iot_analytics_channel,
@@ -49,9 +47,7 @@ class AwsIotAnalyticsFanIn(core.Construct):
 
             # Defining Channel
             channel_name = self.prefix + "_" + base_name + "_channel_" + self.environment_
-            channel = base_iot_analytics_channel(
-                self, channel_name=channel_name, retention_period=channel_retention_period
-            )
+            channel = base_iot_analytics_channel(self, channel_name=channel_name, retention_period=channel_retention_period)
 
             # Defining Pipeline Properties
             pipeline_name = self.prefix + "_" + base_name + "_pipeline_" + self.environment_
@@ -60,8 +56,7 @@ class AwsIotAnalyticsFanIn(core.Construct):
 
             # Defining Channel Activity Property
             pipeline = base_iot_analytics_pipeline(
-                self, activities=activities_dict, resource_dependencies=resources_dependencies,
-                pipeline_name=pipeline_name
+                self, activities=activities_dict, resource_dependencies=resources_dependencies, pipeline_name=pipeline_name
             )
 
             self._channel_pipes.append(dict(channel=channel, pipeline=pipeline))
