@@ -159,26 +159,18 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
 
 USER_POOL_DYNAMODB_SCHEMA = Schema(
     {
-        "organization": {
-            "table_name": And(Use(str)),
-            "partition_key": And(Use(str)),
-            Optional("sort_key"): {"name": And(Use(str)), "type": And(Use(str)),},
-            Optional("stream"): {"enabled": And(Use(bool)), Optional("function"): LAMBDA_BASE_SCHEMA},
-            Optional("ttl_attribute"): And(Use(str)),
-            Optional("billing_mode"): And(Use(str)),
-            Optional("read_capacity"): And(Use(str)),
-            Optional("write_capacity"): And(Use(str)),
-        },
-        "users_attributes": {
-            "table_name": And(Use(str)),
-            "partition_key": And(Use(str)),
-            Optional("sort_key"): And(Use(str)),
-            Optional("stream"): {"enabled": And(Use(bool)), Optional("function"): LAMBDA_BASE_SCHEMA},
-            Optional("ttl_attribute"): And(Use(str)),
-            Optional("billing_mode"): And(Use(str)),
-            Optional("read_capacity"): And(Use(str)),
-            Optional("write_capacity"): And(Use(str)),
-        },
+        "dynamo_tables": [
+            {
+                "table_name": And(Use(str)),
+                "partition_key": And(Use(str)),
+                Optional("sort_key"): {"name": And(Use(str)), "type": And(Use(str)),},
+                Optional("stream"): {"enabled": And(Use(bool)), Optional("function"): LAMBDA_BASE_SCHEMA},
+                Optional("ttl_attribute"): And(Use(str)),
+                Optional("billing_mode"): And(Use(str)),
+                Optional("read_capacity"): And(Use(str)),
+                Optional("write_capacity"): And(Use(str)),
+            }
+        ],
         "user_pool": {
             "pool_name": And(Use(str)),
             Optional("email"): {"from": And(Use(str)), Optional("reply_to"): And(Use(str))},
