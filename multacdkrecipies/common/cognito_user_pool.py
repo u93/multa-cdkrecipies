@@ -1,4 +1,4 @@
-from aws_cdk import core, aws_cognito as cognito, aws_lambda as lambda_
+from aws_cdk import core, aws_cognito as cognito
 
 from .lambda_function import base_lambda_function
 

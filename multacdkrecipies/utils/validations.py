@@ -159,7 +159,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
 
 USER_POOL_DYNAMODB_SCHEMA = Schema(
     {
-        "dynamo_tables": [
+        Optional("dynamo_tables"): [
             {
                 "table_name": And(Use(str)),
                 "partition_key": And(Use(str)),
@@ -221,6 +221,25 @@ USER_POOL_DYNAMODB_SCHEMA = Schema(
                 Optional("verify_auth_challenge_response"): LAMBDA_BASE_SCHEMA,
             },
         },
+    }
+)
+
+USER_POOL_GROUPS_SCHEMA = Schema(
+    {
+        "user_pool_groups": [
+            {
+                "group_name": And(Use(str)),
+                Optional("description"): And(Use(str)),
+                "pool_id": And(Use(str)),
+                "precedence": And(Use(int)),
+                "role": {
+                    "name": And(Use(str)),
+                    "actions": [And(Use(str))],
+                    "resources": [And(Use(str))],
+                    "principal": And(Use(str)),
+                }
+            }
+        ]
     }
 )
 

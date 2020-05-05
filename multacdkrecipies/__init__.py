@@ -14,6 +14,7 @@ from .sns_lambdas_pipe import AwsSnsPipes
 from .sqs_lambdas_pipe import AwsSqsPipes
 from .ssm_parameter import AwsSsmString
 from .user_pool_dynamo import AwsUserPoolCognitoDynamo
+from .user_pool_groups import AwsUserPoolCognitoGroups
 
 from .settings import *
 from .utils import *
