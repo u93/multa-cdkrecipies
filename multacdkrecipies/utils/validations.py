@@ -3,79 +3,13 @@ import traceback
 
 from schema import Schema, And, Use, Optional, SchemaError
 
-LAMBDA_BASE_SCHEMA = {
-    "lambda_name": And(Use(str)),
-    Optional("description"): And(Use(str)),
-    Optional("code_path"): And(Use(str)),
-    "runtime": And(Use(str)),
-    "handler": And(Use(str)),
-    Optional("layers"): [And(Use(str))],
-    Optional("timeout"): And(Use(int)),
-    Optional("reserved_concurrent_executions"): And(Use(int)),
-    Optional("environment_vars"): {And(Use(str)): And(Use(str))},
-    "iam_actions": [And(Use(str))],
-    Optional("alarms"): [
-        {
-            "name": And(Use(str)),
-            "number": And(Use(int)),
-            "periods": And(Use(int)),
-            "points": And(Use(int)),
-            "actions": And(Use(bool)),
-        }
-    ],
-}
+from .base_validations import DYNAMODB_TABLE_SCHEMA, LAMBDA_BASE_SCHEMA
 
-APIGATEWAY_LAMBDA_SCHEMA = Schema(
+APIGATEWAY_LAMBDA_ASYNC_SCHEMA = Schema(
     {
         "api": {
-            "lambda_authorizer": {
-                Optional("imported"): [{"lambda_arn": And(Use(str))}],
-                Optional("origin"): [
-                    {
-                        "lambda_name": And(Use(str)),
-                        Optional("description"): And(Use(str)),
-                        Optional("code_path"): And(Use(str)),
-                        "runtime": And(Use(str)),
-                        "handler": And(Use(str)),
-                        Optional("timeout"): And(Use(int)),
-                        Optional("reserved_concurrent_executions"): And(Use(int)),
-                        Optional("environment_vars"): {And(Use(str)): And(Use(str))},
-                        "iam_actions": [And(Use(str))],
-                        Optional("alarms"): [
-                            {
-                                "name": And(Use(str)),
-                                "number": And(Use(int)),
-                                "periods": And(Use(int)),
-                                "points": And(Use(int)),
-                                "actions": And(Use(bool)),
-                            }
-                        ],
-                    }
-                ],
-            },
-            "lambda_handler": {
-                "resources": [{"method": And(Use(str))}],
-                "handler": {
-                    "lambda_name": And(Use(str)),
-                    Optional("description"): And(Use(str)),
-                    Optional("code_path"): And(Use(str)),
-                    "runtime": And(Use(str)),
-                    "handler": And(Use(str)),
-                    Optional("timeout"): And(Use(int)),
-                    Optional("reserved_concurrent_executions"): And(Use(int)),
-                    Optional("environment_vars"): {And(Use(str)): And(Use(str))},
-                    "iam_actions": [And(Use(str))],
-                    Optional("alarms"): [
-                        {
-                            "name": And(Use(str)),
-                            "number": And(Use(int)),
-                            "periods": And(Use(int)),
-                            "points": And(Use(int)),
-                            "actions": And(Use(bool)),
-                        }
-                    ],
-                },
-            },
+            "lambda_authorizer": {Optional("imported"): [{"lambda_arn": And(Use(str))}], Optional("origin"): LAMBDA_BASE_SCHEMA,},
+            "lambda_handler": {"resources": [{"method": And(Use(str))}], "handler": LAMBDA_BASE_SCHEMA,},
             "http_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
             "service_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
         }
@@ -88,89 +22,40 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
             "proxy": And(Use(bool)),
-            "lambda_authorizer": {
-                Optional("imported"): {"lambda_arn": And(Use(str)),},
-                Optional("origin"): {
-                    "lambda_name": And(Use(str)),
-                    Optional("description"): And(Use(str)),
-                    Optional("code_path"): And(Use(str)),
-                    "runtime": And(Use(str)),
-                    Optional("layers"): [And(Use(str))],
-                    "handler": And(Use(str)),
-                    Optional("timeout"): And(Use(int)),
-                    Optional("reserved_concurrent_executions"): And(Use(int)),
-                    Optional("environment_vars"): {And(Use(str)): And(Use(str))},
-                    "iam_actions": [And(Use(str))],
-                },
-                Optional("alarms"): [
-                    {
-                        "name": And(Use(str)),
-                        "number": And(Use(int)),
-                        "periods": And(Use(int)),
-                        "points": And(Use(int)),
-                        "actions": And(Use(bool)),
-                    }
-                ],
-            },
+            Optional("lambda_authorizer"): {"origin": LAMBDA_BASE_SCHEMA,},
             "resource": {
                 "name": And(Use(str)),
                 Optional("allowed_origins"): [And(Use(str))],
                 Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
                 Optional("methods"): [And(Use(str))],
-                "handler": {
-                    Optional("imported"): {
-                        "lambda_arn": And(Use(str)),
-                        Optional("alarms"): [
-                            {
-                                "name": And(Use(str)),
-                                "number": And(Use(int)),
-                                "periods": And(Use(int)),
-                                "points": And(Use(int)),
-                                "actions": And(Use(bool)),
-                            }
-                        ],
-                    },
-                    Optional("origin"): {
-                        "lambda_name": And(Use(str)),
-                        Optional("description"): And(Use(str)),
-                        Optional("code_path"): And(Use(str)),
-                        Optional("layers"): [And(Use(str))],
-                        "runtime": And(Use(str)),
-                        "handler": And(Use(str)),
-                        Optional("timeout"): And(Use(int)),
-                        Optional("reserved_concurrent_executions"): And(Use(int)),
-                        Optional("environment_vars"): {And(Use(str)): And(Use(str))},
-                        "iam_actions": [And(Use(str))],
-                    },
-                    Optional("alarms"): [
-                        {
-                            "name": And(Use(str)),
-                            "number": And(Use(int)),
-                            "periods": And(Use(int)),
-                            "points": And(Use(int)),
-                            "actions": And(Use(bool)),
-                        }
-                    ],
-                },
+                "handler": LAMBDA_BASE_SCHEMA,
             },
         }
     }
 )
 
+APIGATEWAY_FAN_OUT_SCHEMA = Schema(
+    {
+        "functions": [LAMBDA_BASE_SCHEMA],
+        "api": {
+            "apigateway_name": And(Use(str)),
+            Optional("apigateway_description"): And(Use(str)),
+            "proxy": And(Use(bool)),
+            "lambda_authorizer": {"origin": LAMBDA_BASE_SCHEMA,},
+            "resource": {
+                "name": And(Use(str)),
+                Optional("allowed_origins"): [And(Use(str))],
+                Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
+                Optional("methods"): [And(Use(str))],
+                "handler": LAMBDA_BASE_SCHEMA,
+            },
+        },
+    }
+)
+
 USER_POOL_DYNAMODB_SCHEMA = Schema(
     {
-        Optional("dynamo_tables"): [
-            {
-                "table_name": And(Use(str)),
-                "partition_key": And(Use(str)),
-                Optional("sort_key"): {"name": And(Use(str)), "type": And(Use(str)),},
-                Optional("stream"): {"enabled": And(Use(bool)), Optional("function"): LAMBDA_BASE_SCHEMA},
-                Optional("ttl_attribute"): And(Use(str)),
-                Optional("billing_mode"): And(Use(str)),
-                Optional("read_capacity"): And(Use(str)),
-                Optional("write_capacity"): And(Use(str)),
-            }
-        ],
+        Optional("dynamo_tables"): [DYNAMODB_TABLE_SCHEMA],
         "user_pool": {
             "pool_name": And(Use(str)),
             Optional("email"): {"from": And(Use(str)), Optional("reply_to"): And(Use(str))},
@@ -237,7 +122,7 @@ USER_POOL_GROUPS_SCHEMA = Schema(
                     "actions": [And(Use(str))],
                     "resources": [And(Use(str))],
                     "principal": And(Use(str)),
-                }
+                },
             }
         ]
     }

@@ -1,6 +1,4 @@
-from aws_cdk import (
-    core,
-)
+from aws_cdk import core
 from .common import base_cognito_user_groups, base_role
 from .utils import USER_POOL_GROUPS_SCHEMA, validate_configuration
 

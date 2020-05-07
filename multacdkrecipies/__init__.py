@@ -1,3 +1,4 @@
+from .api_gateway_lambda_fan_out_backend import AwsApiGatewayLambdaFanOutBE
 from .api_gateway_lambda_simple_web_service import AwsApiGatewayLambdaSWS
 from .api_gateway_lambda_robust_api import AwsApiGatewayLambdaPipes
 from .api_gateway_lambda_async_backend import AwsApiGatewayLambdaPipesAsync

@@ -34,6 +34,25 @@ def base_role(construct, resource_name: str, principal_resource: str, actions: l
         return role
 
 
+def base_lambda_role(construct, resource_name: str, principal_resource: str, resources: list, **kwargs):
+    """
+    Function that generates an IAM Role with a Policy for Lambda Invoke.
+    :param construct: Custom construct that will use this function. From the external construct is usually 'self'.
+    :param resource_name: Name of the ROLE resource. Used for naming purposes.
+    :param principal_resource: Resource used to define a Service Principal. Has to match an AWS Resource. For example, 'iot' -> 'iot.amazonaws.com'.
+    :param kwargs: Other parameters that could be used by the construct.
+    :return: IAM Role with an IAM Policy attached.
+    """
+    try:
+        actions = ["lambda:InvokeFunction"]
+        resources = [function.topic_arn for function in resources]
+        role = base_role(construct, resource_name, principal_resource, actions=actions, resources=resources)
+    except Exception:
+        print(traceback.format_exc())
+    else:
+        return role
+
+
 def base_sns_role(construct, resource_name: str, principal_resource: str, **kwargs):
     """
     Function that generates an IAM Role with a Policy for SNS Publishing.

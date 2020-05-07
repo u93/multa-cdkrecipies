@@ -37,9 +37,7 @@ class AwsUserPoolCognitoDynamo(core.Construct):
             table, stream = base_dynamodb_table(self, **table)
             stream_lambda = None
             if stream is True and table["stream"].get("function") is not None:
-                stream_lambda = base_lambda_function(
-                    self, **table["stream"]["function"]
-                )
+                stream_lambda = base_lambda_function(self, **table["stream"]["function"])
 
                 # Add DynamoDB Stream Trigger to Lambda Function
                 stream_lambda.add_event_source(

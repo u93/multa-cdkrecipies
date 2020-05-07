@@ -4,11 +4,11 @@ from aws_cdk import (
     aws_certificatemanager as cert_manager,
     aws_lambda as lambda_,
 )
-from .common import base_alarm, base_lambda_function
-from .utils import APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, validate_configuration
+from .common import base_alarm, base_lambda_function, base_lambda_role
+from .utils import APIGATEWAY_FAN_OUT_SCHEMA, validate_configuration
 
 
-class AwsApiGatewayLambdaSWS(core.Construct):
+class AwsApiGatewayLambdaFanOutBE(core.Construct):
     """
     AWS CDK Construct that defines a Simple Web Service formed by a RestAPI that has a Lambda Authorizer function
     that can be imported or created (if both are passed as configuration, the first of the imported has higher
@@ -24,7 +24,7 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         :param id: ID of the construct, used by CDK.
         :param prefix: Prefix of the construct, used for naming purposes.
         :param environment: Environment of the construct, used for naming purposes.
-        :param configuration: Configuration of the construct. In this case APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA.
+        :param configuration: Configuration of the construct. In this case APIGATEWAY_FAN_OUT_SCHEMA.
         :param kwargs: Other parameters that could be used by the construct.
         """
         super().__init__(scope, id, **kwargs)
@@ -33,17 +33,16 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(
-            configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self._configuration
-        )
+        validate_configuration(configuration_schema=APIGATEWAY_FAN_OUT_SCHEMA, configuration_received=self._configuration)
+
         api_configuration = self._configuration["api"]
 
         # Define Lambda Authorizers
-        lambda_authorizer = api_configuration.get("lambda_authorizer")
-        if lambda_authorizer is None:
+        lambda_authorizers = api_configuration.get("lambda_authorizer")
+        if lambda_authorizers is None:
             self._authorizer_lambda_function = None
         else:
-            self._authorizer_lambda_function = base_lambda_function(self, **lambda_authorizer["origin"])
+            self._authorizer_lambda_function = base_lambda_function(self, **lambda_authorizers["origin"])
 
         # Define API Gateway Lambda Handler
         lambda_handlers = api_configuration["resource"]["handler"]
@@ -103,6 +102,13 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             if allowed_origins is not None:
                 resource.add_cors_preflight(allow_origins=allowed_origins)
 
+        # Define FAN-Out Lambda functions
+        self._lambda_functions = list()
+        for lambda_function in self._configuration["functions"]:
+            _lambda = base_lambda_function(self, **lambda_function)
+            _lambda.grant_invoke(self._handler_lambda_function)
+            self._lambda_functions.append(_lambda)
+
     def set_alarms(self):
         """
         Function that set alarms for the resources involved in the construct. Except API Gateway resource.
@@ -114,7 +120,7 @@ class AwsApiGatewayLambdaSWS(core.Construct):
                 authorizer_alarms.append(
                     base_alarm(
                         self,
-                        resource_name="lambda_authorizer",
+                        resource_name=self._configuration["api"]["lambda_authorizer"]["lambda_name"],
                         base_resource=self._authorizer_lambda_function,
                         **alarm_definition,
                     )
@@ -126,11 +132,23 @@ class AwsApiGatewayLambdaSWS(core.Construct):
                 authorizer_alarms.append(
                     base_alarm(
                         self,
-                        resource_name="lambda_api_handler",
-                        base_resource=self._handler_lambda_functions,
+                        resource_name=self._configuration["api"]["resource"]["handler"]["lambda_name"],
+                        base_resource=self._handler_lambda_function,
                         **alarm_definition,
                     )
                 )
+
+        function_definition_resource = zip(self._configuration["functions"], self._lambda_functions)
+        function_definition_resource_list = list(function_definition_resource)
+        functions_alarms = list()
+        for lambda_function, resource in function_definition_resource_list:
+            if isinstance(lambda_function.get("alarms"), list) is True:
+                for alarm_definition in lambda_function.get("alarms"):
+                    functions_alarms.append(
+                        base_alarm(
+                            self, resource_name=lambda_function["lambda_name"], base_resource=resource, **alarm_definition,
+                        )
+                    )
 
     @property
     def configuration(self):
@@ -151,11 +169,18 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         """
         :return: Construct API Gateway Authorizer Function.
         """
-        return self._authorizer_lambda_function
+        return self._lambda_authorizer_function
 
     @property
-    def lambda_handler_function(self):
+    def lambda_api_router_function(self):
         """
         :return: Construct API Gateway Handler Function.
         """
-        return self._handler_lambda_function
+        return self._lambda_api_router_function
+
+    @property
+    def lambda_functions(self):
+        """
+        :return: Construct API Gateway Handler Function.
+        """
+        return self._lambda_functions

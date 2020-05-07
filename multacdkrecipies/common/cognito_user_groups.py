@@ -21,7 +21,7 @@ def base_cognito_user_groups(construct, **kwargs):
         description=user_pool_group_description,
         user_pool_id=user_pool_group_id,
         precedence=user_pool_group_precendence,
-        role_arn=user_pool_group_role_arn
+        role_arn=user_pool_group_role_arn,
     )
 
     return user_pool_group
