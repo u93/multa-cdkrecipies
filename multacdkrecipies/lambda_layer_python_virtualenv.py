@@ -61,7 +61,7 @@ class AwsLambdaLayerVenv(core.Construct):
                 subprocess.call(["pip", "install", package, "-t", layer_directory_path])
 
         self._configuration["layer_code_path"] = layer_code_path
-        _lambda_layer = base_lambda_layer(self, **self._configuration)
+        self._lambda_layer = base_lambda_layer(self, **self._configuration)
 
     @property
     def configuration(self):

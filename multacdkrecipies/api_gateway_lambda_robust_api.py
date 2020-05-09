@@ -9,7 +9,7 @@ from aws_cdk import (
 )
 
 from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
-from .utils import APIGATEWAY_LAMBDA_SCHEMA, validate_configuration, WrongRuntimePassed
+from .utils import APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
 class AwsApiGatewayLambdaPipes(core.Construct):
@@ -44,57 +44,6 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         api_configuration = self.configuration["api"]
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=APIGATEWAY_LAMBDA_SCHEMA, configuration_received=self.configuration)
-
-        # Define Lambda Authorizers
-        lambda_authorizers = api_configuration["lambda_authorizer"]
-        self._authorizer_lambda_functions = list()
-
-        # Define IN-ACCOUNT Lambda Authorizers
-        for lambda_function in lambda_authorizers.get("imported", list()):
-            self._authorizer_lambda_functions.append(lambda_.Function.from_function_arn(lambda_function["lambda_arn"]))
-
-        # Define NEW-FUNCTION Lambda Authorizers
-        for lambda_function in lambda_authorizers.get("origin", list()):
-            try:
-                function_runtime = getattr(lambda_.Runtime, lambda_function["runtime"])
-            except Exception:
-                raise WrongRuntimePassed(
-                    detail=f"Wrong function runtime {lambda_function['runtime']} specified", tb=traceback.format_exc()
-                )
-
-            obtainer_code_path = lambda_function.get("code_path")
-            if obtainer_code_path is not None:
-                code_path = obtainer_code_path
-            elif obtainer_code_path is None and DEFAULT_LAMBDA_CODE_PATH_EXISTS is True:
-                code_path = DEFAULT_LAMBDA_CODE_PATH
-            else:
-                raise RuntimeError(f"Code path for Lambda Function {lambda_function['lambda_name']} is not valid!")
-
-            # Defining Lambda function
-            _lambda_function = lambda_.Function(
-                self,
-                id=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
-                function_name=self.prefix + "_" + lambda_function["lambda_name"] + "_lambda_" + self.environment_,
-                code=lambda_.Code.from_asset(path=code_path),
-                handler=lambda_function["handler"],
-                runtime=function_runtime,
-                layers=None,
-                description=lambda_function.get("description"),
-                tracing=lambda_.Tracing.ACTIVE,
-                environment=lambda_function.get("environment_vars"),
-                timeout=core.Duration.seconds(lambda_function.get("timeout")),
-                reserved_concurrent_executions=lambda_function.get("reserved_concurrent_executions"),
-            )
-            self._authorizer_lambda_functions.append(_lambda_function)
-
-        # Defining Lambda Function IAM policies to access other services
-        self.iam_policies = list()
-        for iam_actions in configuration["iam_actions"]:
-            self.iam_policies.append(iam_actions)
-
-        for add_authorizer_function in self._authorizer_lambda_functions:
-            policy_statement = iam.PolicyStatement(actions=self.iam_policies, resources=["*"])
-            add_authorizer_function.add_to_role_policy(statement=policy_statement)
-
-        # Define API Methods
+        validate_configuration(
+            configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self.configuration
+        )

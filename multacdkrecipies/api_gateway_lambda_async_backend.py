@@ -9,7 +9,7 @@ from aws_cdk import (
 )
 
 from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
-from .utils import APIGATEWAY_LAMBDA_SCHEMA, validate_configuration, WrongRuntimePassed
+from .utils import APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
 class AwsApiGatewayLambdaPipesAsync(core.Construct):
