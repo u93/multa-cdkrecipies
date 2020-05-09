@@ -37,12 +37,14 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
 
         api_configuration = self._configuration["api"]
 
-        # Define Lambda Authorizers
-        lambda_authorizers = api_configuration.get("lambda_authorizer")
-        if lambda_authorizers is None:
-            self._authorizer_lambda_function = None
-        else:
-            self._authorizer_lambda_function = base_lambda_function(self, **lambda_authorizers["origin"])
+        # Define Lambda Authorizer Function
+        authorizer_functions = api_configuration.get("lambda_authorizer")
+        self._authorizer_lambda_function = None
+        if authorizer_functions is not None:
+            if authorizer_functions.get("imported") is not None:
+                self._authorizer_lambda_function = base_lambda_function(self, **authorizer_functions.get("imported"))
+            elif authorizer_functions.get("origin") is not None:
+                self._authorizer_lambda_function = base_lambda_function(self, **authorizer_functions.get("origin"))
 
         # Define API Gateway Lambda Handler
         lambda_handlers = api_configuration["resource"]["handler"]
@@ -114,18 +116,6 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
         Function that set alarms for the resources involved in the construct. Except API Gateway resource.
         :return: None
         """
-        if isinstance(self._configuration["api"].get("lambda_authorizer", dict()).get("alarms"), list) is True:
-            authorizer_alarms = list()
-            for alarm_definition in self._configuration["api"]["lambda_authorizer"].get("alarms"):
-                authorizer_alarms.append(
-                    base_alarm(
-                        self,
-                        resource_name=self._configuration["api"]["lambda_authorizer"]["lambda_name"],
-                        base_resource=self._authorizer_lambda_function,
-                        **alarm_definition,
-                    )
-                )
-
         if isinstance(self._configuration["api"]["resource"]["handler"].get("alarms"), list) is True:
             authorizer_alarms = list()
             for alarm_definition in self._configuration["api"]["resource"]["handler"].get("alarms"):
@@ -169,7 +159,7 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
         """
         :return: Construct API Gateway Authorizer Function.
         """
-        return self._lambda_authorizer_function
+        return self._authorizer_lambda_function
 
     @property
     def lambda_api_router_function(self):

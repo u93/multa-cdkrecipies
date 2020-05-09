@@ -4,10 +4,10 @@ from aws_cdk import (
     aws_lambda_event_sources as event_sources,
 )
 from .common import base_cognito_user_pool, base_dynamodb_table, base_lambda_function
-from .utils import USER_POOL_DYNAMODB_SCHEMA, validate_configuration
+from .utils import USER_SERVERLESS_BACKEND, validate_configuration
 
 
-class AwsUserPoolCognitoDynamo(core.Construct):
+class AwsUserServerlessBackend(core.Construct):
     """
     AWS CDK Construct that defines a Backend for User Management including a Cognito User Pool with the respective
     Lambda Triggers and also the possibility to configure DynamoDB tables to match necessities that may arise that
@@ -29,9 +29,18 @@ class AwsUserPoolCognitoDynamo(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=USER_POOL_DYNAMODB_SCHEMA, configuration_received=self._configuration)
+        validate_configuration(configuration_schema=USER_SERVERLESS_BACKEND, configuration_received=self._configuration)
 
-        # Define Organization DynamoDB Table
+        # Define Lambda Authorizer Function
+        authorizer_functions = self._configuration.get("authorizer_function")
+        self._authorizer_function = None
+        if authorizer_functions is not None:
+            if authorizer_functions.get("imported") is not None:
+                self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("imported"))
+            elif authorizer_functions.get("origin") is not None:
+                self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
+
+        # Define DynamoDB Tabls
         self._dynamodb_tables_lambda_functions = list()
         for table in self._configuration.get("dynamo_tables"):
             table, stream = base_dynamodb_table(self, **table)
@@ -57,6 +66,13 @@ class AwsUserPoolCognitoDynamo(core.Construct):
         :return: Construct configuration.
         """
         return self._configuration
+
+    @property
+    def authorizer_function(self):
+        """
+        :return: Construct Authorizer Lambda Function.
+        """
+        return self._authorizer_function
 
     @property
     def dynamodb_tables_lambda_functions(self):

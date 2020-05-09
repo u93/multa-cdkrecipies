@@ -38,12 +38,18 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         )
         api_configuration = self._configuration["api"]
 
-        # Define Lambda Authorizers
-        lambda_authorizer = api_configuration.get("lambda_authorizer")
-        if lambda_authorizer is None:
-            self._authorizer_lambda_function = None
-        else:
-            self._authorizer_lambda_function = base_lambda_function(self, **lambda_authorizer["origin"])
+        # Define Lambda Authorizer Function
+        authorizer_functions = api_configuration.get("lambda_authorizer")
+        self._authorizer_lambda_function = None
+        if authorizer_functions is not None:
+            if authorizer_functions.get("imported") is not None:
+                self._authorizer_lambda_function = base_lambda_function(self, **authorizer_functions.get("imported"))
+            elif authorizer_functions.get("origin") is not None:
+                self._authorizer_lambda_function = base_lambda_function(self, **authorizer_functions.get("origin"))
+
+        # Define API Gateway Lambda Handler
+        lambda_handlers = api_configuration["resource"]["handler"]
+        self._handler_lambda_function = base_lambda_function(self, **lambda_handlers["origin"])
 
         # Define API Gateway Lambda Handler
         lambda_handlers = api_configuration["resource"]["handler"]
@@ -108,18 +114,6 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         Function that set alarms for the resources involved in the construct. Except API Gateway resource.
         :return: None
         """
-        if isinstance(self._configuration["api"].get("lambda_authorizer", dict()).get("alarms"), list) is True:
-            authorizer_alarms = list()
-            for alarm_definition in self._configuration["api"]["lambda_authorizer"].get("alarms"):
-                authorizer_alarms.append(
-                    base_alarm(
-                        self,
-                        resource_name="lambda_authorizer",
-                        base_resource=self._authorizer_lambda_function,
-                        **alarm_definition,
-                    )
-                )
-
         if isinstance(self._configuration["api"]["resource"]["handler"].get("alarms"), list) is True:
             authorizer_alarms = list()
             for alarm_definition in self._configuration["api"]["resource"]["handler"].get("alarms"):

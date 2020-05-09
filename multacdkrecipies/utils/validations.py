@@ -8,7 +8,7 @@ from .base_validations import DYNAMODB_TABLE_SCHEMA, LAMBDA_BASE_SCHEMA
 APIGATEWAY_LAMBDA_ASYNC_SCHEMA = Schema(
     {
         "api": {
-            "lambda_authorizer": {Optional("imported"): [{"lambda_arn": And(Use(str))}], Optional("origin"): LAMBDA_BASE_SCHEMA,},
+            Optional("lambda_authorizer"): {Optional("origin"): LAMBDA_BASE_SCHEMA, Optional("imported"): And(Use(str))},
             "lambda_handler": {"resources": [{"method": And(Use(str))}], "handler": LAMBDA_BASE_SCHEMA,},
             "http_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
             "service_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
@@ -22,7 +22,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
             "proxy": And(Use(bool)),
-            Optional("lambda_authorizer"): {"origin": LAMBDA_BASE_SCHEMA,},
+            Optional("lambda_authorizer"): {Optional("origin"): LAMBDA_BASE_SCHEMA, Optional("imported"): And(Use(str))},
             "resource": {
                 "name": And(Use(str)),
                 Optional("allowed_origins"): [And(Use(str))],
@@ -41,7 +41,7 @@ APIGATEWAY_FAN_OUT_SCHEMA = Schema(
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
             "proxy": And(Use(bool)),
-            "lambda_authorizer": {"origin": LAMBDA_BASE_SCHEMA,},
+            Optional("lambda_authorizer"): {Optional("origin"): LAMBDA_BASE_SCHEMA, Optional("imported"): And(Use(str))},
             "resource": {
                 "name": And(Use(str)),
                 Optional("allowed_origins"): [And(Use(str))],
@@ -53,8 +53,9 @@ APIGATEWAY_FAN_OUT_SCHEMA = Schema(
     }
 )
 
-USER_POOL_DYNAMODB_SCHEMA = Schema(
+USER_SERVERLESS_BACKEND = Schema(
     {
+        Optional("authorizer_function"): {Optional("origin"): LAMBDA_BASE_SCHEMA, Optional("imported"): And(Use(str))},
         Optional("dynamo_tables"): [DYNAMODB_TABLE_SCHEMA],
         "user_pool": {
             "pool_name": And(Use(str)),
