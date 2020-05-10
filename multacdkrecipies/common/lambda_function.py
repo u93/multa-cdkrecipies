@@ -38,7 +38,7 @@ def base_lambda_function(construct, **kwargs):
     for layer_arn in kwargs.get("layers", list()):
         try:
             layer = lambda_.LayerVersion.from_layer_version_arn(
-                construct, id=layer_arn + "_" + kwargs["lambda_name"], layer_version_arn=layer_arn
+                construct, id=kwargs["lambda_name"] + "_" + kwargs.get("identifier", "1"), layer_version_arn=layer_arn
             )
         except Exception:
             print(f"Error using Lambda Layer ARN {layer_arn}")

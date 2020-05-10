@@ -94,6 +94,18 @@ USER_SERVERLESS_BACKEND = Schema(
                     }
                 ],
             },
+            Optional("app_client"): {
+                "enabled": And(Use(bool)),
+                "client_name": And(Use(str)),
+                "generate_secret": And(Use(bool)),
+                Optional("auth_flows"): {
+                    Optional("admin_user_password"): And(Use(bool)),
+                    Optional("custom"): And(Use(bool)),
+                    Optional("refresh_token"): And(Use(bool)),
+                    Optional("user_password"): And(Use(bool)),
+                    Optional("user_srp"): And(Use(bool)),
+                },
+            },
             "triggers": {
                 Optional("create_auth_challenge"): LAMBDA_BASE_SCHEMA,
                 Optional("custom_message"): LAMBDA_BASE_SCHEMA,
@@ -273,6 +285,7 @@ IOT_POLICY = Schema({"name": And(Use(str)), "policy_document": And(Use(dict))})
 
 LAMBDA_LAYER_SCHEMA = Schema(
     {
+        "identifier": And(Use(str)),
         "layer_name": And(Use(str)),
         Optional("description"): And(Use(str)),
         Optional("license"): And(Use(str)),

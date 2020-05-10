@@ -77,6 +77,23 @@ def base_cognito_user_pool(construct, **kwargs):
         lambda_triggers=lambda_triggers,
     )
 
+    if kwargs.get("app_client", {}).get("enabled") is True:
+        client_name = kwargs["app_client"]["client_name"]
+        generate_secret = kwargs["app_client"]["generate_secret"]
+        user_pool_client_name = construct.prefix + "_" + client_name + "_client_" + construct.environment_
+
+        auth_flows = None
+        auth_flows_configuration = kwargs["app_client"].get("auth_flows")
+        if auth_flows_configuration is not None:
+            auth_flows = cognito.AuthFlow(**auth_flows_configuration)
+
+        user_pool.add_client(
+            id=user_pool_client_name,
+            user_pool_client_name=user_pool_client_name,
+            generate_secret=generate_secret,
+            auth_flows=auth_flows,
+        )
+
     return user_pool
 
 
