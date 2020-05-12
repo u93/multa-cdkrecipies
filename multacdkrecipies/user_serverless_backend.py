@@ -36,7 +36,11 @@ class AwsUserServerlessBackend(core.Construct):
         self._authorizer_function = None
         if authorizer_functions is not None:
             if authorizer_functions.get("imported") is not None:
-                self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("imported"))
+                self._authorizer_function = lambda_.Function.from_function_arn(
+                    self,
+                    id=authorizer_functions.get("imported").get("identifier"),
+                    function_arn=authorizer_functions.get("imported").get("arn"),
+                )
             elif authorizer_functions.get("origin") is not None:
                 self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
 

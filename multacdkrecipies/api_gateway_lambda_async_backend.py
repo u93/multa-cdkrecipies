@@ -8,6 +8,7 @@ from aws_cdk import (
     aws_lambda as lambda_,
 )
 
+from .common import base_lambda_function
 from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
 from .utils import APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, validate_configuration, WrongRuntimePassed
 
@@ -44,18 +45,25 @@ class AwsApiGatewayLambdaPipesAsync(core.Construct):
         api_configuration = self.configuration["api"]
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=APIGATEWAY_LAMBDA_SCHEMA, configuration_received=self.configuration)
+        validate_configuration(
+            configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self.configuration
+        )
 
-        # Define Lambda Authorizers
-        lambda_authorizers = api_configuration["lambda_authorizer"]
-        self._authorizer_lambda_functions = list()
-
-        # Define IN-ACCOUNT Lambda Authorizers
-        for lambda_function in lambda_authorizers["imported"]:
-            self._authorizer_lambda_functions.append(lambda_.Function.from_function_arn(lambda_function["lambda_arn"]))
+        # Define Lambda Authorizer Function
+        authorizer_functions = api_configuration.get("authorizer_function")
+        self._authorizer_function = None
+        if authorizer_functions is not None:
+            if authorizer_functions.get("imported") is not None:
+                self._authorizer_function = lambda_.Function.from_function_arn(
+                    self,
+                    id=authorizer_functions.get("imported").get("identifier"),
+                    function_arn=authorizer_functions.get("imported").get("arn"),
+                )
+            elif authorizer_functions.get("origin") is not None:
+                self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
 
         # Define NEW-FUNCTION Lambda Authorizers
-        for lambda_function in lambda_authorizers["origin"]:
+        for lambda_function in authorizer_functions["origin"]:
             try:
                 function_runtime = getattr(lambda_.Runtime, lambda_function["runtime"])
             except Exception:

@@ -38,13 +38,17 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
         api_configuration = self._configuration["api"]
 
         # Define Lambda Authorizer Function
-        authorizer_functions = api_configuration.get("lambda_authorizer")
-        self._authorizer_lambda_function = None
+        authorizer_functions = api_configuration.get("authorizer_function")
+        self._authorizer_function = None
         if authorizer_functions is not None:
             if authorizer_functions.get("imported") is not None:
-                self._authorizer_lambda_function = base_lambda_function(self, **authorizer_functions.get("imported"))
+                self._authorizer_function = lambda_.Function.from_function_arn(
+                    self,
+                    id=authorizer_functions.get("imported").get("identifier"),
+                    function_arn=authorizer_functions.get("imported").get("arn"),
+                )
             elif authorizer_functions.get("origin") is not None:
-                self._authorizer_lambda_function = base_lambda_function(self, **authorizer_functions.get("origin"))
+                self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
 
         # Define API Gateway Lambda Handler
         lambda_handlers = api_configuration["resource"]["handler"]
@@ -52,14 +56,14 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
 
         # Define API Gateway
         try:
-            if self._authorizer_lambda_function is None:
+            if self._authorizer_function is None:
                 gateway_authorizer = None
                 print("No Authorizer Function passed, skipping API Gateway Auth")
             else:
                 # Define Gateway Token Authorizer
                 authorizer_name = api_configuration["apigateway_name"] + "_" + "authorizer"
                 gateway_authorizer = api_gateway.TokenAuthorizer(
-                    self, id=authorizer_name, authorizer_name=authorizer_name, handler=self._authorizer_lambda_function
+                    self, id=authorizer_name, authorizer_name=authorizer_name, handler=self._authorizer_function
                 )
         except IndexError:
             print("Unable to find defined Auth Lambda Handler! Please verify configuration payload...")
@@ -155,11 +159,11 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
         return self._lambda_rest_api
 
     @property
-    def lambda_authorizer_function(self):
+    def authorizer_function(self):
         """
         :return: Construct API Gateway Authorizer Function.
         """
-        return self._authorizer_lambda_function
+        return self._authorizer_function
 
     @property
     def lambda_api_router_function(self):

@@ -3,12 +3,12 @@ import traceback
 
 from schema import Schema, And, Use, Optional, SchemaError
 
-from .base_validations import DYNAMODB_TABLE_SCHEMA, LAMBDA_BASE_SCHEMA
+from .base_validations import DYNAMODB_TABLE_SCHEMA, LAMBDA_BASE_SCHEMA, AUTHORIZER_LAMBDA_BASE_SCHEMA
 
 APIGATEWAY_LAMBDA_ASYNC_SCHEMA = Schema(
     {
         "api": {
-            Optional("lambda_authorizer"): {Optional("origin"): LAMBDA_BASE_SCHEMA, Optional("imported"): And(Use(str))},
+            Optional("lambda_authorizer"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
             "lambda_handler": {"resources": [{"method": And(Use(str))}], "handler": LAMBDA_BASE_SCHEMA,},
             "http_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
             "service_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
@@ -22,7 +22,7 @@ APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
             "proxy": And(Use(bool)),
-            Optional("lambda_authorizer"): {Optional("origin"): LAMBDA_BASE_SCHEMA, Optional("imported"): And(Use(str))},
+            Optional("lambda_authorizer"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
             "resource": {
                 "name": And(Use(str)),
                 Optional("allowed_origins"): [And(Use(str))],
@@ -41,7 +41,7 @@ APIGATEWAY_FAN_OUT_SCHEMA = Schema(
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
             "proxy": And(Use(bool)),
-            Optional("lambda_authorizer"): {Optional("origin"): LAMBDA_BASE_SCHEMA, Optional("imported"): And(Use(str))},
+            Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
             "resource": {
                 "name": And(Use(str)),
                 Optional("allowed_origins"): [And(Use(str))],
@@ -53,9 +53,28 @@ APIGATEWAY_FAN_OUT_SCHEMA = Schema(
     }
 )
 
+APIGATEWAY_FAN_OUT_SCHEMA = Schema(
+    {
+        "functions": [LAMBDA_BASE_SCHEMA],
+        "api": {
+            "apigateway_name": And(Use(str)),
+            Optional("apigateway_description"): And(Use(str)),
+            "proxy": And(Use(bool)),
+            Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
+            "resource": {
+                "name": And(Use(str)),
+                Optional("allowed_origins"): [And(Use(str))],
+                Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
+                Optional("methods"): [And(Use(str))],
+                "handler": {"origin": LAMBDA_BASE_SCHEMA,},
+            },
+        },
+    }
+)
+
 USER_SERVERLESS_BACKEND = Schema(
     {
-        Optional("authorizer_function"): {Optional("origin"): LAMBDA_BASE_SCHEMA, Optional("imported"): And(Use(str))},
+        Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
         Optional("dynamo_tables"): [DYNAMODB_TABLE_SCHEMA],
         "user_pool": {
             "pool_name": And(Use(str)),
