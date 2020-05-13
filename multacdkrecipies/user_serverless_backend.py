@@ -4,7 +4,7 @@ from aws_cdk import (
     aws_lambda_event_sources as event_sources,
 )
 from .common import base_cognito_user_pool, base_dynamodb_table, base_lambda_function
-from .utils import USER_SERVERLESS_BACKEND, validate_configuration
+from .utils import USER_SERVERLESS_BACKEND_SCHEMA, validate_configuration
 
 
 class AwsUserServerlessBackend(core.Construct):
@@ -29,7 +29,7 @@ class AwsUserServerlessBackend(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=USER_SERVERLESS_BACKEND, configuration_received=self._configuration)
+        validate_configuration(configuration_schema=USER_SERVERLESS_BACKEND_SCHEMA, configuration_received=self._configuration)
 
         # Define Lambda Authorizer Function
         authorizer_functions = self._configuration.get("authorizer_function")

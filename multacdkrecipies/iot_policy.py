@@ -5,7 +5,7 @@ from aws_cdk import (
     aws_iot as iot_,
 )
 
-from .utils import IOT_POLICY, validate_configuration
+from .utils import IOT_POLICY_SCHEMA, validate_configuration
 
 
 class AwsIotPolicy(core.Construct):
@@ -29,7 +29,7 @@ class AwsIotPolicy(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=IOT_POLICY, configuration_received=self._configuration)
+        validate_configuration(configuration_schema=IOT_POLICY_SCHEMA, configuration_received=self._configuration)
 
         self._iot_policy = iot_.CfnPolicy(
             self,

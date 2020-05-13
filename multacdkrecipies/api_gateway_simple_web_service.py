@@ -5,7 +5,7 @@ from aws_cdk import (
     aws_lambda as lambda_,
 )
 from .common import base_alarm, base_lambda_function
-from .utils import APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, validate_configuration
+from .utils import APIGATEWAY_SIMPLE_WEB_SERVICE_SCHEMA, validate_configuration
 
 
 class AwsApiGatewayLambdaSWS(core.Construct):
@@ -34,7 +34,7 @@ class AwsApiGatewayLambdaSWS(core.Construct):
 
         # Validating that the payload passed is correct
         validate_configuration(
-            configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self._configuration
+            configuration_schema=APIGATEWAY_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self._configuration
         )
         api_configuration = self._configuration["api"]
 
@@ -51,26 +51,18 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             elif authorizer_functions.get("origin") is not None:
                 self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
 
-        # Define API Gateway Lambda Handler
-        lambda_handlers = api_configuration["resource"]["handler"]
-        self._handler_lambda_function = base_lambda_function(self, **lambda_handlers["origin"])
+        # Define API Gateway Authorizer
+        gateway_authorizer = None
+        if self._authorizer_function is not None:
+            # Define Gateway Token Authorizer
+            authorizer_name = api_configuration["apigateway_name"] + "_" + "authorizer"
+            gateway_authorizer = api_gateway.TokenAuthorizer(
+                self, id=authorizer_name, authorizer_name=authorizer_name, handler=self._authorizer_function
+            )
 
-        # Define API Gateway
-        try:
-            if self._authorizer_lambda_function is None:
-                gateway_authorizer = None
-                print("No Authorizer Function passed, skipping API Gateway Auth")
-            else:
-                # Define Gateway Token Authorizer
-                authorizer_name = api_configuration["apigateway_name"] + "_" + "authorizer"
-                gateway_authorizer = api_gateway.TokenAuthorizer(
-                    self, id=authorizer_name, authorizer_name=authorizer_name, handler=self._authorizer_lambda_function
-                )
-        except IndexError:
-            print("Unable to find defined Auth Lambda Handler! Please verify configuration payload...")
-            raise RuntimeError
-
-        custom_domain = api_configuration["resource"].get("custom_domain")
+        # Defining Custom Domain
+        domain_options = None
+        custom_domain = api_configuration["root_resource"].get("custom_domain")
         if custom_domain is not None:
             domain_name = custom_domain["domain_name"]
             certificate_arn = custom_domain["certificate_arn"]
@@ -78,10 +70,11 @@ class AwsApiGatewayLambdaSWS(core.Construct):
                 certificate=cert_manager.Certificate.from_certificate_arn(self, id=domain_name, certificate_arn=certificate_arn),
                 domain_name=domain_name,
             )
-        else:
-            domain_options = None
 
-        if api_configuration["proxy"] is False and api_configuration.get("resource").get("methods") is None:
+        # Define API Gateway Lambda Handler
+        self._handler_function = base_lambda_function(self, **api_configuration["root_resource"]["handler"])
+
+        if api_configuration["proxy"] is False and api_configuration.get("root_resource").get("methods") is None:
             print("Unable to check which method to use for the API! Use proxy: True or define methods...")
             raise RuntimeError
 
@@ -91,15 +84,15 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             rest_api_name=api_configuration["apigateway_name"],
             description=api_configuration["apigateway_description"],
             domain_name=domain_options,
-            handler=self._handler_lambda_function,
+            handler=self._handler_function,
             proxy=api_configuration["proxy"],
         )
 
         # Define Gateway Resource and Methods
-        resource = self._lambda_rest_api.root.add_resource(api_configuration["resource"]["name"])
-        allowed_origins = api_configuration["resource"].get("allowed_origins")
+        resource = self._lambda_rest_api.root.add_resource(api_configuration["root_resource"]["name"])
+        allowed_origins = api_configuration["root_resource"].get("allowed_origins")
         if api_configuration["proxy"] is False:
-            gateway_methods = api_configuration["resource"]["methods"]
+            gateway_methods = api_configuration["root_resource"]["methods"]
             for method in gateway_methods:
                 resource.add_method(http_method=method, authorizer=gateway_authorizer)
 
@@ -114,9 +107,9 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         Function that set alarms for the resources involved in the construct. Except API Gateway resource.
         :return: None
         """
-        if isinstance(self._configuration["api"]["resource"]["handler"].get("alarms"), list) is True:
+        if isinstance(self._configuration["api"]["root_resource"]["handler"].get("alarms"), list) is True:
             authorizer_alarms = list()
-            for alarm_definition in self._configuration["api"]["resource"]["handler"].get("alarms"):
+            for alarm_definition in self._configuration["api"]["root_resource"]["handler"].get("alarms"):
                 authorizer_alarms.append(
                     base_alarm(
                         self,
@@ -141,15 +134,15 @@ class AwsApiGatewayLambdaSWS(core.Construct):
         return self._lambda_rest_api
 
     @property
-    def lambda_authorizer_function(self):
+    def authorizer_function(self):
         """
         :return: Construct API Gateway Authorizer Function.
         """
-        return self._authorizer_lambda_function
+        return self._authorizer_function
 
     @property
-    def lambda_handler_function(self):
+    def handler_function(self):
         """
         :return: Construct API Gateway Handler Function.
         """
-        return self._handler_lambda_function
+        return self._handler_function

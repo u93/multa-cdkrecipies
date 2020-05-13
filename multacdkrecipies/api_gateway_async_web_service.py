@@ -1,53 +1,41 @@
 import traceback
 
-from aws_cdk import (
-    core,
-    aws_apigateway as api_gateway,
-    aws_cloudwatch as cloudwatch,
-    aws_iam as iam,
-    aws_lambda as lambda_,
-)
+from aws_cdk import core, aws_apigateway as api_gateway
 
 from .common import base_lambda_function
 from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
-from .utils import APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, validate_configuration, WrongRuntimePassed
+from .utils import APIGATEWAY_ASYNC_WEB_SERVICE_SCHEMA, validate_configuration, WrongRuntimePassed
 
 
 class AwsApiGatewayLambdaPipesAsync(core.Construct):
     """
-    AWS CDK Construct that defines a pipe where a Rules captures an MQTT Message sent to or from AWS IoT MQTT Broker,
-    then the message is sent to an SNS Topic and a Lambda function subscribed to the topic can process it and take
-    proper actions. The construct takes a few inputs.
-
-    Attributes:
-        prefix (str): The prefix set on the name of each resource created in the stack. Just for organization purposes.
-        environment_ (str): The environment that all resources will use. Also for organizational and testing purposes.
-        _sns_topic (object): SNS Topic representation in CDK.
-        _lambda_function (object): Lambda Function representation in CDK.
-        _iot_rule (object): IoT Topic Rule representation in CDK.
-
+    AWS CDK Construct that defines a Simple Web Service formed by a RestAPI that has a Lambda Authorizer function
+    that can be imported or created (if both are passed as configuration, the first of the imported has higher
+    priority compared to the new one)... Also has a Lambda handler function that will respond to at least one
+    method (GET, POST) that can be imported or created (if both are passed as configuration, the first of the imported has higher
+    priority compared to the new one)... Custom domain with certificate configuration can also be passed to the RestAPI
+    with also the possibility to configure CORS for the API.
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         """
-
-        :param scope:
-        :param id:
-        :param prefix:
-        :param environment:
-        :param configuration:
-        :param kwargs:
+        :param scope: Stack class, used by CDK.
+        :param id: ID of the construct, used by CDK.
+        :param prefix: Prefix of the construct, used for naming purposes.
+        :param environment: Environment of the construct, used for naming purposes.
+        :param configuration: Configuration of the construct. In this case APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA.
+        :param kwargs: Other parameters that could be used by the construct.
         """
         super().__init__(scope, id, **kwargs)
         self.prefix = prefix
         self.environment_ = environment
-        self.configuration = configuration
-        api_configuration = self.configuration["api"]
+        self._configuration = configuration
 
         # Validating that the payload passed is correct
         validate_configuration(
-            configuration_schema=APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA, configuration_received=self.configuration
+            configuration_schema=APIGATEWAY_ASYNC_WEB_SERVICE_SCHEMA, configuration_received=self._configuration
         )
+        api_configuration = self._configuration["api"]
 
         # Define Lambda Authorizer Function
         authorizer_functions = api_configuration.get("authorizer_function")

@@ -5,10 +5,10 @@ from schema import Schema, And, Use, Optional, SchemaError
 
 from .base_validations import DYNAMODB_TABLE_SCHEMA, LAMBDA_BASE_SCHEMA, AUTHORIZER_LAMBDA_BASE_SCHEMA
 
-APIGATEWAY_LAMBDA_ASYNC_SCHEMA = Schema(
+APIGATEWAY_ASYNC_WEB_SERVICE_SCHEMA = Schema(
     {
         "api": {
-            Optional("lambda_authorizer"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
+            Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
             "lambda_handler": {"resources": [{"method": And(Use(str))}], "handler": LAMBDA_BASE_SCHEMA,},
             "http_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
             "service_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
@@ -16,25 +16,59 @@ APIGATEWAY_LAMBDA_ASYNC_SCHEMA = Schema(
     }
 )
 
-APIGATEWAY_LAMBDA_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
+APIGATEWAY_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
     {
         "api": {
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
             "proxy": And(Use(bool)),
-            Optional("lambda_authorizer"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
-            "resource": {
-                "name": And(Use(str)),
+            Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
+            "root_resource": {
                 Optional("allowed_origins"): [And(Use(str))],
                 Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
                 Optional("methods"): [And(Use(str))],
                 "handler": LAMBDA_BASE_SCHEMA,
             },
+            "resource": {"resource_name": And(Use(str)), Optional("methods"): [And(Use(str))], "handler": LAMBDA_BASE_SCHEMA,},
         }
     }
 )
 
-APIGATEWAY_FAN_OUT_SCHEMA = Schema(
+APIGATEWAY_ROBUST_WEB_SERVICE_SCHEMA = Schema(
+    {
+        "api": {
+            "apigateway_name": And(Use(str)),
+            Optional("apigateway_description"): And(Use(str)),
+            Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
+            "settings": {
+                "proxy": And(Use(bool)),
+                Optional("allowed_origins"): [And(Use(str))],
+                Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
+                Optional("default_cors_options"): {"allow_origins": [And(Use(str))], "options_status_code": And(Use(int))},
+                Optional("default_http_methods"): [And(Use(str))],
+                "default_handler": LAMBDA_BASE_SCHEMA,
+                Optional("default_media_types"): [And(Use(str))],
+            },
+            Optional("resource_trees"): [
+                {
+                    "resource_name": And(Use(str)),
+                    Optional("methods"): [And(Use(str))],
+                    "handler": LAMBDA_BASE_SCHEMA,
+                    Optional("child"): {
+                        "resource_name": And(Use(str)),
+                        Optional("methods"): [And(Use(str))],
+                        "handler": LAMBDA_BASE_SCHEMA,
+                        Optional("childs"): [
+                            {"resource_name": And(Use(str)), Optional("methods"): [And(Use(str))], "handler": LAMBDA_BASE_SCHEMA,}
+                        ],
+                    },
+                }
+            ],
+        }
+    }
+)
+
+APIGATEWAY_FAN_OUT_WEB_SERVICE_SCHEMA = Schema(
     {
         "functions": [LAMBDA_BASE_SCHEMA],
         "api": {
@@ -42,7 +76,7 @@ APIGATEWAY_FAN_OUT_SCHEMA = Schema(
             Optional("apigateway_description"): And(Use(str)),
             "proxy": And(Use(bool)),
             Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
-            "resource": {
+            "root_resource": {
                 "name": And(Use(str)),
                 Optional("allowed_origins"): [And(Use(str))],
                 Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
@@ -53,26 +87,7 @@ APIGATEWAY_FAN_OUT_SCHEMA = Schema(
     }
 )
 
-APIGATEWAY_FAN_OUT_SCHEMA = Schema(
-    {
-        "functions": [LAMBDA_BASE_SCHEMA],
-        "api": {
-            "apigateway_name": And(Use(str)),
-            Optional("apigateway_description"): And(Use(str)),
-            "proxy": And(Use(bool)),
-            Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
-            "resource": {
-                "name": And(Use(str)),
-                Optional("allowed_origins"): [And(Use(str))],
-                Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
-                Optional("methods"): [And(Use(str))],
-                "handler": {"origin": LAMBDA_BASE_SCHEMA,},
-            },
-        },
-    }
-)
-
-USER_SERVERLESS_BACKEND = Schema(
+USER_SERVERLESS_BACKEND_SCHEMA = Schema(
     {
         Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
         Optional("dynamo_tables"): [DYNAMODB_TABLE_SCHEMA],
@@ -284,7 +299,7 @@ IOT_ANALYTICS_FAN_OUT_SCHEMA = Schema(
     }
 )
 
-IOT_ANALYTICS_SIMPLE_PIPELINE = Schema(
+IOT_ANALYTICS_SIMPLE_PIPELINE_SCHEMA = Schema(
     {
         "analytics_resource_name": And(Use(str)),
         Optional("retention_periods"): {Optional("channel"): And(Use(int)), Optional("datastore"): And(Use(int)),},
@@ -300,7 +315,7 @@ IOT_ANALYTICS_SIMPLE_PIPELINE = Schema(
     }
 )
 
-IOT_POLICY = Schema({"name": And(Use(str)), "policy_document": And(Use(dict))})
+IOT_POLICY_SCHEMA = Schema({"name": And(Use(str)), "policy_document": And(Use(dict))})
 
 LAMBDA_LAYER_SCHEMA = Schema(
     {

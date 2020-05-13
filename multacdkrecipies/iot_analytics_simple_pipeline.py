@@ -10,7 +10,7 @@ from .common import (
     base_iot_analytics_datastore,
     base_iot_analytics_pipeline,
 )
-from .utils import IOT_ANALYTICS_SIMPLE_PIPELINE, validate_configuration
+from .utils import IOT_ANALYTICS_SIMPLE_PIPELINE_SCHEMA, validate_configuration
 
 
 class AwsIotAnalyticsSimplePipeline(core.Construct):
@@ -35,7 +35,9 @@ class AwsIotAnalyticsSimplePipeline(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=IOT_ANALYTICS_SIMPLE_PIPELINE, configuration_received=self._configuration)
+        validate_configuration(
+            configuration_schema=IOT_ANALYTICS_SIMPLE_PIPELINE_SCHEMA, configuration_received=self._configuration
+        )
 
         base_name = self._configuration["analytics_resource_name"]
         datastore_name = self.prefix + "_" + base_name + "_datastore_" + self.environment_

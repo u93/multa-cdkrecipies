@@ -1,7 +1,4 @@
-import os
-import traceback
-
-from schema import Schema, And, Use, Optional, SchemaError
+from schema import Schema, And, Use, Optional
 
 LAMBDA_BASE_SCHEMA = Schema(
     {
