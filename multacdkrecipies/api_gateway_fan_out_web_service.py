@@ -4,8 +4,8 @@ from aws_cdk import (
     aws_certificatemanager as cert_manager,
     aws_lambda as lambda_,
 )
-from .common import base_alarm, base_lambda_function, base_lambda_role
-from .utils import APIGATEWAY_FAN_OUT_SCHEMA, validate_configuration
+from .common import base_alarm, base_lambda_function
+from .utils import APIGATEWAY_FAN_OUT_WEB_SERVICE_SCHEMA, validate_configuration
 
 
 class AwsApiGatewayLambdaFanOutBE(core.Construct):
@@ -33,7 +33,9 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=APIGATEWAY_FAN_OUT_SCHEMA, configuration_received=self._configuration)
+        validate_configuration(
+            configuration_schema=APIGATEWAY_FAN_OUT_WEB_SERVICE_SCHEMA, configuration_received=self._configuration
+        )
 
         api_configuration = self._configuration["api"]
 
@@ -51,8 +53,8 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
                 self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
 
         # Define API Gateway Lambda Handler
-        lambda_handlers = api_configuration["resource"]["handler"]
-        self._handler_lambda_function = base_lambda_function(self, **lambda_handlers["origin"])
+        lambda_handlers = api_configuration["root_resource"]["handler"]
+        self._handler_lambda_function = base_lambda_function(self, **lambda_handlers)
 
         # Define API Gateway
         try:
@@ -69,7 +71,7 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
             print("Unable to find defined Auth Lambda Handler! Please verify configuration payload...")
             raise RuntimeError
 
-        custom_domain = api_configuration["resource"].get("custom_domain")
+        custom_domain = api_configuration["root_resource"].get("custom_domain")
         if custom_domain is not None:
             domain_name = custom_domain["domain_name"]
             certificate_arn = custom_domain["certificate_arn"]
@@ -80,7 +82,7 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
         else:
             domain_options = None
 
-        if api_configuration["proxy"] is False and api_configuration.get("resource").get("methods") is None:
+        if api_configuration["proxy"] is False and api_configuration.get("root_resource").get("methods") is None:
             print("Unable to check which method to use for the API! Use proxy: True or define methods...")
             raise RuntimeError
 
@@ -95,10 +97,10 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
         )
 
         # Define Gateway Resource and Methods
-        resource = self._lambda_rest_api.root.add_resource(api_configuration["resource"]["name"])
-        allowed_origins = api_configuration["resource"].get("allowed_origins")
+        resource = self._lambda_rest_api.root.add_resource(api_configuration["root_resource"]["name"])
+        allowed_origins = api_configuration["root_resource"].get("allowed_origins")
         if api_configuration["proxy"] is False:
-            gateway_methods = api_configuration["resource"]["methods"]
+            gateway_methods = api_configuration["root_resource"]["methods"]
             for method in gateway_methods:
                 resource.add_method(http_method=method, authorizer=gateway_authorizer)
 

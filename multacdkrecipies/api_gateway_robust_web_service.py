@@ -113,10 +113,10 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         # Define API Gateway Root Methods
         root_methods = api_configuration["settings"].get("default_http_methods", list())
         for method in root_methods:
-            self._lambda_rest_api.root.add_method(http_method=method)
+            self._lambda_rest_api.root.add_method(http_method=method, authorizer=gateway_authorizer)
 
         # Defining Resource Trees for API Gateway with Custom Integrations
-        resource_trees = api_configuration["settings"].get("resource_trees", list())
+        resource_trees = api_configuration["resource_trees"]
         for resource_tree in resource_trees:
             resource_base = self._lambda_rest_api.root.add_resource(path_part=resource_tree["resource_name"])
             resource_base_handler = base_lambda_function(self, **resource_tree["handler"])
@@ -130,7 +130,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
             resource_base_child_definition = resource_tree.get("child")
             if resource_base_child_definition is not None:
                 resource_base_child = resource_base.add_resource(path_part=resource_base_child_definition["resource_name"])
-                resource_base_child_handler = base_lambda_function(self, **resource_tree["handler"])
+                resource_base_child_handler = base_lambda_function(self, **resource_base_child_definition["handler"])
                 for method in resource_base_child_definition["methods"]:
                     resource_base_child.add_method(
                         http_method=method,
@@ -143,7 +143,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                     resource_base_grandchild = resource_base_child.add_resource(
                         path_part=resource_base_grandchild_tree["resource_name"]
                     )
-                    resource_base_grandchild_handler = base_lambda_function(self, **resource_base_grandchild["handler"])
+                    resource_base_grandchild_handler = base_lambda_function(self, **resource_base_grandchild_tree["handler"])
                     for method in resource_base_grandchild_tree["methods"]:
                         resource_base_grandchild.add_method(
                             http_method=method,
