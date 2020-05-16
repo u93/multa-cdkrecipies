@@ -10,6 +10,7 @@ from .iot_analytics_fan_out import AwsIotAnalyticsFanOut
 from .iot_analytics_sagemaker_notebook import AwsIoTAnalyticsSageMakerNotebook
 from .iot_analytics_simple_pipeline import AwsIotAnalyticsSimplePipeline
 from .iot_policy import AwsIotPolicy
+from .lambda_functions_cluster import AwsLambdaFunctionsCluster
 from .lambda_layer_python_virtualenv import AwsLambdaLayerVenv
 from .sns_lambdas_pipe import AwsSnsPipes
 from .sqs_lambdas_pipe import AwsSqsPipes
