@@ -156,11 +156,7 @@ USER_SERVERLESS_BACKEND_SCHEMA = Schema(
     }
 )
 
-LAMBDA_FUNCTIONS_CLUSTER_SCHEMA = Schema(
-    {
-        "functions": [LAMBDA_BASE_SCHEMA],
-    }
-)
+LAMBDA_FUNCTIONS_CLUSTER_SCHEMA = Schema({"functions": [LAMBDA_BASE_SCHEMA],})
 
 USER_POOL_GROUPS_SCHEMA = Schema(
     {

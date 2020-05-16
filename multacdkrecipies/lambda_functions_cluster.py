@@ -1,6 +1,4 @@
-from aws_cdk import (
-    core,
-)
+from aws_cdk import core
 from .common import base_alarm, base_lambda_function
 from .utils import LAMBDA_FUNCTIONS_CLUSTER_SCHEMA, validate_configuration
 
@@ -30,15 +28,12 @@ class AwsLambdaFunctionsCluster(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(
-            configuration_schema=LAMBDA_FUNCTIONS_CLUSTER_SCHEMA, configuration_received=self._configuration
-        )
+        validate_configuration(configuration_schema=LAMBDA_FUNCTIONS_CLUSTER_SCHEMA, configuration_received=self._configuration)
 
         # Define FAN-Out Lambda functions
         self._lambda_functions = list()
         for lambda_function in self._configuration["functions"]:
             _lambda = base_lambda_function(self, **lambda_function)
-            _lambda.grant_invoke(self._handler_lambda_function)
             self._lambda_functions.append(_lambda)
 
     def set_alarms(self):
