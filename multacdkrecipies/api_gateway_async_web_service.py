@@ -2,7 +2,7 @@ import traceback
 
 from aws_cdk import core, aws_apigateway as api_gateway
 
-from .common import base_lambda_function
+from .common import base_bucket, base_lambda_function
 from .settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
 from .utils import APIGATEWAY_ASYNC_WEB_SERVICE_SCHEMA, validate_configuration, WrongRuntimePassed
 
@@ -35,6 +35,10 @@ class AwsApiGatewayLambdaPipesAsync(core.Construct):
         validate_configuration(
             configuration_schema=APIGATEWAY_ASYNC_WEB_SERVICE_SCHEMA, configuration_received=self._configuration
         )
+        # Define S3 Buckets Cluster
+        if isinstance(self._configuration.get("buckets"), list):
+            self._s3_buckets = [base_bucket(self, **bucket) for bucket in self._configuration["buckets"]]
+
         api_configuration = self._configuration["api"]
 
         # Define Lambda Authorizer Function

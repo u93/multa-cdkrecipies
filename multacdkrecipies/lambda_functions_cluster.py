@@ -5,12 +5,6 @@ from .utils import LAMBDA_FUNCTIONS_CLUSTER_SCHEMA, validate_configuration
 
 class AwsLambdaFunctionsCluster(core.Construct):
     """
-    AWS CDK Construct that defines a Simple Web Service formed by a RestAPI that has a Lambda Authorizer function
-    that can be imported or created (if both are passed as configuration, the first of the imported has higher
-    priority compared to the new one)... Also has a Lambda handler function that will respond to at least one
-    method (GET, POST) that can be imported or created (if both are passed as configuration, the first of the imported has higher
-    priority compared to the new one)... Custom domain with certificate configuration can also be passed to the RestAPI
-    with also the possibility to configure CORS for the API.
     """
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
@@ -52,3 +46,10 @@ class AwsLambdaFunctionsCluster(core.Construct):
                             self, resource_name=lambda_function["lambda_name"], base_resource=resource, **alarm_definition,
                         )
                     )
+
+    @property
+    def lambda_functions(self):
+        """
+        :return: Construct Lambda Functions List.
+        """
+        return self._lambda_functions

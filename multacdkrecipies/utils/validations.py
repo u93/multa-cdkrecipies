@@ -3,21 +3,23 @@ import traceback
 
 from schema import Schema, And, Use, Optional, SchemaError
 
-from .base_validations import DYNAMODB_TABLE_SCHEMA, LAMBDA_BASE_SCHEMA, AUTHORIZER_LAMBDA_BASE_SCHEMA
+from .base_validations import AUTHORIZER_LAMBDA_BASE_SCHEMA, DYNAMODB_TABLE_SCHEMA, LAMBDA_BASE_SCHEMA, S3_BUCKET_SCHEMA
 
 APIGATEWAY_ASYNC_WEB_SERVICE_SCHEMA = Schema(
     {
+        Optional("buckets"): [S3_BUCKET_SCHEMA],
         "api": {
             Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
             "lambda_handler": {"resources": [{"method": And(Use(str))}], "handler": LAMBDA_BASE_SCHEMA,},
             "http_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
             "service_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
-        }
+        },
     }
 )
 
 APIGATEWAY_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
     {
+        Optional("buckets"): [S3_BUCKET_SCHEMA],
         "api": {
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
@@ -30,12 +32,13 @@ APIGATEWAY_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                 "handler": LAMBDA_BASE_SCHEMA,
             },
             "resource": {"resource_name": And(Use(str)), Optional("methods"): [And(Use(str))], "handler": LAMBDA_BASE_SCHEMA,},
-        }
+        },
     }
 )
 
 APIGATEWAY_ROBUST_WEB_SERVICE_SCHEMA = Schema(
     {
+        Optional("buckets"): [S3_BUCKET_SCHEMA],
         "api": {
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
@@ -64,12 +67,13 @@ APIGATEWAY_ROBUST_WEB_SERVICE_SCHEMA = Schema(
                     },
                 }
             ],
-        }
+        },
     }
 )
 
 APIGATEWAY_FAN_OUT_WEB_SERVICE_SCHEMA = Schema(
     {
+        Optional("buckets"): [S3_BUCKET_SCHEMA],
         "functions": [LAMBDA_BASE_SCHEMA],
         "api": {
             "apigateway_name": And(Use(str)),
@@ -90,6 +94,7 @@ APIGATEWAY_FAN_OUT_WEB_SERVICE_SCHEMA = Schema(
 USER_SERVERLESS_BACKEND_SCHEMA = Schema(
     {
         Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
+        Optional("buckets"): [S3_BUCKET_SCHEMA],
         Optional("dynamo_tables"): [DYNAMODB_TABLE_SCHEMA],
         "user_pool": {
             "pool_name": And(Use(str)),
@@ -157,6 +162,8 @@ USER_SERVERLESS_BACKEND_SCHEMA = Schema(
 )
 
 LAMBDA_FUNCTIONS_CLUSTER_SCHEMA = Schema({"functions": [LAMBDA_BASE_SCHEMA],})
+
+S3_BUCKETS_CLUSTER_SCHEMA = Schema({"buckets": [S3_BUCKET_SCHEMA],})
 
 USER_POOL_GROUPS_SCHEMA = Schema(
     {

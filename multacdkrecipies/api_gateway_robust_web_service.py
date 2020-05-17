@@ -1,5 +1,3 @@
-import traceback
-
 from aws_cdk import (
     core,
     aws_apigateway as api_gateway,
@@ -7,7 +5,7 @@ from aws_cdk import (
     aws_lambda as lambda_,
 )
 
-from .common import base_lambda_function
+from .common import base_bucket, base_lambda_function
 from .utils import APIGATEWAY_ROBUST_WEB_SERVICE_SCHEMA, validate_configuration
 
 
@@ -39,6 +37,10 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         validate_configuration(
             configuration_schema=APIGATEWAY_ROBUST_WEB_SERVICE_SCHEMA, configuration_received=self._configuration
         )
+        # Define S3 Buckets Cluster
+        if isinstance(self._configuration.get("buckets"), list):
+            self._s3_buckets = [base_bucket(self, **bucket) for bucket in self._configuration["buckets"]]
+
         api_configuration = self._configuration["api"]
         api_gateway_name = self.prefix + "_" + api_configuration["apigateway_name"] + "_" + self.environment_
         api_gateway_name_description = api_configuration.get("apigateway_description")
@@ -108,6 +110,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
             proxy=proxy_configuration,
             binary_media_types=binary_media_types,
             default_cors_preflight_options=default_cors_options,
+            cloud_watch_role=True
         )
 
         # Define API Gateway Root Methods
@@ -126,6 +129,10 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                     integration=api_gateway.LambdaIntegration(handler=resource_base_handler),
                     authorizer=gateway_authorizer,
                 )
+            resource_base.add_cors_preflight(
+                allow_methods=resource_tree["methods"],
+                allow_origins=["*"]
+            )
 
             resource_base_child_definition = resource_tree.get("child")
             if resource_base_child_definition is not None:
@@ -137,6 +144,10 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                         integration=api_gateway.LambdaIntegration(handler=resource_base_child_handler),
                         authorizer=gateway_authorizer,
                     )
+                resource_base_child.add_cors_preflight(
+                    allow_methods=resource_base_child_definition["methods"],
+                    allow_origins=["*"]
+                )
 
                 resource_base_child_trees = resource_base_child_definition.get("childs", list())
                 for resource_base_grandchild_tree in resource_base_child_trees:
@@ -150,6 +161,10 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                             integration=api_gateway.LambdaIntegration(handler=resource_base_grandchild_handler),
                             authorizer=gateway_authorizer,
                         )
+                    resource_base_grandchild.add_cors_preflight(
+                        allow_methods=resource_base_grandchild_tree["methods"],
+                        allow_origins=["*"]
+                    )
 
     @property
     def configuration(self):

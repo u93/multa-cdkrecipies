@@ -40,3 +40,5 @@ DYNAMODB_TABLE_SCHEMA = Schema(
         Optional("write_capacity"): And(Use(str)),
     }
 )
+
+S3_BUCKET_SCHEMA = Schema({"bucket_name": And(Use(str)), "versioned": And(Use(bool)), "public_read_access": And(Use(bool)),})

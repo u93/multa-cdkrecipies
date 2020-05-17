@@ -1,4 +1,5 @@
 from .alarms import base_alarm
+from .bucket import base_bucket
 from .cognito_user_groups import base_cognito_user_groups
 from .cognito_user_pool import base_cognito_user_pool
 from .dynamo_table import base_dynamodb_table

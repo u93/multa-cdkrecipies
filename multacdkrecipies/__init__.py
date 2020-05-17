@@ -12,6 +12,7 @@ from .iot_analytics_simple_pipeline import AwsIotAnalyticsSimplePipeline
 from .iot_policy import AwsIotPolicy
 from .lambda_functions_cluster import AwsLambdaFunctionsCluster
 from .lambda_layer_python_virtualenv import AwsLambdaLayerVenv
+from .s3_buckets_cluster import AwsS3BucketsCluster
 from .sns_lambdas_pipe import AwsSnsPipes
 from .sqs_lambdas_pipe import AwsSqsPipes
 from .ssm_parameter import AwsSsmString

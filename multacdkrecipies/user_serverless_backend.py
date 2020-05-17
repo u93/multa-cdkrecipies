@@ -3,7 +3,7 @@ from aws_cdk import (
     aws_lambda as lambda_,
     aws_lambda_event_sources as event_sources,
 )
-from .common import base_cognito_user_pool, base_dynamodb_table, base_lambda_function
+from .common import base_bucket, base_cognito_user_pool, base_dynamodb_table, base_lambda_function
 from .utils import USER_SERVERLESS_BACKEND_SCHEMA, validate_configuration
 
 
@@ -60,6 +60,10 @@ class AwsUserServerlessBackend(core.Construct):
                 )
 
             self._dynamodb_tables_lambda_functions.append({"table": table, "stream_lambda": stream_lambda})
+
+        # Define S3 Buckets Cluster
+        if isinstance(self._configuration.get("buckets"), list):
+            self._s3_buckets = [base_bucket(self, **bucket) for bucket in self._configuration["buckets"]]
 
         # Define Cognito User Pool
         self._user_pool = base_cognito_user_pool(self, **self._configuration["user_pool"])

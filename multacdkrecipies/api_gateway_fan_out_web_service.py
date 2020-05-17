@@ -4,7 +4,7 @@ from aws_cdk import (
     aws_certificatemanager as cert_manager,
     aws_lambda as lambda_,
 )
-from .common import base_alarm, base_lambda_function
+from .common import base_bucket, base_alarm, base_lambda_function
 from .utils import APIGATEWAY_FAN_OUT_WEB_SERVICE_SCHEMA, validate_configuration
 
 
@@ -36,6 +36,9 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
         validate_configuration(
             configuration_schema=APIGATEWAY_FAN_OUT_WEB_SERVICE_SCHEMA, configuration_received=self._configuration
         )
+        # Define S3 Buckets Cluster
+        if isinstance(self._configuration.get("buckets"), list):
+            self._s3_buckets = [base_bucket(self, **bucket) for bucket in self._configuration["buckets"]]
 
         api_configuration = self._configuration["api"]
 
@@ -94,6 +97,7 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
             domain_name=domain_options,
             handler=self._handler_lambda_function,
             proxy=api_configuration["proxy"],
+            cloud_watch_role=True
         )
 
         # Define Gateway Resource and Methods
