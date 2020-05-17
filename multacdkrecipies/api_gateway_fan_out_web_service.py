@@ -41,6 +41,8 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
             self._s3_buckets = [base_bucket(self, **bucket) for bucket in self._configuration["buckets"]]
 
         api_configuration = self._configuration["api"]
+        api_gateway_name = self.prefix + "_" + api_configuration["apigateway_name"] + "_" + self.environment_
+        api_gateway_name_description = api_configuration.get("apigateway_description")
 
         # Define Lambda Authorizer Function
         authorizer_functions = api_configuration.get("authorizer_function")
@@ -55,26 +57,18 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
             elif authorizer_functions.get("origin") is not None:
                 self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
 
-        # Define API Gateway Lambda Handler
-        lambda_handlers = api_configuration["root_resource"]["handler"]
-        self._handler_lambda_function = base_lambda_function(self, **lambda_handlers)
+        # Define API Gateway Authorizer
+        gateway_authorizer = None
+        if self._authorizer_function is not None:
+            # Define Gateway Token Authorizer
+            authorizer_name = api_configuration["apigateway_name"] + "_" + "authorizer"
+            gateway_authorizer = api_gateway.TokenAuthorizer(
+                self, id=authorizer_name, authorizer_name=authorizer_name, handler=self._authorizer_function
+            )
 
-        # Define API Gateway
-        try:
-            if self._authorizer_function is None:
-                gateway_authorizer = None
-                print("No Authorizer Function passed, skipping API Gateway Auth")
-            else:
-                # Define Gateway Token Authorizer
-                authorizer_name = api_configuration["apigateway_name"] + "_" + "authorizer"
-                gateway_authorizer = api_gateway.TokenAuthorizer(
-                    self, id=authorizer_name, authorizer_name=authorizer_name, handler=self._authorizer_function
-                )
-        except IndexError:
-            print("Unable to find defined Auth Lambda Handler! Please verify configuration payload...")
-            raise RuntimeError
-
-        custom_domain = api_configuration["root_resource"].get("custom_domain")
+        # Defining Custom Domain
+        domain_options = None
+        custom_domain = api_configuration["settings"].get("custom_domain")
         if custom_domain is not None:
             domain_name = custom_domain["domain_name"]
             certificate_arn = custom_domain["certificate_arn"]
@@ -82,43 +76,79 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
                 certificate=cert_manager.Certificate.from_certificate_arn(self, id=domain_name, certificate_arn=certificate_arn),
                 domain_name=domain_name,
             )
-        else:
-            domain_options = None
 
-        if api_configuration["proxy"] is False and api_configuration.get("root_resource").get("methods") is None:
+        # Define API Gateway Lambda Handler
+        self._handler_function = base_lambda_function(self, **api_configuration["settings"]["default_handler"])
+
+        # Validating Proxy configuration for API Gateway
+        proxy_configuration = api_configuration["settings"]["proxy"]
+        if proxy_configuration is False and api_configuration["settings"].get("default_http_methods") is None:
             print("Unable to check which method to use for the API! Use proxy: True or define methods...")
             raise RuntimeError
 
+        # Defining allowed binary media types by API Gateway
+        binary_media_types = api_configuration["settings"].get("default_media_types")
+
+        # Defining CORS preflight options
+        default_cors_options = None
+        default_cors_configuration = api_configuration["settings"].get("default_cors_options")
+        if default_cors_configuration is not None:
+            default_cors_options = api_gateway.CorsOptions(
+                allow_origins=default_cors_configuration["allow_origins"],
+                allow_methods=["ANY"],
+                status_code=default_cors_configuration["options_status_code"],
+            )
+
+        # Defining STAGE Options
+        default_stage_options = None
+        default_stage_configuration = api_configuration["settings"].get("default_stage_options")
+        if default_stage_configuration is not None:
+            logging_level = api_gateway.MethodLoggingLevel.ERROR
+            logging_level_configuration = default_stage_configuration["logging_level"]
+            for element in api_gateway.MethodLoggingLevel:
+                if logging_level_configuration in str(element):
+                    logging_level = element
+            default_stage_options = api_gateway.StageOptions(
+                logging_level=logging_level, metrics_enabled=default_stage_configuration["metrics_enabled"],
+            )
+
+        # Defining Rest API Gateway with Lambda Integration
         self._lambda_rest_api = api_gateway.LambdaRestApi(
             self,
-            id=api_configuration["apigateway_name"],
-            rest_api_name=api_configuration["apigateway_name"],
-            description=api_configuration["apigateway_description"],
+            id=api_gateway_name,
+            rest_api_name=api_gateway_name,
+            description=api_gateway_name_description,
             domain_name=domain_options,
-            handler=self._handler_lambda_function,
-            proxy=api_configuration["proxy"],
-            cloud_watch_role=True
+            handler=self._handler_function,
+            proxy=proxy_configuration,
+            binary_media_types=binary_media_types,
+            default_cors_preflight_options=default_cors_options,
+            cloud_watch_role=True,
+            deploy_options=default_stage_options,
         )
 
-        # Define Gateway Resource and Methods
-        resource = self._lambda_rest_api.root.add_resource(api_configuration["root_resource"]["name"])
-        allowed_origins = api_configuration["root_resource"].get("allowed_origins")
-        if api_configuration["proxy"] is False:
-            gateway_methods = api_configuration["root_resource"]["methods"]
-            for method in gateway_methods:
-                resource.add_method(http_method=method, authorizer=gateway_authorizer)
+        # Define API Gateway Root Methods
+        root_methods = api_configuration["settings"].get("default_http_methods", list())
+        for method in root_methods:
+            self._lambda_rest_api.root.add_method(http_method=method, authorizer=gateway_authorizer)
 
-            if allowed_origins is not None:
-                resource.add_cors_preflight(allow_origins=allowed_origins, allow_methods=gateway_methods)
+        # Defining Resource Trees for API Gateway with Custom Integrations
+        resource = api_configuration["resource"]
+        resource_base = self._lambda_rest_api.root.add_resource(path_part=resource["resource_name"])
+        if resource.get("handler") is not None:
+            resource_base_handler = base_lambda_function(self, **resource["handler"])
+            resource_integration = api_gateway.LambdaIntegration(handler=resource_base_handler)
         else:
-            if allowed_origins is not None:
-                resource.add_cors_preflight(allow_origins=allowed_origins)
+            resource_integration = None
+
+        for method in resource.get("methods", list):
+            resource_base.add_method(http_method=method, integration=resource_integration, authorizer=gateway_authorizer)
 
         # Define FAN-Out Lambda functions
         self._lambda_functions = list()
         for lambda_function in self._configuration["functions"]:
             _lambda = base_lambda_function(self, **lambda_function)
-            _lambda.grant_invoke(self._handler_lambda_function)
+            _lambda.grant_invoke(self._handler_function)
             self._lambda_functions.append(_lambda)
 
     def set_alarms(self):
@@ -133,7 +163,7 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
                     base_alarm(
                         self,
                         resource_name=self._configuration["api"]["resource"]["handler"]["lambda_name"],
-                        base_resource=self._handler_lambda_function,
+                        base_resource=self._handler_function,
                         **alarm_definition,
                     )
                 )

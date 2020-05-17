@@ -96,7 +96,21 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         if default_cors_configuration is not None:
             default_cors_options = api_gateway.CorsOptions(
                 allow_origins=default_cors_configuration["allow_origins"],
+                allow_methods=["ANY"],
                 status_code=default_cors_configuration["options_status_code"],
+            )
+
+        # Defining STAGE Options
+        default_stage_options = None
+        default_stage_configuration = api_configuration["settings"].get("default_stage_options")
+        if default_stage_configuration is not None:
+            logging_level = api_gateway.MethodLoggingLevel.ERROR
+            logging_level_configuration = default_stage_configuration["logging_level"]
+            for element in api_gateway.MethodLoggingLevel:
+                if logging_level_configuration in str(element):
+                    logging_level = element
+            default_stage_options = api_gateway.StageOptions(
+                logging_level=logging_level, metrics_enabled=default_stage_configuration["metrics_enabled"],
             )
 
         # Defining Rest API Gateway with Lambda Integration
@@ -110,7 +124,8 @@ class AwsApiGatewayLambdaPipes(core.Construct):
             proxy=proxy_configuration,
             binary_media_types=binary_media_types,
             default_cors_preflight_options=default_cors_options,
-            cloud_watch_role=True
+            cloud_watch_role=True,
+            deploy_options=default_stage_options,
         )
 
         # Define API Gateway Root Methods
@@ -129,10 +144,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                     integration=api_gateway.LambdaIntegration(handler=resource_base_handler),
                     authorizer=gateway_authorizer,
                 )
-            resource_base.add_cors_preflight(
-                allow_methods=resource_tree["methods"],
-                allow_origins=["*"]
-            )
+            # resource_base.add_cors_preflight(allow_methods=resource_tree["methods"], allow_origins=["*"])
 
             resource_base_child_definition = resource_tree.get("child")
             if resource_base_child_definition is not None:
@@ -144,10 +156,9 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                         integration=api_gateway.LambdaIntegration(handler=resource_base_child_handler),
                         authorizer=gateway_authorizer,
                     )
-                resource_base_child.add_cors_preflight(
-                    allow_methods=resource_base_child_definition["methods"],
-                    allow_origins=["*"]
-                )
+                # resource_base_child.add_cors_preflight(
+                #     allow_methods=resource_base_child_definition["methods"], allow_origins=["*"]
+                # )
 
                 resource_base_child_trees = resource_base_child_definition.get("childs", list())
                 for resource_base_grandchild_tree in resource_base_child_trees:
@@ -161,10 +172,9 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                             integration=api_gateway.LambdaIntegration(handler=resource_base_grandchild_handler),
                             authorizer=gateway_authorizer,
                         )
-                    resource_base_grandchild.add_cors_preflight(
-                        allow_methods=resource_base_grandchild_tree["methods"],
-                        allow_origins=["*"]
-                    )
+                    # resource_base_grandchild.add_cors_preflight(
+                    #     allow_methods=resource_base_grandchild_tree["methods"], allow_origins=["*"]
+                    # )
 
     @property
     def configuration(self):

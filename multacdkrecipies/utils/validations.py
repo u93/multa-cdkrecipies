@@ -25,13 +25,21 @@ APIGATEWAY_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
             Optional("apigateway_description"): And(Use(str)),
             "proxy": And(Use(bool)),
             Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
-            "root_resource": {
+            "settings": {
+                "proxy": And(Use(bool)),
                 Optional("allowed_origins"): [And(Use(str))],
                 Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
-                Optional("methods"): [And(Use(str))],
-                "handler": LAMBDA_BASE_SCHEMA,
+                Optional("default_cors_options"): {"allow_origins": [And(Use(str))], "options_status_code": And(Use(int))},
+                Optional("default_http_methods"): [And(Use(str))],
+                "default_handler": LAMBDA_BASE_SCHEMA,
+                Optional("default_media_types"): [And(Use(str))],
+                Optional("default_stage_options"): {"metrics_enabled": And(Use(bool)), "logging_level": And(Use(str))},
             },
-            "resource": {"resource_name": And(Use(str)), Optional("methods"): [And(Use(str))], "handler": LAMBDA_BASE_SCHEMA,},
+            "resource": {
+                "resource_name": And(Use(str)),
+                Optional("methods"): [And(Use(str))],
+                Optional("handler"): LAMBDA_BASE_SCHEMA,
+            },
         },
     }
 )
@@ -51,6 +59,7 @@ APIGATEWAY_ROBUST_WEB_SERVICE_SCHEMA = Schema(
                 Optional("default_http_methods"): [And(Use(str))],
                 "default_handler": LAMBDA_BASE_SCHEMA,
                 Optional("default_media_types"): [And(Use(str))],
+                Optional("default_stage_options"): {"metrics_enabled": And(Use(bool)), "logging_level": And(Use(str))},
             },
             Optional("resource_trees"): [
                 {
@@ -78,14 +87,21 @@ APIGATEWAY_FAN_OUT_WEB_SERVICE_SCHEMA = Schema(
         "api": {
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
-            "proxy": And(Use(bool)),
             Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
-            "root_resource": {
-                "name": And(Use(str)),
+            "settings": {
+                "proxy": And(Use(bool)),
                 Optional("allowed_origins"): [And(Use(str))],
                 Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
+                Optional("default_cors_options"): {"allow_origins": [And(Use(str))], "options_status_code": And(Use(int))},
+                Optional("default_http_methods"): [And(Use(str))],
+                "default_handler": LAMBDA_BASE_SCHEMA,
+                Optional("default_media_types"): [And(Use(str))],
+                Optional("default_stage_options"): {"metrics_enabled": And(Use(bool)), "logging_level": And(Use(str))},
+            },
+            "resource": {
+                "resource_name": And(Use(str)),
                 Optional("methods"): [And(Use(str))],
-                "handler": LAMBDA_BASE_SCHEMA,
+                Optional("handler"): LAMBDA_BASE_SCHEMA,
             },
         },
     }

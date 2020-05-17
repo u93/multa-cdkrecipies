@@ -91,7 +91,7 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             domain_name=domain_options,
             handler=self._handler_function,
             proxy=api_configuration["proxy"],
-            cloud_watch_role=True
+            cloud_watch_role=True,
         )
 
         # Define Gateway Resource and Methods
