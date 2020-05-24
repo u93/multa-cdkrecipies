@@ -1,9 +1,12 @@
 #!/bin/bash
 
+S3_BUCKET="cdkrecipies"
+PACKAGE_NAME="multacdkrecipies"
+
 ACTION=${1}
 export VERSION=${2}
 
-black -t py37 -l 130 ./multacdkrecipies > /dev/null
+black -t py37 -l 130 ./${S3_BUCKET_FOLDER} > /dev/null
 python setup.py sdist > /dev/null
 
 if [ "${ACTION}" == "DEVELOPMENT" ]; then
@@ -12,15 +15,15 @@ if [ "${ACTION}" == "DEVELOPMENT" ]; then
 
 <html>
   <body>
-    <a href="multacdkrecipies-${VERSION}.tar.gz">
-      multacdkrecipies-${VERSION}.tar.gz
+    <a href="${PACKAGE_NAME}-${VERSION}.tar.gz">
+      ${PACKAGE_NAME}-${VERSION}.tar.gz
     </a>
   </body>
 </html>
 _EOF_
 
-  aws s3 cp index.html s3://cdkrecipies/multacdkrecipies/ > /dev/null
-  aws s3 cp ./dist/multacdkrecipies-${VERSION}.tar.gz s3://cdkrecipies/multacdkrecipies/ > /dev/null
+  aws s3 cp index.html s3://${S3_BUCKET}/${PACKAGE_NAME}/ > /dev/null
+  aws s3 cp ./dist/${PACKAGE_NAME}-${VERSION}.tar.gz s3://${S3_BUCKET}/${PACKAGE_NAME}/ > /dev/null
 
   rm -rf dist/*
 

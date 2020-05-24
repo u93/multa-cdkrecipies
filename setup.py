@@ -2,8 +2,8 @@ import os
 import setuptools
 
 
-VERSION = os.environ.get("VERSION", "0.3.0")
-CDK_VERSION = os.environ.get("CDK_VERSION", "1.36.1")
+VERSION = os.environ.get("VERSION", "0.4.0")
+CDK_VERSION = os.environ.get("CDK_VERSION", "1.41.0")
 
 with open("./README.md") as fp:
     long_description = fp.read()
@@ -21,7 +21,14 @@ setuptools.setup(
     maintainer="Eugenio Efrain Breijo",
     maintainer_email="eebf1993@gmail.com",
     url="https://github.com/u93/multacdkrecipies",
-    packages=["multacdkrecipies", "multacdkrecipies.utils", "multacdkrecipies.settings", "multacdkrecipies.common", "multacdkrecipies.scripts", "multacdkrecipies.scripts.iot_analytics_notebook"],
+    packages=[
+        "multacdkrecipies",
+        "multacdkrecipies.utils",
+        "multacdkrecipies.settings",
+        "multacdkrecipies.common",
+        "multacdkrecipies.scripts",
+        "multacdkrecipies.scripts.iot_analytics_notebook",
+    ],
     install_requires=[
         "appdirs==1.4.3",
         "attrs==19.3.0",
@@ -98,8 +105,7 @@ setuptools.setup(
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Software Development",
         "Topic :: Software Development :: Code Generators",
-        "Topic :: Software Development :: Libraries :: Application Frameworks"
-        "Topic :: Utilities",
+        "Topic :: Software Development :: Libraries :: Application Frameworks" "Topic :: Utilities",
         "Typing :: Typed",
     ],
 )
