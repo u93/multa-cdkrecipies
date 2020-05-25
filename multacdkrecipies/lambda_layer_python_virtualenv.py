@@ -54,11 +54,24 @@ class AwsLambdaLayerVenv(core.Construct):
                 print(f"Lambda Python requirements path for Lambda Layer {self._configuration['layer_name']} is not valid!")
                 raise RuntimeError
 
-        with open(requirements_path) as requirements_file:
-            for package in requirements_file:
-                if "aws-cdk" in package:
-                    continue
-                subprocess.call(["pip", "install", package, "-t", layer_directory_path])
+        subprocess.call(
+            [
+                "docker",
+                "run",
+                "--rm",
+                "-v",
+                f"{os.environ.get('PWD')}:/foo",
+                "-w",
+                "/foo",
+                "lambci/lambda:build-python3.7",
+                "pip",
+                "install",
+                "-r",
+                requirements_path,
+                "-t",
+                layer_directory_path,
+            ]
+        )
 
         self._configuration["layer_code_path"] = layer_code_path
         self._lambda_layer = base_lambda_layer(self, **self._configuration)
