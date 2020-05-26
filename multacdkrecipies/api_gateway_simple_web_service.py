@@ -94,6 +94,18 @@ class AwsApiGatewayLambdaSWS(core.Construct):
             cloud_watch_role=True,
         )
 
+        # Add Custom responses
+        self._lambda_rest_api.add_gateway_response(
+            f"{self.prefix}_4XXresponse_{self.environment_}",
+            type=api_gateway.ResponseType.DEFAULT_4_XX,
+            response_headers={"Access-Control-Allow-Origin": "'*'"}
+        )
+        self._lambda_rest_api.add_gateway_response(
+            f"{self.prefix}_5XXresponse_{self.environment_}",
+            type=api_gateway.ResponseType.DEFAULT_5_XX,
+            response_headers={"Access-Control-Allow-Origin": "'*'"}
+        )
+
         # Define Gateway Resource and Methods
         resource = self._lambda_rest_api.root.add_resource(api_configuration["root_resource"]["name"])
         allowed_origins = api_configuration["root_resource"].get("allowed_origins")

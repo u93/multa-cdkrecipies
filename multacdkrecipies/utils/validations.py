@@ -358,6 +358,19 @@ LAMBDA_LAYER_SCHEMA = Schema(
     }
 )
 
+PIPELINE_SERVERLESS = Schema(
+    {
+        "build": {
+            "project_name": And(Use(str)),
+            Optional("project_description"): And(Use(str)),
+            "environment_base_image": And(Use(str)),
+            Optional("environment_variables"): {
+
+            }
+        }
+    }
+)
+
 SAGEMAKER_NOTEBOOK_SCHEMA = Schema(
     {"name": And(Use(str)), "scripts": {"on_create": And(Use(str)), "on_start": And(Use(str))}, "instance_type": And(Use(str)),}
 )
