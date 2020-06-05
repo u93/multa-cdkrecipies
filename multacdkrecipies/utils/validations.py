@@ -291,6 +291,63 @@ SQS_CONFIG_SCHEMA = Schema(
     }
 )
 
+IOT_KINESIS_CONFIG_SCHEMA = Schema(
+    {
+        "stream": {
+            "stream_name": And(Use(str)),
+            "shard_count": And(Use(int)),
+            Optional("retention_period"): And(Use(int)),
+            Optional("alarms"): [
+                {
+                    "name": And(Use(str)),
+                    "number": And(Use(int)),
+                    "periods": And(Use(int)),
+                    "points": And(Use(int)),
+                    "actions": And(Use(bool)),
+                }
+            ],
+        },
+        "lambda_handlers": [
+            {
+                "lambda_handler": LAMBDA_BASE_SCHEMA,
+                "event_settings": {"starting_position": And(Use(str)), "batch_size": And(Use(int))},
+            }
+        ],
+        "iot_rule": {
+            "rule_name": And(Use(str)),
+            Optional("description"): And(Use(str)),
+            "rule_disabled": And(Use(bool)),
+            "sql": And(Use(str)),
+            "aws_iot_sql_version": And(Use(str)),
+        },
+    }
+)
+
+IOT_KINESIS_FIREHOSE_CONFIG_SCHEMA = Schema(
+    {
+        "topic": {
+            "topic_name": And(Use(str)),
+            Optional("alarms"): [
+                {
+                    "name": And(Use(str)),
+                    "number": And(Use(int)),
+                    "periods": And(Use(int)),
+                    "points": And(Use(int)),
+                    "actions": And(Use(bool)),
+                }
+            ],
+        },
+        "lambda_handlers": [LAMBDA_BASE_SCHEMA,],
+        "iot_rule": {
+            "rule_name": And(Use(str)),
+            Optional("description"): And(Use(str)),
+            "rule_disabled": And(Use(bool)),
+            "sql": And(Use(str)),
+            "aws_iot_sql_version": And(Use(str)),
+        },
+    }
+)
+
 IOT_ANALYTICS_DATA_WORKFLOW_SCHEMA = Schema(
     {
         "name": And(Use(str)),
@@ -364,9 +421,7 @@ PIPELINE_SERVERLESS = Schema(
             "project_name": And(Use(str)),
             Optional("project_description"): And(Use(str)),
             "environment_base_image": And(Use(str)),
-            Optional("environment_variables"): {
-
-            }
+            Optional("environment_variables"): {},
         }
     }
 )

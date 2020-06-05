@@ -132,12 +132,12 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         self._lambda_rest_api.add_gateway_response(
             f"{self.prefix}_4XXresponse_{self.environment_}",
             type=api_gateway.ResponseType.DEFAULT_4_XX,
-            response_headers={"Access-Control-Allow-Origin": "'*'"}
+            response_headers={"Access-Control-Allow-Origin": "'*'"},
         )
         self._lambda_rest_api.add_gateway_response(
             f"{self.prefix}_5XXresponse_{self.environment_}",
             type=api_gateway.ResponseType.DEFAULT_5_XX,
-            response_headers={"Access-Control-Allow-Origin": "'*'"}
+            response_headers={"Access-Control-Allow-Origin": "'*'"},
         )
 
         # Define API Gateway Root Methods

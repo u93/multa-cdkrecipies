@@ -91,6 +91,25 @@ def base_sqs_role(construct, resource_name: str, principal_resource: str, **kwar
         return role
 
 
+def base_kinesis_role(construct, resource_name: str, principal_resource: str, **kwargs):
+    """
+    Function that generates an IAM Role with a Policy for SQS Send Message.
+    :param construct: Custom construct that will use this function. From the external construct is usually 'self'.
+    :param resource_name: Name of the resource. Used for naming purposes.
+    :param principal_resource: Resource used to define a Service Principal. Has to match an AWS Resource. For example, 'iot' -> 'iot.amazonaws.com'.
+    :param kwargs: Other parameters that could be used by the construct.
+    :return: IAM Role with an IAM Policy attached.
+    """
+    try:
+        actions = ["kinesis:PutRecord"]
+        resources = [construct._kinesis_stream.stream_arn]
+        role = base_role(construct, resource_name, principal_resource, actions=actions, resources=resources)
+    except Exception:
+        print(traceback.format_exc())
+    else:
+        return role
+
+
 def base_iot_analytics_role(construct, resource_name: str, principal_resource: str, **kwargs):
     """
     Function that generates an IAM Role with a Policy for SQS Send Message.
