@@ -3,10 +3,10 @@ from copy import deepcopy
 from aws_cdk import (
     core,
     aws_iot as iot,
-    aws_k as sns_subs,
+    aws_lambda_event_sources as event_src,
 )
-from .common import base_alarm, base_iot_rule, base_lambda_function, base_sns_role, base_topic
-from .utils import IOT_SNS_CONFIG_SCHEMA, validate_configuration
+from .common import base_alarm, base_iot_rule, base_kinesis_role, base_kinesis_firehose_delivery_stream
+from .utils import IOT_KINESIS_FIREHOSE_CONFIG_SCHEMA, validate_configuration
 
 
 class AwsIotRulesKinesisFirehosePipes(core.Construct):
@@ -32,29 +32,29 @@ class AwsIotRulesKinesisFirehosePipes(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=IOT_SNS_CONFIG_SCHEMA, configuration_received=self._configuration)
+        validate_configuration(configuration_schema=IOT_KINESIS_FIREHOSE_CONFIG_SCHEMA, configuration_received=self._configuration)
 
-        # Defining SNS Topic
-        topic_data = deepcopy(self._configuration["topic"])
-        self._sns_topic = base_topic(self, **topic_data)
+        # Defining Kinesis Stream
+        stream_data = deepcopy(self._configuration["stream"])
+        self._kinesis_stream = base_kinesis_firehose_delivery_stream(self, **stream_data)
 
         # Defining IAM Role
-        role = base_sns_role(self, resource_name=topic_data["topic_name"], principal_resource="iot")
+        role = base_kinesis_role(self, resource_name=stream_data["stream_name"], principal_resource="iot")
 
         # Validating Lambda Function Runtime
         functions_data = self._configuration["lambda_handlers"]
         self._lambda_functions = list()
-        for lambda_function in functions_data:
-            _lambda_function = base_lambda_function(self, **lambda_function)
+        for setting in functions_data:
+            _lambda_function = base_lambda_function(self, **setting["lambda_handler"])
             self._lambda_functions.append(_lambda_function)
 
-            # Defining the Lambda subscription to the specified SNS Topic in cdk.json file.
-            sns_subscription = sns_subs.LambdaSubscription(fn=_lambda_function)
-            self._sns_topic.add_subscription(sns_subscription)
+            # Defining Function Subscription
+            event_source = event_src.KinesisEventSource(stream=self._kinesis_stream, **setting["event_settings"])
+            _lambda_function.add_event_source(event_source)
 
         # Defining Topic Rule properties
-        action = iot.CfnTopicRule.SnsActionProperty(target_arn=self._sns_topic.topic_arn, role_arn=role.role_arn)
-        action_property = iot.CfnTopicRule.ActionProperty(sns=action)
+        action = iot.CfnTopicRule.KinesisActionProperty(stream_name=self._kinesis_stream.stream_name, role_arn=role.role_arn)
+        action_property = iot.CfnTopicRule.ActionProperty(kinesis=action)
 
         rule_data = self._configuration["iot_rule"]
         self._iot_rule = base_iot_rule(self, action_property=action_property, **rule_data)
@@ -64,18 +64,6 @@ class AwsIotRulesKinesisFirehosePipes(core.Construct):
         Function that set alarms for the resources involved in the construct. Except the IoT Rule.
         :return: None
         """
-        if isinstance(self._configuration["topic"].get("alarms"), list) is True:
-            sns_alarms = list()
-            for alarm_definition in self._configuration["topic"].get("alarms"):
-                sns_alarms.append(
-                    base_alarm(
-                        self,
-                        resource_name=self._configuration["topic"]["topic_name"],
-                        base_resource=self._sns_topic,
-                        **alarm_definition,
-                    )
-                )
-
         for lambda_function_data, lambda_function_definition in zip(
             self._configuration["lambda_handlers"], self._lambda_functions
         ):
@@ -99,11 +87,11 @@ class AwsIotRulesKinesisFirehosePipes(core.Construct):
         return self._configuration
 
     @property
-    def sns_topic(self):
+    def kinesis_stream(self):
         """
-        :return: Construct SNS Topic.
+        :return: Construct Kinesis Stream.
         """
-        return self._sns_topic
+        return self._kinesis_stream
 
     @property
     def lambda_functions(self):

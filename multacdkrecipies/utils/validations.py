@@ -297,15 +297,6 @@ IOT_KINESIS_CONFIG_SCHEMA = Schema(
             "stream_name": And(Use(str)),
             "shard_count": And(Use(int)),
             Optional("retention_period"): And(Use(int)),
-            Optional("alarms"): [
-                {
-                    "name": And(Use(str)),
-                    "number": And(Use(int)),
-                    "periods": And(Use(int)),
-                    "points": And(Use(int)),
-                    "actions": And(Use(bool)),
-                }
-            ],
         },
         "lambda_handlers": [
             {
@@ -325,19 +316,21 @@ IOT_KINESIS_CONFIG_SCHEMA = Schema(
 
 IOT_KINESIS_FIREHOSE_CONFIG_SCHEMA = Schema(
     {
-        "topic": {
-            "topic_name": And(Use(str)),
-            Optional("alarms"): [
-                {
-                    "name": And(Use(str)),
-                    "number": And(Use(int)),
-                    "periods": And(Use(int)),
-                    "points": And(Use(int)),
-                    "actions": And(Use(bool)),
-                }
-            ],
+        "stream": {
+            "stream_name": And(Use(str)),
+            "destinations": {
+                Optional("extended_s3_destination_configuration"): {
+                    "bucket": S3_BUCKET_SCHEMA,
+                    "compression_format": And(Use(str)),
+                    "buffering_hints": And(Use(str))
+                },
+                Optional("s3_destination_configuration"): {
+                    "bucket": S3_BUCKET_SCHEMA,
+                    "compression_format": And(Use(str)),
+                    "buffering_hints": And(Use(str))
+                },
+            }
         },
-        "lambda_handlers": [LAMBDA_BASE_SCHEMA,],
         "iot_rule": {
             "rule_name": And(Use(str)),
             Optional("description"): And(Use(str)),
