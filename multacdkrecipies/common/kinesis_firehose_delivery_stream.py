@@ -21,7 +21,7 @@ def base_kinesis_firehose_delivery_stream(construct, **kwargs):
         extended_s3_destination_configuration=destinations_config["extended_s3_destination_configuration"],
         redshift_destination_configuration=destinations_config["redshift_destination_configuration"],
         s3_destination_configuration=destinations_config["s3_destination_configuration"],
-        splunk_destination_configuration=destinations_config["splunk_destination_configuration"]
+        splunk_destination_configuration=destinations_config["splunk_destination_configuration"],
     )
 
     return firehose_stream.attr_arn
@@ -33,7 +33,7 @@ def firehose_destinations(configuration):
         extended_s3_destination_configuration=None,
         redshift_destination_configuration=None,
         s3_destination_configuration=None,
-        splunk_destination_configuration=None
+        splunk_destination_configuration=None,
     )
     if configuration.get("elasticsearch_destination_configuration") is not None:
         pass
@@ -41,10 +41,7 @@ def firehose_destinations(configuration):
         bucket = base_bucket()
         role = base_kinesis_firehose_s3_role()
         extended_s3_config = fh_stream.CfnDeliveryStream.ExtendedS3DestinationConfigurationProperty(
-            bucket_arn=bucket.bucket_arn,
-            role_arn=role.role_arn,
-            compression_format="",
-            buffering_hints="",
+            bucket_arn=bucket.bucket_arn, role_arn=role.role_arn, compression_format="", buffering_hints="",
         )
         destinations_config["extended_s3_destination_configuration"] = extended_s3_config
     if configuration.get("redshift_destination_configuration") is not None:
@@ -53,10 +50,7 @@ def firehose_destinations(configuration):
         bucket = base_bucket()
         role = base_kinesis_firehose_s3_role()
         s3_config = fh_stream.CfnDeliveryStream.S3DestinationConfigurationProperty(
-            bucket_arn=bucket.bucket_arn,
-            role_arn=role.role_arn,
-            compression_format="",
-            buffering_hints="",
+            bucket_arn=bucket.bucket_arn, role_arn=role.role_arn, compression_format="", buffering_hints="",
         )
         destinations_config["s3_destination_configuration"] = s3_config
     if configuration.get("splunk_destination_configuration") is not None:

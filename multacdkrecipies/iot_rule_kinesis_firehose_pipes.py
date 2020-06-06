@@ -32,7 +32,9 @@ class AwsIotRulesKinesisFirehosePipes(core.Construct):
         self._configuration = configuration
 
         # Validating that the payload passed is correct
-        validate_configuration(configuration_schema=IOT_KINESIS_FIREHOSE_CONFIG_SCHEMA, configuration_received=self._configuration)
+        validate_configuration(
+            configuration_schema=IOT_KINESIS_FIREHOSE_CONFIG_SCHEMA, configuration_received=self._configuration
+        )
 
         # Defining Kinesis Stream
         stream_data = deepcopy(self._configuration["stream"])
