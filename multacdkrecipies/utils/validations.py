@@ -200,24 +200,6 @@ USER_POOL_GROUPS_SCHEMA = Schema(
     }
 )
 
-SNS_CONFIG_SCHEMA = Schema(
-    {
-        "topic": {
-            "topic_name": And(Use(str)),
-            Optional("alarms"): [
-                {
-                    "name": And(Use(str)),
-                    "number": And(Use(int)),
-                    "periods": And(Use(int)),
-                    "points": And(Use(int)),
-                    "actions": And(Use(bool)),
-                }
-            ],
-        },
-        "lambda_handlers": [LAMBDA_BASE_SCHEMA],
-    }
-)
-
 IOT_LAMBDA_CONFIG_SCHEMA = Schema(
     {
         "lambda_handler": LAMBDA_BASE_SCHEMA,
@@ -256,7 +238,6 @@ IOT_SNS_CONFIG_SCHEMA = Schema(
     }
 )
 
-
 IOT_SQS_CONFIG_SCHEMA = Schema(
     {
         "queue": {
@@ -281,6 +262,36 @@ IOT_SQS_CONFIG_SCHEMA = Schema(
             "sql": And(Use(str)),
             "aws_iot_sql_version": And(Use(str)),
         },
+    }
+)
+
+CLOUDWATCH_CONFIG_SCHEMA = Schema(
+    {
+        "cloudwatch_rule": {
+            "rule_name": And(Use(str)),
+            Optional("description"): And(Use(str)),
+            "enabled": And(Use(bool)),
+            "schedule": And(Use(str)),
+        },
+        "lambda_handlers": [LAMBDA_BASE_SCHEMA,],
+    }
+)
+
+SNS_CONFIG_SCHEMA = Schema(
+    {
+        "topic": {
+            "topic_name": And(Use(str)),
+            Optional("alarms"): [
+                {
+                    "name": And(Use(str)),
+                    "number": And(Use(int)),
+                    "periods": And(Use(int)),
+                    "points": And(Use(int)),
+                    "actions": And(Use(bool)),
+                }
+            ],
+        },
+        "lambda_handlers": [LAMBDA_BASE_SCHEMA],
     }
 )
 

@@ -2,7 +2,7 @@ import os
 import setuptools
 
 
-VERSION = os.environ.get("VERSION", "0.4.0")
+VERSION = os.environ.get("VERSION", "0.4.1")
 CDK_VERSION = os.environ.get("CDK_VERSION", "1.44.0")
 
 with open("./README.md") as fp:
@@ -47,6 +47,7 @@ setuptools.setup(
         f"aws-cdk.aws-ec2=={CDK_VERSION}",
         f"aws-cdk.aws-elasticloadbalancingv2=={CDK_VERSION}",
         f"aws-cdk.aws-events=={CDK_VERSION}",
+        f"aws-cdk.aws-events-targets=={CDK_VERSION}",
         f"aws-cdk.aws-iam=={CDK_VERSION}",
         f"aws-cdk.aws-iot=={CDK_VERSION}",
         f"aws-cdk.aws-iotanalytics=={CDK_VERSION}",
