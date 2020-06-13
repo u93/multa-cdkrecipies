@@ -144,7 +144,13 @@ USER_SERVERLESS_BACKEND_SCHEMA = Schema(
             },
             "sign_in": {"order": [And(Use(str))]},
             "attributes": {
-                "standard": [And(Use(str))],
+                "standard": [
+                    {
+                        "name": And(Use(str)),
+                        "mutable": And(Use(bool)),
+                        "required": And(Use(bool)),
+                    }
+                ],
                 Optional("custom"): [
                     {
                         "name": And(Use(str)),

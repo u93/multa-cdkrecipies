@@ -56,11 +56,16 @@ def base_cognito_user_pool(construct, **kwargs):
     standard_attributes_list = attributes.get("standard", list())
     standard_attributes_dict = dict()
     for element in standard_attributes_list:
-        standard_attributes_dict[element] = True
-    required_attributes = cognito.StandardAttributes(**standard_attributes_dict)
+        standard_attributes_dict[element["name"]] = cognito.StandardAttribute(
+            mutable=element.get("mutable"), required=element.get("required")
+        )
+    standard_attributes = cognito.StandardAttributes(**standard_attributes_dict)
 
     custom_attributes_list = attributes.get("custom", list())
-    custom_attributes = base_custom_attributes(custom_attributes_list=custom_attributes_list)
+    if len(custom_attributes_list) > 0:
+        custom_attributes = base_custom_attributes(custom_attributes_list=custom_attributes_list)
+    else:
+        custom_attributes = None
 
     user_pool = cognito.UserPool(
         construct,
@@ -72,7 +77,7 @@ def base_cognito_user_pool(construct, **kwargs):
         user_verification=user_verification_info,
         user_invitation=user_invitation_configuration,
         sign_in_aliases=sign_in_aliases,
-        required_attributes=required_attributes,
+        standard_attributes=standard_attributes,
         custom_attributes=custom_attributes,
         lambda_triggers=lambda_triggers,
     )
