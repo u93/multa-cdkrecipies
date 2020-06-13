@@ -2,6 +2,7 @@ from aws_cdk import core
 
 from .common import (
     base_iot_analytics_channel,
+    base_iot_analytics_dataset,
     base_iot_analytics_datastore,
     base_iot_analytics_pipeline,
 )
@@ -40,6 +41,7 @@ class AwsIotAnalyticsFanIn(core.Construct):
         )
 
         self._channel_pipes = list()
+        resources_dependencies = list()
         for channel_pipe in self._configuration["channel_pipe_definition"]:
             extra_activities = channel_pipe.get("extra_activities")
             base_name = channel_pipe["name"]
@@ -52,14 +54,27 @@ class AwsIotAnalyticsFanIn(core.Construct):
             # Defining Pipeline Properties
             pipeline_name = self.prefix + "_" + base_name + "_pipeline_" + self.environment_
             activities_dict = dict(channel=channel, datastore=self._datastore)
-            resources_dependencies = [channel, self._datastore]
+
+            individual_resource_dependencies = [channel, self._datastore]
+            resources_dependencies.extend(individual_resource_dependencies)
 
             # Defining Channel Activity Property
             pipeline = base_iot_analytics_pipeline(
-                self, activities=activities_dict, resource_dependencies=resources_dependencies, pipeline_name=pipeline_name
+                self,
+                activities=activities_dict,
+                resource_dependencies=individual_resource_dependencies,
+                pipeline_name=pipeline_name,
             )
 
             self._channel_pipes.append(dict(channel=channel, pipeline=pipeline))
+
+        # Defining Datasets
+        self._datasets = list()
+        for dataset_configuration in self._configuration.get("datasets", []):
+            dataset = base_iot_analytics_dataset(
+                construct=self, resource_dependencies=resources_dependencies, **dataset_configuration
+            )
+            self._datasets.append(dataset)
 
     @property
     def configuration(self):

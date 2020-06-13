@@ -146,6 +146,7 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
 
         # Defining Resource Trees for API Gateway with Custom Integrations
         resource = api_configuration["resource"]
+        self._lambda_rest_api.root.add_proxy()
         resource_base = self._lambda_rest_api.root.add_resource(path_part=resource["resource_name"])
         if resource.get("handler") is not None:
             resource_base_handler = base_lambda_function(self, **resource["handler"])

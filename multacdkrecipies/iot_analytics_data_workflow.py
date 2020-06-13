@@ -2,6 +2,7 @@ from aws_cdk import core
 
 from .common import (
     base_iot_analytics_channel,
+    base_iot_analytics_dataset,
     base_iot_analytics_datastore,
     base_iot_analytics_pipeline,
 )
@@ -43,12 +44,14 @@ class AwsIotAnalyticsDataWorkflow(core.Construct):
         # Defining Datastore
         datastore_retention_period = retention_periods.get("datastore")
         self._datastore = base_iot_analytics_datastore(
-            self, datastore_name=datastore_name, retention_period=datastore_retention_period
+            construct=self, datastore_name=datastore_name, retention_period=datastore_retention_period
         )
 
         # Defining Channel
         channel_retention_period = retention_periods.get("channel")
-        self._channel = base_iot_analytics_channel(self, channel_name=channel_name, retention_period=channel_retention_period)
+        self._channel = base_iot_analytics_channel(
+            construct=self, channel_name=channel_name, retention_period=channel_retention_period
+        )
 
         # Defining Pipeline Properties
         activities_dict = dict(channel=self._channel, datastore=self._datastore)
@@ -56,8 +59,16 @@ class AwsIotAnalyticsDataWorkflow(core.Construct):
 
         # Defining Pipeline
         self._pipeline = base_iot_analytics_pipeline(
-            self, activities=activities_dict, resource_dependencies=resources_dependencies, pipeline_name=pipeline_name
+            construct=self, activities=activities_dict, resource_dependencies=resources_dependencies, pipeline_name=pipeline_name
         )
+
+        # Defining Datasets
+        self._datasets = list()
+        for dataset_configuration in self._configuration.get("datasets", []):
+            dataset = base_iot_analytics_dataset(
+                construct=self, resource_dependencies=resources_dependencies, **dataset_configuration
+            )
+            self._datasets.append(dataset)
 
     @property
     def configuration(self):

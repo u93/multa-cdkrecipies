@@ -4,11 +4,12 @@ from aws_cdk import (
 )
 
 from .common import (
-    base_iot_rule,
-    base_iot_analytics_role,
     base_iot_analytics_channel,
+    base_iot_analytics_dataset,
     base_iot_analytics_datastore,
     base_iot_analytics_pipeline,
+    base_iot_analytics_role,
+    base_iot_rule,
 )
 from .utils import IOT_ANALYTICS_SIMPLE_PIPELINE_SCHEMA, validate_configuration
 
@@ -64,6 +65,14 @@ class AwsIotAnalyticsSimplePipeline(core.Construct):
         self._pipeline = base_iot_analytics_pipeline(
             self, activities=activities_dict, resource_dependencies=resources_dependencies, pipeline_name=pipeline_name
         )
+
+        # Defining Datasets
+        self._datasets = list()
+        for dataset_configuration in self._configuration.get("datasets", []):
+            dataset = base_iot_analytics_dataset(
+                construct=self, resource_dependencies=resources_dependencies, **dataset_configuration
+            )
+            self._datasets.append(dataset)
 
         # Defining IAM Role
         role = base_iot_analytics_role(self, resource_name=self._channel.channel_name, principal_resource="iot")

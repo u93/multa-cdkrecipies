@@ -4,6 +4,7 @@ from .cognito_user_groups import base_cognito_user_groups
 from .cognito_user_pool import base_cognito_user_pool
 from .dynamo_table import base_dynamodb_table
 from .iot_analytics_channel import base_iot_analytics_channel
+from .iot_analytics_sql_dataset import base_iot_analytics_dataset
 from .iot_analytics_datastore import base_iot_analytics_datastore
 from .iot_analytics_pipeline import base_iot_analytics_pipeline
 from .iot_rule import base_iot_rule

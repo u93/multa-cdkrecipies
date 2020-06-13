@@ -41,4 +41,17 @@ DYNAMODB_TABLE_SCHEMA = Schema(
     }
 )
 
+IOT_ANALYTICS_DATASET = Schema(
+    {
+        "dataset_name": And(Use(str)),
+        Optional("retention_period"): And(Use(int)),
+        "sql_action": {
+            "name": And(Use(str)),
+            "sql_query": And(Use(str)),
+            Optional("delta_time"): {"timestamp_field": And(Use(str)), "offset_seconds": And(Use(int))},
+        },
+        Optional("trigger_action"): {"schedule": And(Use(str))},
+    }
+)
+
 S3_BUCKET_SCHEMA = Schema({"bucket_name": And(Use(str)), "versioned": And(Use(bool)), "public_read_access": And(Use(bool)),})

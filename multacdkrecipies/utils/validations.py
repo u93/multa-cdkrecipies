@@ -3,7 +3,13 @@ import traceback
 
 from schema import Schema, And, Use, Optional, SchemaError
 
-from .base_validations import AUTHORIZER_LAMBDA_BASE_SCHEMA, DYNAMODB_TABLE_SCHEMA, LAMBDA_BASE_SCHEMA, S3_BUCKET_SCHEMA
+from .base_validations import (
+    AUTHORIZER_LAMBDA_BASE_SCHEMA,
+    DYNAMODB_TABLE_SCHEMA,
+    IOT_ANALYTICS_DATASET,
+    LAMBDA_BASE_SCHEMA,
+    S3_BUCKET_SCHEMA,
+)
 
 APIGATEWAY_ASYNC_WEB_SERVICE_SCHEMA = Schema(
     {
@@ -365,6 +371,7 @@ IOT_ANALYTICS_DATA_WORKFLOW_SCHEMA = Schema(
     {
         "name": And(Use(str)),
         Optional("retention_periods"): {Optional("channel"): And(Use(int)), Optional("datastore"): And(Use(int)),},
+        Optional("datasets"): [IOT_ANALYTICS_DATASET],
     }
 )
 
@@ -378,6 +385,7 @@ IOT_ANALYTICS_FAN_IN_SCHEMA = Schema(
             }
         ],
         "datastore_definition": {"name": And(Use(str)), Optional("datastore_retention_period"): And(Use(int))},
+        Optional("datasets"): [IOT_ANALYTICS_DATASET],
     }
 )
 
@@ -391,6 +399,7 @@ IOT_ANALYTICS_FAN_OUT_SCHEMA = Schema(
                 Optional("datastore_retention_period"): And(Use(int)),
             }
         ],
+        Optional("datasets"): [IOT_ANALYTICS_DATASET],
     }
 )
 
@@ -398,6 +407,7 @@ IOT_ANALYTICS_SIMPLE_PIPELINE_SCHEMA = Schema(
     {
         "analytics_resource_name": And(Use(str)),
         Optional("retention_periods"): {Optional("channel"): And(Use(int)), Optional("datastore"): And(Use(int)),},
+        Optional("datasets"): [IOT_ANALYTICS_DATASET],
         "iot_rules": [
             {
                 "rule_name": And(Use(str)),
