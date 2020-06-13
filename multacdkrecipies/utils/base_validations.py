@@ -46,7 +46,6 @@ IOT_ANALYTICS_DATASET = Schema(
         "dataset_name": And(Use(str)),
         Optional("retention_period"): And(Use(int)),
         "sql_action": {
-            "name": And(Use(str)),
             "sql_query": And(Use(str)),
             Optional("delta_time"): {"timestamp_field": And(Use(str)), "offset_seconds": And(Use(int))},
         },

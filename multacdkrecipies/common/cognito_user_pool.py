@@ -53,11 +53,11 @@ def base_cognito_user_pool(construct, **kwargs):
     sign_in_aliases = cognito.SignInAliases(**sing_in_kwargs)
 
     attributes = kwargs.get("attributes")
-    required_attributes_list = attributes.get("standard", list())
-    required_attributes_dict = dict()
-    for element in required_attributes_list:
-        required_attributes_dict[element] = True
-    required_attributes = cognito.RequiredAttributes(**required_attributes_dict)
+    standard_attributes_list = attributes.get("standard", list())
+    standard_attributes_dict = dict()
+    for element in standard_attributes_list:
+        standard_attributes_dict[element] = True
+    required_attributes = cognito.StandardAttributes(**standard_attributes_dict)
 
     custom_attributes_list = attributes.get("custom", list())
     custom_attributes = base_custom_attributes(custom_attributes_list=custom_attributes_list)
