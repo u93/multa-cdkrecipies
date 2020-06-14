@@ -82,6 +82,7 @@ def base_cognito_user_pool(construct, **kwargs):
         lambda_triggers=lambda_triggers,
     )
 
+    user_pool_client = None
     if kwargs.get("app_client", {}).get("enabled") is True:
         client_name = kwargs["app_client"]["client_name"]
         generate_secret = kwargs["app_client"]["generate_secret"]
@@ -92,32 +93,16 @@ def base_cognito_user_pool(construct, **kwargs):
         if auth_flows_configuration is not None:
             auth_flows = cognito.AuthFlow(**auth_flows_configuration)
 
-        user_pool.add_client(
+        user_pool_client = cognito.UserPoolClient(
+            construct,
             id=user_pool_client_name,
             user_pool_client_name=user_pool_client_name,
             generate_secret=generate_secret,
             auth_flows=auth_flows,
+            user_pool=user_pool
         )
 
-    return user_pool
-
-
-def base_user_verification(sign_up_info: dict):
-    received_email_style = sign_up_info.get("email", {}).get("style")
-    if received_email_style == "code":
-        email_style = cognito.VerificationEmailStyle.CODE
-    elif received_email_style == "link":
-        email_style = cognito.VerificationEmailStyle.LINK
-    else:
-        email_style = None
-    user_verification = cognito.UserVerificationConfig(
-        email_subject=sign_up_info.get("email", {}).get("subject"),
-        email_body=sign_up_info.get("email", {}).get("body"),
-        email_style=email_style,
-        sms_message=sign_up_info.get("sms", {}).get("body"),
-    )
-
-    return user_verification
+    return user_pool, user_pool_client
 
 
 def base_custom_attributes(custom_attributes_list: list):
@@ -143,14 +128,6 @@ def base_custom_attributes(custom_attributes_list: list):
 
 
 def base_lambda_triggers(construct, trigger_functions):
-    trigger_functions_data = dict()
-    for key in trigger_functions.keys():
-        if trigger_functions.get(key) is None:
-            continue
-        else:
-            trigger_functions_data[key] = base_lambda_function(construct, **trigger_functions[key])
-
-    lambda_triggers = cognito.UserPoolTriggers(**trigger_functions_data)
     """
     lambda_triggers = cognito.UserPoolTriggers(
         create_auth_challenge=create_auth_challenge_lambda,
@@ -165,5 +142,31 @@ def base_lambda_triggers(construct, trigger_functions):
         verify_auth_challenge_response=verify_auth_challenge_response_lambda
     )
     """
+    trigger_functions_data = dict()
+    for key in trigger_functions.keys():
+        if trigger_functions.get(key) is None:
+            continue
+        else:
+            trigger_functions_data[key] = base_lambda_function(construct, **trigger_functions[key])
+
+    lambda_triggers = cognito.UserPoolTriggers(**trigger_functions_data)
 
     return lambda_triggers
+
+
+def base_user_verification(sign_up_info: dict):
+    received_email_style = sign_up_info.get("email", {}).get("style")
+    if received_email_style == "code":
+        email_style = cognito.VerificationEmailStyle.CODE
+    elif received_email_style == "link":
+        email_style = cognito.VerificationEmailStyle.LINK
+    else:
+        email_style = None
+    user_verification = cognito.UserVerificationConfig(
+        email_subject=sign_up_info.get("email", {}).get("subject"),
+        email_body=sign_up_info.get("email", {}).get("body"),
+        email_style=email_style,
+        sms_message=sign_up_info.get("sms", {}).get("body"),
+    )
+
+    return user_verification

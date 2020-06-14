@@ -144,13 +144,7 @@ USER_SERVERLESS_BACKEND_SCHEMA = Schema(
             },
             "sign_in": {"order": [And(Use(str))]},
             "attributes": {
-                "standard": [
-                    {
-                        "name": And(Use(str)),
-                        "mutable": And(Use(bool)),
-                        "required": And(Use(bool)),
-                    }
-                ],
+                "standard": [{"name": And(Use(str)), "mutable": And(Use(bool)), "required": And(Use(bool)),}],
                 Optional("custom"): [
                     {
                         "name": And(Use(str)),
@@ -172,6 +166,12 @@ USER_SERVERLESS_BACKEND_SCHEMA = Schema(
                     Optional("user_password"): And(Use(bool)),
                     Optional("user_srp"): And(Use(bool)),
                 },
+            },
+            Optional("identity_pool"): {
+                "identity_pool_name": And(Use(str)),
+                Optional("allow_unauth_identities"): And(Use(bool)),
+                "unauth_role": {"actions": [And(Use(str))], "resources": [And(Use(str))]},
+                "auth_role": {"actions": [And(Use(str))], "resources": [And(Use(str))]},
             },
             "triggers": {
                 Optional("create_auth_challenge"): LAMBDA_BASE_SCHEMA,

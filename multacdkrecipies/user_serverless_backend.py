@@ -3,7 +3,17 @@ from aws_cdk import (
     aws_lambda as lambda_,
     aws_lambda_event_sources as event_sources,
 )
-from .common import base_bucket, base_cognito_user_pool, base_dynamodb_table, base_lambda_function
+from .common import (
+    base_bucket,
+    base_cognito_user_pool,
+    base_cognito_user_identity_pool,
+    base_dynamodb_table,
+    base_lambda_function,
+    base_cognito_identity_pool_unauth_role,
+    base_cognito_identity_pool_auth_role,
+    base_cognito_user_identity_pool_attach_role
+)
+
 from .utils import USER_SERVERLESS_BACKEND_SCHEMA, validate_configuration
 
 
@@ -66,7 +76,15 @@ class AwsUserServerlessBackend(core.Construct):
             self._s3_buckets = [base_bucket(self, **bucket) for bucket in self._configuration["buckets"]]
 
         # Define Cognito User Pool
-        self._user_pool = base_cognito_user_pool(self, **self._configuration["user_pool"])
+        self._user_pool, self._user_pool_client = base_cognito_user_pool(self, **self._configuration["user_pool"])
+
+        if self._configuration.get("identity_pool") is not None and self._user_pool_client is not None:
+            self._identity_pool = base_cognito_user_identity_pool(
+                self,
+                user_pool_client_id=self._user_pool_client.user_pool_client_id,
+                user_pool_provider_name=self._user_pool.user_pool_provider_name,
+                **self._configuration["identity_pool"]
+            )
 
     @property
     def configuration(self):
