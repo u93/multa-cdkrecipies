@@ -434,6 +434,7 @@ LAMBDA_LAYER_SCHEMA = Schema(
         "layer_name": And(Use(str)),
         Optional("description"): And(Use(str)),
         Optional("license"): And(Use(str)),
+        Optional("dependencies"): And(Use(bool)),
         Optional("paths"): {
             "python_requirements_path": And(Use(str)),
             "layer_directory_path": And(Use(str)),

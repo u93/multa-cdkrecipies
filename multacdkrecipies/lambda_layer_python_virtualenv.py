@@ -54,24 +54,25 @@ class AwsLambdaLayerVenv(core.Construct):
                 print(f"Lambda Python requirements path for Lambda Layer {self._configuration['layer_name']} is not valid!")
                 raise RuntimeError
 
-        subprocess.call(
-            [
-                "docker",
-                "run",
-                "--rm",
-                "-v",
-                f"{os.environ.get('PWD')}:/foo",
-                "-w",
-                "/foo",
-                "lambci/lambda:build-python3.7",
-                "pip",
-                "install",
-                "-r",
-                requirements_path,
-                "-t",
-                layer_directory_path,
-            ]
-        )
+        subprocess_command = [
+            "docker",
+            "run",
+            "--rm",
+            "-v",
+            f"{os.environ.get('PWD')}:/foo",
+            "-w",
+            "/foo",
+            "lambci/lambda:build-python3.7",
+            "pip",
+            "install",
+            "-r",
+            requirements_path,
+            "-t",
+            layer_directory_path,
+        ]
+        if self._configuration.get("dependencies", False) is False:
+            subprocess_command.append("--no-dependencies")
+        subprocess.call(subprocess_command)
 
         self._configuration["layer_code_path"] = layer_code_path
         self._lambda_layer = base_lambda_layer(self, **self._configuration)
