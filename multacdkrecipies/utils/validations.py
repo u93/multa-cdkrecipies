@@ -173,7 +173,7 @@ USER_SERVERLESS_BACKEND_SCHEMA = Schema(
                 "unauth_role": {"actions": [And(Use(str))], "resources": [And(Use(str))]},
                 "auth_role": {"actions": [And(Use(str))], "resources": [And(Use(str))]},
             },
-            "triggers": {
+            Optional("triggers"): {
                 Optional("create_auth_challenge"): LAMBDA_BASE_SCHEMA,
                 Optional("custom_message"): LAMBDA_BASE_SCHEMA,
                 Optional("define_auth_challenge"): LAMBDA_BASE_SCHEMA,

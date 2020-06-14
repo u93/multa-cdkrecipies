@@ -99,7 +99,7 @@ def base_cognito_user_pool(construct, **kwargs):
             user_pool_client_name=user_pool_client_name,
             generate_secret=generate_secret,
             auth_flows=auth_flows,
-            user_pool=user_pool
+            user_pool=user_pool,
         )
 
     return user_pool, user_pool_client

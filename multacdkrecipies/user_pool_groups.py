@@ -1,5 +1,5 @@
 from aws_cdk import core
-from .common import base_cognito_user_groups, base_role
+from .common import base_cognito_user_groups, base_service_role
 from .utils import USER_POOL_GROUPS_SCHEMA, validate_configuration
 
 
@@ -28,7 +28,7 @@ class AwsUserPoolCognitoGroups(core.Construct):
 
         self._groups_roles_list = list()
         for group_definition in self._configuration["user_pool_groups"]:
-            role = base_role(
+            role = base_service_role(
                 self,
                 resource_name=group_definition["role"]["name"],
                 actions=group_definition["role"]["actions"],

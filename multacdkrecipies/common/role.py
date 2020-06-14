@@ -41,7 +41,7 @@ def base_federated_role(
     assume_role_action: str,
     conditions: dict,
     actions: list,
-    resources: list
+    resources: list,
 ):
     """
     Function that generates an IAM Federated Role with a Policy.
@@ -60,9 +60,7 @@ def base_federated_role(
         iam_role_name = construct.prefix + "_role_" + resource_name + "_" + construct.environment_
         iam_policy_name = construct.prefix + "_policy_" + resource_name + "_" + construct.environment_
         principal = iam.FederatedPrincipal(
-            federated=f"{federated_resource}.amazonaws.com",
-            conditions=conditions,
-            assume_role_action=assume_role_action
+            federated=f"{federated_resource}.amazonaws.com", conditions=conditions, assume_role_action=assume_role_action
         )
 
         # Defining IAM Role
@@ -215,11 +213,14 @@ def base_iot_analytics_role(construct, resource_name: str, principal_resource: s
         return role
 
 
-def base_cognito_identity_pool_unauth_role(construct, resource_name: str, actions: list, resources: list, **kwargs):
+def base_cognito_identity_pool_unauth_role(
+    construct, identity_pool, resource_name: str, actions: list, resources: list, **kwargs
+):
     """
     Function that generates an IAM Role with a Policy for IoT Analytics Batch Put Message.
     :param construct: Custom construct that will use this function. From the external construct is usually 'self'.
     :param resource_name: Name of the resource. Used for naming purposes.
+    :param identity_pool:
     :param actions: IAM Actions allowed for Unauthenticated Users.
     :param resources: IAM Resources allowed for Unauthenticated Users.
     :param kwargs: Other parameters that could be used by the construct.
@@ -228,8 +229,8 @@ def base_cognito_identity_pool_unauth_role(construct, resource_name: str, action
     try:
         federated_resource = "cognito-identity.amazonaws.com"
         conditions = {
-            "StringEquals": {"cognito-identity.amazonaws.com:aud": construct._indentity_pool.ref},
-            "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "unauthenticated"}
+            "StringEquals": {"cognito-identity.amazonaws.com:aud": identity_pool.ref},
+            "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "unauthenticated"},
         }
         assume_role_action = "sts:AssumeRoleWithWebIdentity"
         role = base_federated_role(
@@ -247,10 +248,11 @@ def base_cognito_identity_pool_unauth_role(construct, resource_name: str, action
         return role
 
 
-def base_cognito_identity_pool_auth_role(construct, resource_name: str, actions: list, resources: list, **kwargs):
+def base_cognito_identity_pool_auth_role(construct, identity_pool, resource_name: str, actions: list, resources: list, **kwargs):
     """
     Function that generates an IAM Role with a Policy for IoT Analytics Batch Put Message.
     :param construct: Custom construct that will use this function. From the external construct is usually 'self'.
+    :param identity_pool:
     :param resource_name: Name of the resource. Used for naming purposes.
     :param actions: IAM Actions allowed for Unauthenticated Users.
     :param resources: IAM Resources allowed for Unauthenticated Users.
@@ -260,8 +262,8 @@ def base_cognito_identity_pool_auth_role(construct, resource_name: str, actions:
     try:
         federated_resource = "cognito-identity.amazonaws.com"
         conditions = {
-            "StringEquals": {"cognito-identity.amazonaws.com:aud": construct._indentity_pool.ref},
-            "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "authenticated"}
+            "StringEquals": {"cognito-identity.amazonaws.com:aud": identity_pool.ref},
+            "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "authenticated"},
         }
         assume_role_action = "sts:AssumeRoleWithWebIdentity"
         role = base_federated_role(
