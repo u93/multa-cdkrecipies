@@ -227,7 +227,7 @@ def base_cognito_identity_pool_unauth_role(
     :return: IAM Role with an IAM Policy attached.
     """
     try:
-        federated_resource = "cognito-identity.amazonaws.com"
+        federated_resource = "cognito-identity"
         conditions = {
             "StringEquals": {"cognito-identity.amazonaws.com:aud": identity_pool.ref},
             "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "unauthenticated"},
@@ -260,7 +260,7 @@ def base_cognito_identity_pool_auth_role(construct, identity_pool, resource_name
     :return: IAM Role with an IAM Policy attached.
     """
     try:
-        federated_resource = "cognito-identity.amazonaws.com"
+        federated_resource = "cognito-identity"
         conditions = {
             "StringEquals": {"cognito-identity.amazonaws.com:aud": identity_pool.ref},
             "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "authenticated"},

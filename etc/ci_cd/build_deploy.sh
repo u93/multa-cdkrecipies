@@ -29,7 +29,7 @@ _EOF_
 
 elif [ "${ACTION}" == "PRODUCION" ]; then
 
-  echo "Entering in PRODUCION deployment!"
+  echo "Entering in PRODUCTION deployment!"
 
 else
 

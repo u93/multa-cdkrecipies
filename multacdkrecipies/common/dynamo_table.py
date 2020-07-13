@@ -59,4 +59,33 @@ def base_dynamodb_table(construct, **kwargs):
         time_to_live_attribute=dynamodb_table_ttl_attribute,
     )
 
+    for global_index in kwargs.get("global_secondary_indexes", list()):
+        global_index["partition_key"] = dynamo.Attribute(name=global_index["partition_key"], type=dynamo.AttributeType.STRING)
+        if global_index.get("sort_key") is None:
+            global_index["sort_key"] = None
+        else:
+            if sort_key.get("type") == "string":
+                sort_key_type = dynamo.AttributeType.STRING
+            elif sort_key.get("type") == "integer":
+                sort_key_type = dynamo.AttributeType.NUMBER
+            elif sort_key.get("type") == "binary":
+                sort_key_type = dynamo.AttributeType.BINARY
+            else:
+                sort_key_type = dynamo.AttributeType.STRING
+            global_index["sort_key"] = dynamo.Attribute(name=sort_key.get("name"), type=sort_key_type)
+        dynamodb_table.add_global_secondary_index(**global_index)
+
+    for local_index in kwargs.get("local_secondary_indexes", list()):
+        sort_key = local_index.get("sort_key")
+        if sort_key.get("type") == "string":
+            sort_key_type = dynamo.AttributeType.STRING
+        elif sort_key.get("type") == "integer":
+            sort_key_type = dynamo.AttributeType.NUMBER
+        elif sort_key.get("type") == "binary":
+            sort_key_type = dynamo.AttributeType.BINARY
+        else:
+            sort_key_type = dynamo.AttributeType.STRING
+        local_index["sort_key"] = dynamo.Attribute(name=sort_key.get("name"), type=sort_key_type)
+        dynamodb_table.add_global_secondary_index(**local_index)
+
     return dynamodb_table, bool(dynamodb_table_streams)

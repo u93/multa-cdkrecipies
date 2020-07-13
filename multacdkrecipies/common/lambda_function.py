@@ -2,6 +2,8 @@ import traceback
 
 from aws_cdk import (
     core,
+    aws_events as events,
+    aws_events_targets as targets,
     aws_iam as iam,
     aws_lambda as lambda_,
 )
@@ -47,10 +49,11 @@ def base_lambda_function(construct, **kwargs):
             function_layers.append(layer)
 
     # Defining Lambda function
+    function_name = construct.prefix + "_" + kwargs["lambda_name"] + "_" + construct.environment_
     _lambda_function = lambda_.Function(
         construct,
-        id=construct.prefix + "_" + kwargs["lambda_name"] + "_" + construct.environment_,
-        function_name=construct.prefix + "_" + kwargs["lambda_name"] + "_" + construct.environment_,
+        id=function_name,
+        function_name=function_name,
         code=lambda_.Code.from_asset(path=code_path),
         handler=kwargs["handler"],
         runtime=function_runtime,
@@ -69,5 +72,16 @@ def base_lambda_function(construct, **kwargs):
 
     policy_statement = iam.PolicyStatement(actions=construct.iam_policies, resources=["*"])
     _lambda_function.add_to_role_policy(statement=policy_statement)
+
+    if kwargs.get("keep_warm") is not None and kwargs.get("keep_warm", {}).get("enabled") is True:
+        keep_warm_settings = kwargs.get("keep_warm")
+        base_schedule_expression = keep_warm_settings.get("rate", "0/2 * * * ? *")
+        base_description = f"Keep warm rule for {function_name}"
+        rule_name = construct.prefix + "_" + kwargs["lambda_name"] + "_rule_" + construct.environment_
+        schedule = events.Schedule.expression(f"cron({base_schedule_expression})")
+        _cloudwatch_event = events.Rule(
+            construct, id=rule_name, rule_name=rule_name, description=base_description, enabled=True, schedule=schedule,
+        )
+        _cloudwatch_event.add_target(targets.LambdaFunction(handler=_lambda_function))
 
     return _lambda_function

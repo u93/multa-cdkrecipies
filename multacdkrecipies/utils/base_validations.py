@@ -21,6 +21,7 @@ LAMBDA_BASE_SCHEMA = Schema(
                 "actions": And(Use(bool)),
             }
         ],
+        Optional("keep_warm"): {"enabled": And(Use(bool)), Optional("rate"): And(Use(str))},
     }
 )
 
@@ -38,6 +39,23 @@ DYNAMODB_TABLE_SCHEMA = Schema(
         Optional("billing_mode"): And(Use(str)),
         Optional("read_capacity"): And(Use(str)),
         Optional("write_capacity"): And(Use(str)),
+        Optional("global_secondary_indexes"): [
+            {
+                "index_name": And(Use(str)),
+                "partition_key": And(Use(str)),
+                Optional("sort_key"): {"name": And(Use(str)), "type": And(Use(str)),},
+                Optional("read_capacity"): And(Use(str)),
+                Optional("write_capacity"): And(Use(str)),
+            }
+        ],
+        Optional("local_secondary_indexes"): [
+            {
+                "index_name": And(Use(str)),
+                "sort_key": {"name": And(Use(str)), "type": And(Use(str)),},
+                Optional("read_capacity"): And(Use(str)),
+                Optional("write_capacity"): And(Use(str)),
+            }
+        ],
     }
 )
 
