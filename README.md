@@ -1,6 +1,6 @@
 # multacdkrecipies - Custom CDK Constructs for rapid development
 
-![stronghold logo](etc/img/logo.png)
+![multacdkrecipies logo](etc/img/logo.png)
 
 [comment]: <[![Downloads](http://pepy.tech/badge/stronghold)](http://pepy.tech/count/stronghold)>
 
@@ -158,6 +158,7 @@ app.synth()
 
 + [@sfernandezf](https://github.com/sfernandezf) for all the help and introduce me to AWS.
 + Mauricio Villaescusa for introduce me to CDK and listen all my dummy ideas.
++ [@destradar93](https://github.com/destradar93) and [@yoya93](https://github.com/yoya93) for all the help testing and using this project.
 
 **Donations**
 ---
