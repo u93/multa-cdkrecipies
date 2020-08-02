@@ -20,7 +20,7 @@
 **Usage**
 ---
 
-- config.py
+- `config.py`
 ```
 "LAMBDA_LAYER_CONFIG": {
     "identifier": "api_gateway",
@@ -94,7 +94,7 @@ API_CONFIG = {
 }
 ```
 
-- stack.py
+- `stack.py`
 ```
 from aws_cdk import core
 from multacdkrecipies import (
@@ -134,7 +134,7 @@ class ApiStack(core.Stack):
         )
 ```
 
-- app.py
+- `app.py`
 ```
 from aws_cdk import core
 from stack import ApiStack
