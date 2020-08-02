@@ -32,6 +32,7 @@ jobs:
         python setup.py sdist
 
     - name: Publish distribution 📦 to Test PyPI
+      if: github.ref == 'refs/heads/develop'
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ secrets.TEST_PYPI_PASSWORD }}
