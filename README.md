@@ -4,6 +4,7 @@
 
 [comment]: <[![Downloads](http://pepy.tech/badge/stronghold)](http://pepy.tech/count/stronghold)>
 
+
  - Designed to facilitate AWS CDK usage in Python CDK Apps by creating high-level constructs that help development in Serverless Applications.
  - Designed to be used like a regular Python CDK application.
  - Designed to expose resources over Python Classes properties, keeping flexibility in the CDK application.
