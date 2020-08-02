@@ -8,7 +8,6 @@ CDK_VERSION = os.environ.get("CDK_VERSION", "1.51.0")
 with open("./README.md") as fp:
     long_description = fp.read()
 
-
 setuptools.setup(
     name="multacdkrecipies",
     version=VERSION,
