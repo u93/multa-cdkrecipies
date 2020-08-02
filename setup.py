@@ -16,6 +16,7 @@ setuptools.setup(
     author_email="eebf1993@gmail.com",
     description="A CDK Python Construct for AWS IoT Infrastructure",
     keywords=["aws", "aws-cdk", "cdk", "infrastructure", "cloudformation", "python", "constructs", "framework"],
+    licence="MIT",
     long_description=long_description,
     long_description_content_type="text/markdown",
     maintainer="Eugenio Efrain Breijo",
