@@ -111,7 +111,8 @@ setuptools.setup(
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Software Development",
         "Topic :: Software Development :: Code Generators",
-        "Topic :: Software Development :: Libraries :: Application Frameworks" "Topic :: Utilities",
+        "Topic :: Software Development :: Libraries :: Application Frameworks",
+        "Topic :: Utilities",
         "Typing :: Typed",
     ],
 )
