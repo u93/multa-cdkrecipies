@@ -1,7 +1,10 @@
 from glob import glob
 import os
 
-python_lib_dir = glob(f"{os.environ.get('VIRTUAL_ENV')}/lib/*")[0].split("/")[-1]
+try:
+    python_lib_dir = glob(f"{os.environ.get('VIRTUAL_ENV')}/lib/*")[0].split("/")[-1]
+except Exception:
+    python_lib_dir = "python3.7"
 
 DEFAULT_LAMBDA_LAYER_CODE_INSTALL_PATH = f"./etc/layer/python/lib/{python_lib_dir}/site-packages/"
 DEFAULT_LAMBDA_LAYER_CODE_PATH = "./etc/layer/"

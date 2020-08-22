@@ -3,7 +3,7 @@ import setuptools
 
 
 VERSION = os.environ.get("VERSION", "0.1.0")
-CDK_VERSION = os.environ.get("CDK_VERSION", "1.51.0")
+CDK_VERSION = os.environ.get("CDK_VERSION", "1.56.0")
 
 with open("./README.md") as fp:
     long_description = fp.read()
@@ -30,7 +30,7 @@ setuptools.setup(
         "multacdkrecipies.scripts.iot_analytics_notebook",
     ],
     install_requires=[
-        "appdirs==1.4.3",
+        "appdirs==1.4.4",
         "attrs==19.3.0",
         f"aws-cdk.assets=={CDK_VERSION}",
         f"aws-cdk.aws-apigateway=={CDK_VERSION}",
@@ -70,28 +70,32 @@ setuptools.setup(
         f"aws-cdk.cx-api=={CDK_VERSION}",
         f"aws-cdk.region-info=={CDK_VERSION}",
         "black==19.10b0",
-        "boto3==1.11.7",
-        "botocore==1.14.7",
+        "boto3==1.14.33",
+        "botocore==1.17.33",
         "cattrs==1.0.0",
-        "Click==7.0",
-        "contextlib2==0.5.5",
-        "docutils==0.15.2",
-        "Jinja2==2.10.3",
-        "jmespath==0.9.4",
-        "jsii==0.21.2",
+        "click==7.1.2",
+        "constructs==3.0.4",
+        "contextlib2==0.6.0.post1",
+        "docutils==0.16",
+        "entrypoints==0.3",
+        "flake8==3.8.3",
+        "Jinja2==2.11.2",
+        "jmespath==0.10.0",
+        "jsii==1.9.0",
         "MarkupSafe==1.1.1",
+        "mccabe==0.6.1",
         "pathspec==0.7.0",
         "publication==0.0.3",
         "python-dateutil==2.8.1",
-        "regex==2020.1.8",
+        "regex==2020.6.8",
         "s3pypi==0.10.1",
-        "s3transfer==0.3.1",
-        "schema==0.7.1",
-        "six==1.14.0",
-        "toml==0.10.0",
+        "s3transfer==0.3.3",
+        "schema==0.7.3",
+        "six==1.15.0",
+        "toml==0.10.1",
         "typed-ast==1.4.1",
-        "typing-extensions==3.7.4.1",
-        "urllib3==1.25.8",
+        "typing-extensions==3.7.4.2",
+        "urllib3==1.25.10",
     ],
     python_requires=">=3.7",
     classifiers=[
