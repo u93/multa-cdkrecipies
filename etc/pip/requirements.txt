@@ -52,6 +52,7 @@ aws-cdk.cloud-assembly-schema==1.56.0
 aws-cdk.core==1.56.0
 aws-cdk.custom-resources==1.56.0
 aws-cdk.cx-api==1.56.0
+aws-cdk.pipelines==1.56.0
 aws-cdk.region-info==1.56.0
 black==19.10b0
 boto3==1.14.33

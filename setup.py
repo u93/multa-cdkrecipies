@@ -2,7 +2,7 @@ import os
 import setuptools
 
 
-VERSION = os.environ.get("VERSION", "0.1.0")
+VERSION = os.environ.get("VERSION", "0.1.1")
 CDK_VERSION = os.environ.get("CDK_VERSION", "1.56.0")
 
 with open("./README.md") as fp:
@@ -68,6 +68,8 @@ setuptools.setup(
         f"aws-cdk.aws-ssm=={CDK_VERSION}",
         f"aws-cdk.core=={CDK_VERSION}",
         f"aws-cdk.cx-api=={CDK_VERSION}",
+        f"aws-cdk.cx-api=={CDK_VERSION}",
+        f"aws-cdk.pipelines=={CDK_VERSION}",
         f"aws-cdk.region-info=={CDK_VERSION}",
         "black==19.10b0",
         "boto3==1.14.33",
