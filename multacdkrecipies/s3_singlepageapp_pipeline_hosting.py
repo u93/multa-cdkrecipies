@@ -68,7 +68,7 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
                     },
                     "artifacts": {
                         "base-directory": self._configuration["pipeline"]["stages"]["build"]["build_directory"],
-                        "files": self._configuration["pipeline"]["stages"]["build"]["files"]
+                        "files": self._configuration["pipeline"]["stages"]["build"].get("files", "**/*")
                     }
                 }
             )

@@ -211,6 +211,7 @@ S3_SPA_PIPELINE_HOSTING_SCHEMA = Schema(
             "stages": {
                 Optional("github_source"): {
                     "name": And(Use(str)),
+                    "branch": And(Use(str)),
                     "repo": And(Use(str)),
                     "owner": And(Use(str)),
                     "oauth_token_secret_arn": And(Use(str)),
