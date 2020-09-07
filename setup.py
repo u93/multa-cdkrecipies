@@ -2,8 +2,8 @@ import os
 import setuptools
 
 
-VERSION = os.environ.get("VERSION", "0.1.1")
-CDK_VERSION = os.environ.get("CDK_VERSION", "1.56.0")
+VERSION = os.environ.get("VERSION", "0.2.0")
+CDK_VERSION = os.environ.get("CDK_VERSION", "1.62.0")
 
 with open("./README.md") as fp:
     long_description = fp.read()
@@ -31,7 +31,7 @@ setuptools.setup(
     ],
     install_requires=[
         "appdirs==1.4.4",
-        "attrs==19.3.0",
+        "attrs==20.2.0",
         f"aws-cdk.assets=={CDK_VERSION}",
         f"aws-cdk.aws-apigateway=={CDK_VERSION}",
         f"aws-cdk.aws-applicationautoscaling=={CDK_VERSION}",
@@ -39,6 +39,7 @@ setuptools.setup(
         f"aws-cdk.aws-codebuild=={CDK_VERSION}",
         f"aws-cdk.aws-codecommit=={CDK_VERSION}",
         f"aws-cdk.aws-codepipeline=={CDK_VERSION}",
+        f"aws-cdk.aws-codepipeline-actions=={CDK_VERSION}",
         f"aws-cdk.aws-certificatemanager=={CDK_VERSION}",
         f"aws-cdk.aws-cloudformation=={CDK_VERSION}",
         f"aws-cdk.aws-cloudwatch=={CDK_VERSION}",
@@ -60,6 +61,7 @@ setuptools.setup(
         f"aws-cdk.aws-route53=={CDK_VERSION}",
         f"aws-cdk.aws-s3=={CDK_VERSION}",
         f"aws-cdk.aws-s3-assets=={CDK_VERSION}",
+        f"aws-cdk.aws-s3-deployment=={CDK_VERSION}",
         f"aws-cdk.aws-s3-notifications=={CDK_VERSION}",
         f"aws-cdk.aws-sagemaker=={CDK_VERSION}",
         f"aws-cdk.aws-sns=={CDK_VERSION}",
@@ -72,8 +74,8 @@ setuptools.setup(
         f"aws-cdk.pipelines=={CDK_VERSION}",
         f"aws-cdk.region-info=={CDK_VERSION}",
         "black==19.10b0",
-        "boto3==1.14.33",
-        "botocore==1.17.33",
+        "boto3==1.14.56",
+        "botocore==1.17.56",
         "cattrs==1.0.0",
         "click==7.1.2",
         "constructs==3.0.4",
@@ -83,13 +85,13 @@ setuptools.setup(
         "flake8==3.8.3",
         "Jinja2==2.11.2",
         "jmespath==0.10.0",
-        "jsii==1.9.0",
+        "jsii==1.12.0",
         "MarkupSafe==1.1.1",
         "mccabe==0.6.1",
         "pathspec==0.7.0",
         "publication==0.0.3",
         "python-dateutil==2.8.1",
-        "regex==2020.6.8",
+        "regex==2020.7.14",
         "s3pypi==0.10.1",
         "s3transfer==0.3.3",
         "schema==0.7.3",

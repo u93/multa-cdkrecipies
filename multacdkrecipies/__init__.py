@@ -16,6 +16,7 @@ from .lambda_functions_cluster import AwsLambdaFunctionsCluster
 from .lambda_layer_python_virtualenv import AwsLambdaLayerVenv
 from .pipeline_serverless import PipelineServerless
 from .s3_buckets_cluster import AwsS3BucketsCluster
+from .s3_singlepageapp_pipeline_hosting import AwsS3SinglePageAppHostingPipeline
 from .sns_lambdas_pipe import AwsSnsPipes
 from .sqs_lambdas_pipe import AwsSqsPipes
 from .ssm_parameter import AwsSsmString

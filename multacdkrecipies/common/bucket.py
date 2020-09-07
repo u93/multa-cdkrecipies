@@ -11,8 +11,19 @@ def base_bucket(construct, **kwargs):
     bucket_name = construct.prefix + "-" + kwargs["bucket_name"] + "-bucket-" + construct.environment_
     versioned = kwargs.get("versioned")
     public_read_access = kwargs["public_read_access"]
+    cors_settings = kwargs.get("cors")
+    website_error_document = kwargs.get("website", {}).get("error")
+    website_index_document = kwargs.get("website", {}).get("index")
 
-    bucket = s3.Bucket(construct, id=bucket_name, bucket_name=bucket_name, versioned=versioned)
+    bucket = s3.Bucket(
+        construct,
+        id=bucket_name,
+        bucket_name=bucket_name,
+        cors=cors_settings,
+        versioned=versioned,
+        website_error_document=website_error_document,
+        website_index_document=website_index_document
+    )
 
     if public_read_access is True:
         bucket.grant_public_access()
