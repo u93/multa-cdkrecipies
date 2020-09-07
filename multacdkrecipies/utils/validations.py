@@ -221,7 +221,7 @@ S3_SPA_PIPELINE_HOSTING_SCHEMA = Schema(
                     Optional("version"): And(Use(str)),
                     "commands": [And(Use(str))],
                     "build_directory": And(Use(str)),
-                    "files": And(Use(str)),
+                    Optional("files"): And(Use(str)),
                 },
                 "deploy": {
                     "name": And(Use(str)),
