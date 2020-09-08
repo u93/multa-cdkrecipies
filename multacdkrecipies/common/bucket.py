@@ -15,6 +15,12 @@ def base_bucket(construct, **kwargs):
     website_error_document = kwargs.get("website", {}).get("error")
     website_index_document = kwargs.get("website", {}).get("index")
 
+    if cors_settings is not None:
+        cors_settings = s3.CorsRule(
+            allowed_methods=cors_settings["allowed_methods"],
+            allowed_origins=cors_settings["allowed_origins"]
+        )
+
     bucket = s3.Bucket(
         construct,
         id=bucket_name,
