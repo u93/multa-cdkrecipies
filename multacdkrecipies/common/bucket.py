@@ -16,9 +16,10 @@ def base_bucket(construct, **kwargs):
     website_index_document = kwargs.get("website", {}).get("index")
 
     if cors_settings is not None:
+        allowed_methods = [value for value in list(s3.HttpMethods) if value.value in cors_settings["allowed_origins"]]
         cors_settings = s3.CorsRule(
             allowed_methods=cors_settings["allowed_methods"],
-            allowed_origins=cors_settings["allowed_origins"]
+            allowed_origins=allowed_methods
         )
         cors_settings = [cors_settings]
 
