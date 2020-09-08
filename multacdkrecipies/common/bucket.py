@@ -20,6 +20,7 @@ def base_bucket(construct, **kwargs):
             allowed_methods=cors_settings["allowed_methods"],
             allowed_origins=cors_settings["allowed_origins"]
         )
+        cors_settings = [cors_settings]
 
     bucket = s3.Bucket(
         construct,
