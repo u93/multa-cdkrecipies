@@ -200,9 +200,9 @@ S3_SPA_PIPELINE_HOSTING_SCHEMA = Schema(
             "cloudfront_distribution": {
                 "name": And(Use(str)),
                 "origin_config": {
-                    "behaviours": [
-                        {"is_default_behavior": And(Use(bool))}
-                    ]
+                    "behaviours": {
+                        "is_default_behavior": And(Use(bool))
+                    }
                 }
             }
         },

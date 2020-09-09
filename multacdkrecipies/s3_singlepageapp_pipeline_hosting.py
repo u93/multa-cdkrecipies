@@ -44,9 +44,11 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
         }
         self._deployment_artifact_bucket = base_bucket(self, **artifact_bucket_config)
 
-        # behaviour = cf.Behavior()
+        behaviour = cf.Behavior(
+            is_default_behavior=self._configuration["hosting"]["cloudfront_distribution"]["origin_config"]["behaviours"]["is_default_behavior"]
+        )
         cloudfront_origins = cf.SourceConfiguration(
-            behaviors=self._configuration["hosting"]["cloudfront_distribution"]["origin_config"]["behaviours"],
+            behaviors=[behaviour],
             s3_origin_source=cf.S3OriginConfig(s3_bucket_source=self._deployment_bucket)
         )
         self._cloudfront_distribution = cf.CloudFrontWebDistribution(

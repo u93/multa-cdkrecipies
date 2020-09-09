@@ -2,7 +2,7 @@ import os
 import setuptools
 
 
-VERSION = os.environ.get("VERSION", "0.2.7.3")
+VERSION = os.environ.get("VERSION", "0.2.7.4")
 CDK_VERSION = os.environ.get("CDK_VERSION", "1.62.0")
 
 with open("./README.md") as fp:
