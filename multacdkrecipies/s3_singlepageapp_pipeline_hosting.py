@@ -38,7 +38,7 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
         self._deployment_bucket = base_bucket(self, **self._configuration["hosting"]["bucket"])
 
         artifact_bucket_config = {
-            "bucket_name": f"{self._configuration['hosting']['bucket']}-artifacts",
+            "bucket_name": f"{self._configuration['hosting']['bucket']['bucket_name']}-artifacts",
             "versioned": True,
             "public_read_access": False
         }
