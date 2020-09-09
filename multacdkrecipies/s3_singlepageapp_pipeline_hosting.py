@@ -57,10 +57,11 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
             origin_configs=[cloudfront_origins]
         )
 
+        code_build_project_name = f"{self.prefix}-{self._configuration['pipeline']['stages']['build']['name']}-cbproject-{self.environment_}"
         self._codebuild_project = cb.Project(
             self,
-            id=f"{self._configuration['pipeline']['stages']['build']['name']}-cbproject",
-            project_name=f"{self._configuration['pipeline']['stages']['build']['name']}-cbproject",
+            id=code_build_project_name,
+            project_name=code_build_project_name,
             build_spec=cb.BuildSpec.from_object(
                 {
                     "version": self._configuration["pipeline"]["stages"]["build"].get("version", "0.2"),
@@ -80,11 +81,12 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
         source_artifact = cp.Artifact(artifact_name="source_artifact")
         single_page_app_artifact = cp.Artifact(artifact_name="single_page_app_artifact")
 
+        pipeline_name = f"{self.prefix}-{self._configuration['pipeline']['name']}-pipeline-{self.environment_}"
         self._s3_single_page_app_pipeline = cp.Pipeline(
             self,
-            id=self._configuration["pipeline"]["name"],
+            id=pipeline_name,
+            pipeline_name=pipeline_name,
             artifact_bucket=self._deployment_artifact_bucket,
-            pipeline_name=self._configuration["pipeline"]["name"],
         )
 
         self._s3_single_page_app_pipeline.add_stage(
