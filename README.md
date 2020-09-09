@@ -2,7 +2,12 @@
 
 ![multacdkrecipies logo](etc/img/logo.png)
 
-[comment]: <[![Downloads](http://pepy.tech/badge/stronghold)](http://pepy.tech/count/stronghold)>
+![Versions](https://img.shields.io/pypi/v/multacdkrecipies)
+[![Downloads](https://pepy.tech/badge/multacdkrecipies)](https://pepy.tech/project/multacdkrecipies)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
+[![Python 3.7](https://img.shields.io/badge/python-3.7-blue.svg)](https://www.python.org/downloads/release/python-360/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+[![PyPI license](https://img.shields.io/pypi/l/ansicolortags.svg)](https://pypi.python.org/pypi/ansicolortags/)
 
  - Designed to facilitate AWS CDK usage in Python CDK Apps by creating high-level constructs that help development in Serverless Applications.
  - Designed to be used like a regular Python CDK application.
@@ -21,6 +26,7 @@
 ---
 
 - `config.py`
+    + Set configuration for the multacdkrecipies CDK Constructs.
 ```
 "LAMBDA_LAYER_CONFIG": {
     "identifier": "api_gateway",
@@ -95,6 +101,7 @@ API_CONFIG = {
 ```
 
 - `stack.py`
+    + Create the CDK App Stack by using multacdkrecipies CDK Constructs with the configuration defined above.
 ```
 from aws_cdk import core
 from multacdkrecipies import (
@@ -135,6 +142,7 @@ class ApiStack(core.Stack):
 ```
 
 - `app.py`
+    + Initialize the CDK App like a regular CDK App.
 ```
 from aws_cdk import core
 from stack import ApiStack

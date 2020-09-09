@@ -71,4 +71,18 @@ IOT_ANALYTICS_DATASET = Schema(
     }
 )
 
-S3_BUCKET_SCHEMA = Schema({"bucket_name": And(Use(str)), "versioned": And(Use(bool)), "public_read_access": And(Use(bool)),})
+S3_BUCKET_SCHEMA = Schema(
+    {
+        "bucket_name": And(Use(str)),
+        Optional("cors"): {
+            "allowed_methods": [And(Use(str))],
+            "allowed_origins": [And(Use(str))],
+        },
+        "versioned": And(Use(bool)),
+        "public_read_access": And(Use(bool)),
+        Optional("website"): {
+            "index": And(Use(str)),
+            "error": And(Use(str))
+        }
+    }
+)

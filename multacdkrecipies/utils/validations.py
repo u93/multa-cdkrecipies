@@ -193,6 +193,44 @@ LAMBDA_FUNCTIONS_CLUSTER_SCHEMA = Schema({"functions": [LAMBDA_BASE_SCHEMA],})
 
 S3_BUCKETS_CLUSTER_SCHEMA = Schema({"buckets": [S3_BUCKET_SCHEMA],})
 
+S3_SPA_PIPELINE_HOSTING_SCHEMA = Schema(
+    {
+        "hosting": {
+            "bucket": S3_BUCKET_SCHEMA,
+            "cloudfront_distribution": {
+                "name": And(Use(str)),
+                "origin_config": {
+                    "behaviours": {
+                        "is_default_behavior": And(Use(bool))
+                    }
+                }
+            }
+        },
+        "pipeline": {
+            "name": And(Use(str)),
+            "stages": {
+                Optional("github_source"): {
+                    "name": And(Use(str)),
+                    "branch": And(Use(str)),
+                    "repo": And(Use(str)),
+                    "owner": And(Use(str)),
+                    "oauth_token_secret_arn": And(Use(str)),
+                },
+                "build": {
+                    "name": And(Use(str)),
+                    Optional("version"): And(Use(str)),
+                    "commands": [And(Use(str))],
+                    "build_directory": And(Use(str)),
+                    Optional("files"): And(Use(str)),
+                },
+                "deploy": {
+                    "name": And(Use(str)),
+                }
+            }
+        }
+    }
+)
+
 USER_POOL_GROUPS_SCHEMA = Schema(
     {
         "user_pool_groups": [
@@ -436,9 +474,9 @@ LAMBDA_LAYER_SCHEMA = Schema(
         Optional("license"): And(Use(str)),
         Optional("dependencies"): And(Use(bool)),
         Optional("paths"): {
-            "python_requirements_path": And(Use(str)),
-            "layer_directory_path": And(Use(str)),
             "layer_code_path": And(Use(str)),
+            "layer_directory_path": And(Use(str)),
+            "python_requirements_file_path": And(Use(str)),
         },
         "layer_runtimes": [And(Use(str))],
         Optional("exclude"): [And(Use(str))],
