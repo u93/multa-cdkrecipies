@@ -201,7 +201,7 @@ S3_SPA_PIPELINE_HOSTING_SCHEMA = Schema(
                 "name": And(Use(str)),
                 "origin_config": {
                     "behaviours": [
-                        {"default": And(Use(bool))}
+                        {"is_default_behavior": And(Use(bool))}
                     ]
                 }
             }
