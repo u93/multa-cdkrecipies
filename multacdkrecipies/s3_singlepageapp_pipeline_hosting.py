@@ -96,6 +96,7 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
                     action_name=self._configuration["pipeline"]["stages"]["github_source"]["name"],
                     repo=self._configuration["pipeline"]["stages"]["github_source"]["repo"],
                     owner=self._configuration["pipeline"]["stages"]["github_source"]["owner"],
+                    branch=self._configuration["pipeline"]["stages"]["github_source"]["branch"],
                     oauth_token=core.SecretValue.secrets_manager(
                         secret_id=self._configuration["pipeline"]["stages"]["github_source"]["oauth_token_secret_arn"],
                     ),
