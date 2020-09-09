@@ -9,7 +9,7 @@ def base_bucket(construct, **kwargs):
     :return: S3 Bucket Construct.
     """
     bucket_name = construct.prefix + "-" + kwargs["bucket_name"] + "-bucket-" + construct.environment_
-    bucket_name = bucket_name.replace("_", "-")
+    parsed_bucket_name = bucket_name.replace("_", "-")
     versioned = kwargs.get("versioned")
     public_read_access = kwargs["public_read_access"]
     cors_settings = kwargs.get("cors")
@@ -26,8 +26,8 @@ def base_bucket(construct, **kwargs):
 
     bucket = s3.Bucket(
         construct,
-        id=bucket_name,
-        bucket_name=bucket_name,
+        id=parsed_bucket_name,
+        bucket_name=parsed_bucket_name,
         cors=cors_settings,
         versioned=versioned,
         website_error_document=website_error_document,
