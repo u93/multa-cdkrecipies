@@ -18,10 +18,7 @@ def base_bucket(construct, **kwargs):
 
     if cors_settings is not None:
         allowed_methods = [value for value in list(s3.HttpMethods) if value.value in cors_settings["allowed_methods"]]
-        cors_settings = s3.CorsRule(
-            allowed_methods=allowed_methods,
-            allowed_origins=cors_settings["allowed_origins"]
-        )
+        cors_settings = s3.CorsRule(allowed_methods=allowed_methods, allowed_origins=cors_settings["allowed_origins"])
         cors_settings = [cors_settings]
 
     bucket = s3.Bucket(
@@ -31,7 +28,7 @@ def base_bucket(construct, **kwargs):
         cors=cors_settings,
         versioned=versioned,
         website_error_document=website_error_document,
-        website_index_document=website_index_document
+        website_index_document=website_index_document,
     )
 
     if public_read_access is True:

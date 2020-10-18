@@ -109,7 +109,8 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
                 if logging_level_configuration in str(element):
                     logging_level = element
             default_stage_options = api_gateway.StageOptions(
-                logging_level=logging_level, metrics_enabled=default_stage_configuration["metrics_enabled"],
+                logging_level=logging_level,
+                metrics_enabled=default_stage_configuration["metrics_enabled"],
             )
 
         # Defining Rest API Gateway with Lambda Integration
@@ -188,7 +189,10 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
                 for alarm_definition in lambda_function.get("alarms"):
                     functions_alarms.append(
                         base_alarm(
-                            self, resource_name=lambda_function["lambda_name"], base_resource=resource, **alarm_definition,
+                            self,
+                            resource_name=lambda_function["lambda_name"],
+                            base_resource=resource,
+                            **alarm_definition,
                         )
                     )
 

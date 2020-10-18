@@ -6,8 +6,7 @@ from multacdkrecipies.recipies.utils import S3_BUCKETS_CLUSTER_SCHEMA, validate_
 
 
 class AwsS3BucketsCluster(core.Construct):
-    """
-    """
+    """"""
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         """

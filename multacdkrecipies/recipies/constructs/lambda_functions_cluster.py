@@ -4,8 +4,7 @@ from multacdkrecipies.recipies.utils import LAMBDA_FUNCTIONS_CLUSTER_SCHEMA, val
 
 
 class AwsLambdaFunctionsCluster(core.Construct):
-    """
-    """
+    """"""
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         """
@@ -43,7 +42,10 @@ class AwsLambdaFunctionsCluster(core.Construct):
                 for alarm_definition in lambda_function.get("alarms"):
                     functions_alarms.append(
                         base_alarm(
-                            self, resource_name=lambda_function["lambda_name"], base_resource=resource, **alarm_definition,
+                            self,
+                            resource_name=lambda_function["lambda_name"],
+                            base_resource=resource,
+                            **alarm_definition,
                         )
                     )
 

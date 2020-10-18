@@ -110,7 +110,8 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                 if logging_level_configuration in str(element):
                     logging_level = element
             default_stage_options = api_gateway.StageOptions(
-                logging_level=logging_level, metrics_enabled=default_stage_configuration["metrics_enabled"],
+                logging_level=logging_level,
+                metrics_enabled=default_stage_configuration["metrics_enabled"],
             )
 
         # Defining Rest API Gateway with Lambda Integration

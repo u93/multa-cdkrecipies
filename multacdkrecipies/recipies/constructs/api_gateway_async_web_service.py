@@ -4,7 +4,11 @@ from aws_cdk import core
 
 from multacdkrecipies.common import base_bucket, base_lambda_function
 from multacdkrecipies.recipies.settings import DEFAULT_LAMBDA_CODE_PATH, DEFAULT_LAMBDA_CODE_PATH_EXISTS
-from multacdkrecipies.recipies.utils import APIGATEWAY_ASYNC_WEB_SERVICE_SCHEMA, validate_configuration, WrongRuntimePassed
+from multacdkrecipies.recipies.utils import (
+    APIGATEWAY_ASYNC_WEB_SERVICE_SCHEMA,
+    validate_configuration,
+    WrongRuntimePassed,
+)
 
 
 class AwsApiGatewayLambdaPipesAsync(core.Construct):

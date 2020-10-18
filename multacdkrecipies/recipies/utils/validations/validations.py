@@ -16,9 +16,18 @@ APIGATEWAY_ASYNC_WEB_SERVICE_SCHEMA = Schema(
         Optional("buckets"): [S3_BUCKET_SCHEMA],
         "api": {
             Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
-            "lambda_handler": {"resources": [{"method": And(Use(str))}], "handler": LAMBDA_BASE_SCHEMA,},
-            "http_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
-            "service_handler": {"resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}], "handler": {}},
+            "lambda_handler": {
+                "resources": [{"method": And(Use(str))}],
+                "handler": LAMBDA_BASE_SCHEMA,
+            },
+            "http_handler": {
+                "resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}],
+                "handler": {},
+            },
+            "service_handler": {
+                "resources": [{"method": And(Use(str)), "lambda_authorizer": And(Use(str))}],
+                "handler": {},
+            },
         },
     }
 )
@@ -35,7 +44,10 @@ APIGATEWAY_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
                 "proxy": And(Use(bool)),
                 Optional("allowed_origins"): [And(Use(str))],
                 Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
-                Optional("default_cors_options"): {"allow_origins": [And(Use(str))], "options_status_code": And(Use(int))},
+                Optional("default_cors_options"): {
+                    "allow_origins": [And(Use(str))],
+                    "options_status_code": And(Use(int)),
+                },
                 Optional("default_http_methods"): [And(Use(str))],
                 "default_handler": LAMBDA_BASE_SCHEMA,
                 Optional("default_media_types"): [And(Use(str))],
@@ -61,7 +73,10 @@ APIGATEWAY_ROBUST_WEB_SERVICE_SCHEMA = Schema(
                 "proxy": And(Use(bool)),
                 Optional("allowed_origins"): [And(Use(str))],
                 Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
-                Optional("default_cors_options"): {"allow_origins": [And(Use(str))], "options_status_code": And(Use(int))},
+                Optional("default_cors_options"): {
+                    "allow_origins": [And(Use(str))],
+                    "options_status_code": And(Use(int)),
+                },
                 Optional("default_http_methods"): [And(Use(str))],
                 "default_handler": LAMBDA_BASE_SCHEMA,
                 Optional("default_media_types"): [And(Use(str))],
@@ -77,7 +92,11 @@ APIGATEWAY_ROBUST_WEB_SERVICE_SCHEMA = Schema(
                         Optional("methods"): [And(Use(str))],
                         "handler": LAMBDA_BASE_SCHEMA,
                         Optional("childs"): [
-                            {"resource_name": And(Use(str)), Optional("methods"): [And(Use(str))], "handler": LAMBDA_BASE_SCHEMA,}
+                            {
+                                "resource_name": And(Use(str)),
+                                Optional("methods"): [And(Use(str))],
+                                "handler": LAMBDA_BASE_SCHEMA,
+                            }
                         ],
                     },
                 }
@@ -98,7 +117,10 @@ APIGATEWAY_FAN_OUT_WEB_SERVICE_SCHEMA = Schema(
                 "proxy": And(Use(bool)),
                 Optional("allowed_origins"): [And(Use(str))],
                 Optional("custom_domain"): {"domain_name": And(Use(str)), "certificate_arn": And(Use(str))},
-                Optional("default_cors_options"): {"allow_origins": [And(Use(str))], "options_status_code": And(Use(int))},
+                Optional("default_cors_options"): {
+                    "allow_origins": [And(Use(str))],
+                    "options_status_code": And(Use(int)),
+                },
                 Optional("default_http_methods"): [And(Use(str))],
                 "default_handler": LAMBDA_BASE_SCHEMA,
                 Optional("default_media_types"): [And(Use(str))],
@@ -134,17 +156,34 @@ USER_SERVERLESS_BACKEND_SCHEMA = Schema(
             "sign_up": {
                 "enabled": And(Use(bool)),
                 "user_verification": {
-                    Optional("email"): {"subject": And(Use(str)), "body": And(Use(str)), "style": And(Use(str)),},
-                    Optional("sms"): {"body": And(Use(str)),},
+                    Optional("email"): {
+                        "subject": And(Use(str)),
+                        "body": And(Use(str)),
+                        "style": And(Use(str)),
+                    },
+                    Optional("sms"): {
+                        "body": And(Use(str)),
+                    },
                 },
             },
             "invitation": {
-                Optional("email"): {"subject": And(Use(str)), "body": And(Use(str)),},
-                Optional("sms"): {"body": And(Use(str)),},
+                Optional("email"): {
+                    "subject": And(Use(str)),
+                    "body": And(Use(str)),
+                },
+                Optional("sms"): {
+                    "body": And(Use(str)),
+                },
             },
             "sign_in": {"order": [And(Use(str))]},
             "attributes": {
-                "standard": [{"name": And(Use(str)), "mutable": And(Use(bool)), "required": And(Use(bool)),}],
+                "standard": [
+                    {
+                        "name": And(Use(str)),
+                        "mutable": And(Use(bool)),
+                        "required": And(Use(bool)),
+                    }
+                ],
                 Optional("custom"): [
                     {
                         "name": And(Use(str)),
@@ -189,9 +228,17 @@ USER_SERVERLESS_BACKEND_SCHEMA = Schema(
     }
 )
 
-LAMBDA_FUNCTIONS_CLUSTER_SCHEMA = Schema({"functions": [LAMBDA_BASE_SCHEMA],})
+LAMBDA_FUNCTIONS_CLUSTER_SCHEMA = Schema(
+    {
+        "functions": [LAMBDA_BASE_SCHEMA],
+    }
+)
 
-S3_BUCKETS_CLUSTER_SCHEMA = Schema({"buckets": [S3_BUCKET_SCHEMA],})
+S3_BUCKETS_CLUSTER_SCHEMA = Schema(
+    {
+        "buckets": [S3_BUCKET_SCHEMA],
+    }
+)
 
 S3_SPA_SIMPLE_PIPELINE_SCHEMA = Schema(
     {
@@ -217,9 +264,9 @@ S3_SPA_SIMPLE_PIPELINE_SCHEMA = Schema(
                 },
                 "deploy": {
                     "name": And(Use(str)),
-                }
-            }
-        }
+                },
+            },
+        },
     }
 )
 
@@ -229,12 +276,8 @@ S3_SPA_SIMPLE_PIPELINE_HOSTING_SCHEMA = Schema(
             "bucket": S3_BUCKET_SCHEMA,
             "cloudfront_distribution": {
                 "name": And(Use(str)),
-                "origin_config": {
-                    "behaviours": {
-                        "is_default_behavior": And(Use(bool))
-                    }
-                }
-            }
+                "origin_config": {"behaviours": {"is_default_behavior": And(Use(bool))}},
+            },
         },
         "pipeline": {
             "name": And(Use(str)),
@@ -255,9 +298,9 @@ S3_SPA_SIMPLE_PIPELINE_HOSTING_SCHEMA = Schema(
                 },
                 "deploy": {
                     "name": And(Use(str)),
-                }
-            }
-        }
+                },
+            },
+        },
     }
 )
 
@@ -307,7 +350,9 @@ IOT_SNS_CONFIG_SCHEMA = Schema(
                 }
             ],
         },
-        "lambda_handlers": [LAMBDA_BASE_SCHEMA,],
+        "lambda_handlers": [
+            LAMBDA_BASE_SCHEMA,
+        ],
         "iot_rule": {
             "rule_name": And(Use(str)),
             Optional("description"): And(Use(str)),
@@ -334,7 +379,9 @@ IOT_SQS_CONFIG_SCHEMA = Schema(
                 }
             ],
         },
-        "lambda_handlers": [LAMBDA_BASE_SCHEMA,],
+        "lambda_handlers": [
+            LAMBDA_BASE_SCHEMA,
+        ],
         "iot_rule": {
             "rule_name": And(Use(str)),
             Optional("description"): And(Use(str)),
@@ -353,7 +400,17 @@ CLOUDWATCH_CONFIG_SCHEMA = Schema(
             "enabled": And(Use(bool)),
             "schedule": And(Use(str)),
         },
-        "lambda_handlers": [LAMBDA_BASE_SCHEMA,],
+        "lambda_handlers": [
+            LAMBDA_BASE_SCHEMA,
+        ],
+    }
+)
+
+S3_LAMBDA_CONFIG_SCHEMA = Schema(
+    {
+        "bucket": S3_BUCKET_SCHEMA,
+        "lambda_handler": LAMBDA_BASE_SCHEMA,
+        "events": [And(Use(str))]
     }
 )
 
@@ -391,13 +448,19 @@ SQS_CONFIG_SCHEMA = Schema(
                 }
             ],
         },
-        "lambda_handlers": [LAMBDA_BASE_SCHEMA,],
+        "lambda_handlers": [
+            LAMBDA_BASE_SCHEMA,
+        ],
     }
 )
 
 IOT_KINESIS_CONFIG_SCHEMA = Schema(
     {
-        "stream": {"stream_name": And(Use(str)), "shard_count": And(Use(int)), Optional("retention_period"): And(Use(int)),},
+        "stream": {
+            "stream_name": And(Use(str)),
+            "shard_count": And(Use(int)),
+            Optional("retention_period"): And(Use(int)),
+        },
         "lambda_handlers": [
             {
                 "lambda_handler": LAMBDA_BASE_SCHEMA,
@@ -444,7 +507,10 @@ IOT_KINESIS_FIREHOSE_CONFIG_SCHEMA = Schema(
 IOT_ANALYTICS_DATA_WORKFLOW_SCHEMA = Schema(
     {
         "name": And(Use(str)),
-        Optional("retention_periods"): {Optional("channel"): And(Use(int)), Optional("datastore"): And(Use(int)),},
+        Optional("retention_periods"): {
+            Optional("channel"): And(Use(int)),
+            Optional("datastore"): And(Use(int)),
+        },
         Optional("datasets"): [IOT_ANALYTICS_DATASET],
     }
 )
@@ -480,7 +546,10 @@ IOT_ANALYTICS_FAN_OUT_SCHEMA = Schema(
 IOT_ANALYTICS_SIMPLE_PIPELINE_SCHEMA = Schema(
     {
         "analytics_resource_name": And(Use(str)),
-        Optional("retention_periods"): {Optional("channel"): And(Use(int)), Optional("datastore"): And(Use(int)),},
+        Optional("retention_periods"): {
+            Optional("channel"): And(Use(int)),
+            Optional("datastore"): And(Use(int)),
+        },
         Optional("datasets"): [IOT_ANALYTICS_DATASET],
         "iot_rules": [
             {
@@ -525,7 +594,11 @@ PIPELINE_SERVERLESS = Schema(
 )
 
 SAGEMAKER_NOTEBOOK_SCHEMA = Schema(
-    {"name": And(Use(str)), "scripts": {"on_create": And(Use(str)), "on_start": And(Use(str))}, "instance_type": And(Use(str)),}
+    {
+        "name": And(Use(str)),
+        "scripts": {"on_create": And(Use(str)), "on_start": And(Use(str))},
+        "instance_type": And(Use(str)),
+    }
 )
 
 SSM_PARAMETER_STRING_SCHEMA = Schema(

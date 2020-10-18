@@ -9,8 +9,7 @@ from multacdkrecipies.recipies.utils import S3_SPA_SIMPLE_PIPELINE_SCHEMA, valid
 
 
 class AwsS3SinglePageAppHostingPipeline(core.Construct):
-    """
-    """
+    """"""
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         """
@@ -31,15 +30,15 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
 
         self._deployment_bucket = base_bucket(self, **self._configuration["hosting"]["bucket"])
 
-        artifact_bucket_name = f"{self.prefix}-{self._configuration['hosting']['bucket']['bucket_name']}-artifacts-{self.environment_}"
-        artifact_bucket_config = {
-            "bucket_name": artifact_bucket_name,
-            "versioned": True,
-            "public_read_access": False
-        }
+        artifact_bucket_name = (
+            f"{self.prefix}-{self._configuration['hosting']['bucket']['bucket_name']}-artifacts-{self.environment_}"
+        )
+        artifact_bucket_config = {"bucket_name": artifact_bucket_name, "versioned": True, "public_read_access": False}
         self._deployment_artifact_bucket = base_bucket(self, **artifact_bucket_config)
 
-        code_build_project_name = f"{self.prefix}-{self._configuration['pipeline']['stages']['build']['name']}-cbproject-{self.environment_}"
+        code_build_project_name = (
+            f"{self.prefix}-{self._configuration['pipeline']['stages']['build']['name']}-cbproject-{self.environment_}"
+        )
         self._codebuild_project = cb.Project(
             self,
             id=code_build_project_name,
@@ -47,17 +46,13 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
             build_spec=cb.BuildSpec.from_object(
                 {
                     "version": self._configuration["pipeline"]["stages"]["build"].get("version", "0.2"),
-                    "phases": {
-                        "build": {
-                            "commands": self._configuration["pipeline"]["stages"]["build"]["commands"]
-                        }
-                    },
+                    "phases": {"build": {"commands": self._configuration["pipeline"]["stages"]["build"]["commands"]}},
                     "artifacts": {
                         "base-directory": self._configuration["pipeline"]["stages"]["build"]["build_directory"],
-                        "files": self._configuration["pipeline"]["stages"]["build"].get("files", "**/*")
-                    }
+                        "files": self._configuration["pipeline"]["stages"]["build"].get("files", "**/*"),
+                    },
                 }
-            )
+            ),
         )
 
         source_artifact = cp.Artifact(artifact_name="source_artifact")
@@ -82,9 +77,9 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
                     oauth_token=core.SecretValue.secrets_manager(
                         secret_id=self._configuration["pipeline"]["stages"]["github_source"]["oauth_token_secret_arn"],
                     ),
-                    output=source_artifact
+                    output=source_artifact,
                 )
-            ]
+            ],
         )
 
         self._s3_single_page_app_pipeline.add_stage(
@@ -94,9 +89,9 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
                     action_name=self._configuration["pipeline"]["stages"]["build"]["name"],
                     input=source_artifact,
                     project=self._codebuild_project,
-                    outputs=[single_page_app_artifact]
+                    outputs=[single_page_app_artifact],
                 )
-            ]
+            ],
         )
 
         self._s3_single_page_app_pipeline.add_stage(
@@ -107,7 +102,7 @@ class AwsS3SinglePageAppHostingPipeline(core.Construct):
                     bucket=self._deployment_bucket,
                     input=single_page_app_artifact,
                 )
-            ]
+            ],
         )
 
     @property

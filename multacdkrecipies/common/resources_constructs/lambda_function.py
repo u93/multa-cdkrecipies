@@ -80,7 +80,12 @@ def base_lambda_function(construct, **kwargs):
         rule_name = construct.prefix + "_" + kwargs["lambda_name"] + "_rule_" + construct.environment_
         schedule = events.Schedule.expression(f"cron({base_schedule_expression})")
         _cloudwatch_event = events.Rule(
-            construct, id=rule_name, rule_name=rule_name, description=base_description, enabled=True, schedule=schedule,
+            construct,
+            id=rule_name,
+            rule_name=rule_name,
+            description=base_description,
+            enabled=True,
+            schedule=schedule,
         )
         _cloudwatch_event.add_target(targets.LambdaFunction(handler=_lambda_function))
 

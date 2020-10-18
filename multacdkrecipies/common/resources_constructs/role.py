@@ -60,7 +60,9 @@ def base_federated_role(
         iam_role_name = construct.prefix + "_role_" + resource_name + "_" + construct.environment_
         iam_policy_name = construct.prefix + "_policy_" + resource_name + "_" + construct.environment_
         principal = iam.FederatedPrincipal(
-            federated=f"{federated_resource}.amazonaws.com", conditions=conditions, assume_role_action=assume_role_action
+            federated=f"{federated_resource}.amazonaws.com",
+            conditions=conditions,
+            assume_role_action=assume_role_action,
         )
 
         # Defining IAM Role

@@ -3,7 +3,9 @@ from aws_cdk import aws_iotanalytics as iotanl_
 
 def channel_activity(resource, next_resource):
     channel_activity_property = iotanl_.CfnPipeline.ChannelProperty(
-        channel_name=resource.channel_name, name=resource.channel_name, next=next_resource.datastore_name,
+        channel_name=resource.channel_name,
+        name=resource.channel_name,
+        next=next_resource.datastore_name,
     )
     pipeline_channel_activity = iotanl_.CfnPipeline.ActivityProperty(channel=channel_activity_property)
     return pipeline_channel_activity

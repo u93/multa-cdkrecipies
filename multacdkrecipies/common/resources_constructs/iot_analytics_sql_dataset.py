@@ -30,14 +30,18 @@ def base_iot_analytics_dataset(construct, resource_dependencies: list, **kwargs)
         delta_time = [
             iotanl_.CfnDataset.FilterProperty(
                 delta_time=iotanl_.CfnDataset.DeltaTimeProperty(
-                    offset_seconds=received_offset_seconds, time_expression=time_expression,
+                    offset_seconds=received_offset_seconds,
+                    time_expression=time_expression,
                 )
             )
         ]
 
     sql_action = iotanl_.CfnDataset.ActionProperty(
         action_name=dataset_name,
-        query_action=iotanl_.CfnDataset.QueryActionProperty(sql_query=sql_action_definition["sql_query"], filters=delta_time,),
+        query_action=iotanl_.CfnDataset.QueryActionProperty(
+            sql_query=sql_action_definition["sql_query"],
+            filters=delta_time,
+        ),
     )
     actions.append(sql_action)
 

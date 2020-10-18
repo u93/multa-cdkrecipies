@@ -117,9 +117,13 @@ def base_custom_attributes(custom_attributes_list: list):
                 mutable=element.get("mutable"), min=element.get("minimum"), max=element.get("maximum")
             )
         elif element["type"] == "bool":
-            custom_attribute = cognito.BooleanAttribute(mutable=element.get("mutable"),)
+            custom_attribute = cognito.BooleanAttribute(
+                mutable=element.get("mutable"),
+            )
         elif element["type"] == "date":
-            custom_attribute = cognito.DateTimeAttribute(mutable=element.get("mutable"),)
+            custom_attribute = cognito.DateTimeAttribute(
+                mutable=element.get("mutable"),
+            )
         else:
             continue
         custom_attributes[element] = custom_attribute

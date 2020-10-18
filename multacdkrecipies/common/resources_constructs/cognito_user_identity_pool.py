@@ -28,7 +28,10 @@ def base_cognito_user_identity_pool(construct, user_pool_client_id, user_pool_pr
     )
 
     base_cognito_user_identity_pool_attach_role(
-        construct, identity_pool=identity_pool, unauth_role_config=kwargs["unauth_role"], auth_role_config=kwargs["auth_role"]
+        construct,
+        identity_pool=identity_pool,
+        unauth_role_config=kwargs["unauth_role"],
+        auth_role_config=kwargs["auth_role"],
     )
 
     return identity_pool

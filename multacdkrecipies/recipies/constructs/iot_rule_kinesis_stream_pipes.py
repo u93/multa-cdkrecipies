@@ -5,7 +5,13 @@ from aws_cdk import (
     aws_iot as iot,
     aws_lambda_event_sources as event_src,
 )
-from multacdkrecipies.common import base_alarm, base_iot_rule, base_lambda_function, base_kinesis_role, base_kinesis_stream
+from multacdkrecipies.common import (
+    base_alarm,
+    base_iot_rule,
+    base_lambda_function,
+    base_kinesis_role,
+    base_kinesis_stream,
+)
 from multacdkrecipies.recipies.utils import IOT_KINESIS_CONFIG_SCHEMA, validate_configuration
 
 

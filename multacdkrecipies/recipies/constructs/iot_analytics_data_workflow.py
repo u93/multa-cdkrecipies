@@ -59,7 +59,10 @@ class AwsIotAnalyticsDataWorkflow(core.Construct):
 
         # Defining Pipeline
         self._pipeline = base_iot_analytics_pipeline(
-            construct=self, activities=activities_dict, resource_dependencies=resources_dependencies, pipeline_name=pipeline_name
+            construct=self,
+            activities=activities_dict,
+            resource_dependencies=resources_dependencies,
+            pipeline_name=pipeline_name,
         )
 
         # Defining Datasets

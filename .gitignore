@@ -137,3 +137,5 @@ idea/
 /cdk.json
 
 cdk.out/
+Scripts/
+pyvenv.cfg

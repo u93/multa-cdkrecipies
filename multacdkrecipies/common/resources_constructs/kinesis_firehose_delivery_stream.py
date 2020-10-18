@@ -41,7 +41,10 @@ def firehose_destinations(configuration):
         bucket = base_bucket()
         role = base_kinesis_firehose_s3_role()
         extended_s3_config = fh_stream.CfnDeliveryStream.ExtendedS3DestinationConfigurationProperty(
-            bucket_arn=bucket.bucket_arn, role_arn=role.role_arn, compression_format="", buffering_hints="",
+            bucket_arn=bucket.bucket_arn,
+            role_arn=role.role_arn,
+            compression_format="",
+            buffering_hints="",
         )
         destinations_config["extended_s3_destination_configuration"] = extended_s3_config
     if configuration.get("redshift_destination_configuration") is not None:
@@ -50,7 +53,10 @@ def firehose_destinations(configuration):
         bucket = base_bucket()
         role = base_kinesis_firehose_s3_role()
         s3_config = fh_stream.CfnDeliveryStream.S3DestinationConfigurationProperty(
-            bucket_arn=bucket.bucket_arn, role_arn=role.role_arn, compression_format="", buffering_hints="",
+            bucket_arn=bucket.bucket_arn,
+            role_arn=role.role_arn,
+            compression_format="",
+            buffering_hints="",
         )
         destinations_config["s3_destination_configuration"] = s3_config
     if configuration.get("splunk_destination_configuration") is not None:

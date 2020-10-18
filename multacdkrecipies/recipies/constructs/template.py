@@ -6,8 +6,7 @@ from multacdkrecipies.recipies.utils import SNS_CONFIG_SCHEMA, validate_configur
 
 
 class AwsSnsPipes(core.Construct):
-    """
-    """
+    """"""
 
     def __init__(self, scope: core.Construct, id: str, *, prefix: str, environment: str, configuration, **kwargs):
         """
