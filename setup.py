@@ -2,8 +2,8 @@ import os
 import setuptools
 
 
-VERSION = os.environ.get("VERSION", "0.2.0")
-CDK_VERSION = os.environ.get("CDK_VERSION", "1.62.0")
+VERSION = os.environ.get("VERSION", "0.2.0.1")
+CDK_VERSION = os.environ.get("CDK_VERSION", "1.68.0")
 
 with open("./README.md") as fp:
     long_description = fp.read()
@@ -70,33 +70,38 @@ setuptools.setup(
         f"aws-cdk.cx-api=={CDK_VERSION}",
         f"aws-cdk.pipelines=={CDK_VERSION}",
         f"aws-cdk.region-info=={CDK_VERSION}",
-        "black==19.10b0",
-        "boto3==1.14.56",
-        "botocore==1.17.56",
+        "black==20.8b1",
+        "boto3==1.15.18",
+        "botocore==1.18.18",
         "cattrs==1.0.0",
         "click==7.1.2",
-        "resources_constructs==3.0.4",
+        "constructs==3.0.22",
         "contextlib2==0.6.0.post1",
         "docutils==0.16",
         "entrypoints==0.3",
-        "flake8==3.8.3",
+        "flake8==3.8.4",
+        "importlib-metadata==2.0.0",
         "Jinja2==2.11.2",
         "jmespath==0.10.0",
-        "jsii==1.12.0",
+        "jsii==1.13.0",
         "MarkupSafe==1.1.1",
         "mccabe==0.6.1",
-        "pathspec==0.7.0",
+        "mypy-extensions==0.4.3",
+        "pathspec==0.8.0",
         "publication==0.0.3",
+        "pycodestyle==2.6.0",
+        "pyflakes==2.2.0",
         "python-dateutil==2.8.1",
-        "regex==2020.7.14",
-        "s3pypi==0.10.1",
+        "regex==2020.10.15",
+        "s3pypi==0.11.0",
         "s3transfer==0.3.3",
         "schema==0.7.3",
         "six==1.15.0",
         "toml==0.10.1",
         "typed-ast==1.4.1",
-        "typing-extensions==3.7.4.2",
+        "typing-extensions==3.7.4.3",
         "urllib3==1.25.10",
+        "zipp==3.3.1",
     ],
     python_requires=">=3.7",
     classifiers=[
