@@ -133,3 +133,7 @@ idea/
 /.vscode/
 /test/
 /dist/
+/tests/
+/cdk.json
+
+cdk.out/

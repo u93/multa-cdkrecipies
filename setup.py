@@ -2,7 +2,7 @@ import os
 import setuptools
 
 
-VERSION = os.environ.get("VERSION", "0.2.7.5")
+VERSION = os.environ.get("VERSION", "0.2.0")
 CDK_VERSION = os.environ.get("CDK_VERSION", "1.62.0")
 
 with open("./README.md") as fp:
@@ -14,7 +14,7 @@ setuptools.setup(
     author="Eugenio Efrain Breijo",
     author_email="eebf1993@gmail.com",
     description="A CDK Python Construct for AWS IoT Infrastructure",
-    keywords=["aws", "aws-cdk", "cdk", "infrastructure", "cloudformation", "python", "constructs", "framework"],
+    keywords=["aws", "aws-cdk", "cdk", "infrastructure", "cloudformation", "python", "resources_constructs", "framework"],
     licence="MIT",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -23,11 +23,8 @@ setuptools.setup(
     url="https://github.com/u93/multacdkrecipies",
     packages=[
         "multacdkrecipies",
-        "multacdkrecipies.utils",
-        "multacdkrecipies.settings",
-        "multacdkrecipies.common",
-        "multacdkrecipies.scripts",
-        "multacdkrecipies.scripts.iot_analytics_notebook",
+        "multacdkrecipies.recipies",
+        "multacdkrecipies.framework",
     ],
     install_requires=[
         "appdirs==1.4.4",
@@ -78,7 +75,7 @@ setuptools.setup(
         "botocore==1.17.56",
         "cattrs==1.0.0",
         "click==7.1.2",
-        "constructs==3.0.4",
+        "resources_constructs==3.0.4",
         "contextlib2==0.6.0.post1",
         "docutils==0.16",
         "entrypoints==0.3",
