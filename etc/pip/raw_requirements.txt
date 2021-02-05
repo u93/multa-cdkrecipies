@@ -1,5 +1,5 @@
-appdirs==1.4.4
-attrs==20.2.0
+appdirs
+attrs
 aws-cdk.assets
 aws-cdk.aws-apigateway
 aws-cdk.aws-applicationautoscaling
