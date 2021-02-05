@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 
-VERSION = os.environ.get("VERSION", "0.2.0.4")
+VERSION = os.environ.get("VERSION", "0.2.0.5")
 CDK_VERSION = os.environ.get("CDK_VERSION", "1.88.0")
 
 with open("./README.md") as fp:
@@ -22,7 +22,7 @@ setup(
     maintainer_email="eebf1993@gmail.com",
     url="https://github.com/u93/multacdkrecipies",
     package_dir={"": "multacdkrecipies"},
-    packages=find_packages("multacdkrecipies"),
+    packages=find_packages(),
     install_requires=[
         "appdirs==1.4.4",
         "attrs==20.3.0",
