@@ -1,14 +1,14 @@
 import os
-import setuptools
+from setuptools import setup, find_packages
 
 
-VERSION = os.environ.get("VERSION", "0.2.0.3")
+VERSION = os.environ.get("VERSION", "0.2.0.5")
 CDK_VERSION = os.environ.get("CDK_VERSION", "1.88.0")
 
 with open("./README.md") as fp:
     long_description = fp.read()
 
-setuptools.setup(
+setup(
     name="multacdkrecipies",
     version=VERSION,
     author="Eugenio Efrain Breijo",
@@ -21,14 +21,10 @@ setuptools.setup(
     maintainer="Eugenio Efrain Breijo",
     maintainer_email="eebf1993@gmail.com",
     url="https://github.com/u93/multacdkrecipies",
-    packages=[
-        "multacdkrecipies",
-        "multacdkrecipies.recipies",
-        "multacdkrecipies.framework",
-    ],
+    packages=find_packages(),
     install_requires=[
         "appdirs==1.4.4",
-        "attrs==20.2.0",
+        "attrs==20.3.0",
         f"aws-cdk.assets=={CDK_VERSION}",
         f"aws-cdk.aws-apigateway=={CDK_VERSION}",
         f"aws-cdk.aws-applicationautoscaling=={CDK_VERSION}",
@@ -94,14 +90,14 @@ setuptools.setup(
         "python-dateutil==2.8.1",
         "regex==2020.10.15",
         "s3pypi==0.11.0",
-        "s3transfer==0.3.3",
-        "schema==0.7.3",
+        "s3transfer==0.3.4",
+        "schema==0.7.4",
         "six==1.15.0",
-        "toml==0.10.1",
-        "typed-ast==1.4.1",
+        "toml==0.10.2",
+        "typed-ast==1.4.2",
         "typing-extensions==3.7.4.3",
-        "urllib3==1.25.10",
-        "zipp==3.3.1",
+        "urllib3==1.26.3",
+        "zipp==3.4.0",
     ],
     python_requires=">=3.7",
     classifiers=[
