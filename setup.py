@@ -21,7 +21,6 @@ setup(
     maintainer="Eugenio Efrain Breijo",
     maintainer_email="eebf1993@gmail.com",
     url="https://github.com/u93/multacdkrecipies",
-    package_dir={"": "multacdkrecipies"},
     packages=find_packages(),
     install_requires=[
         "appdirs==1.4.4",
