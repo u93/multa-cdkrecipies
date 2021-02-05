@@ -8,7 +8,7 @@ def base_iot_analytics_datastore(construct, **kwargs):
     :param kwargs: Consist of required 'datastore_name', and optional 'retention_period'.
     :return: IoT Analytics Datastore Construct.
     """
-    datastore_name = kwargs["datastore_name"]
+    datastore_name = kwargs["datastore_name"].replace("-", "_")
     retention_days = kwargs.get("retention_period")
     unlimited_storage = False if retention_days is not None else True
 

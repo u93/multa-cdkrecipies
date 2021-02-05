@@ -19,6 +19,7 @@ def base_iot_rule(construct, action_property, **kwargs):
 
     # Defining AWS IoT Rule
     rule_name = construct.prefix + "_" + kwargs["rule_name"] + "_" + construct.environment_
+    rule_name = rule_name.replace("-", "_")
     iot_rule = iot.CfnTopicRule(construct, id=rule_name, rule_name=rule_name, topic_rule_payload=rule_payload)
 
     return iot_rule

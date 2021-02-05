@@ -28,7 +28,7 @@ def base_iot_analytics_pipeline(construct, activities: dict, resource_dependenci
     :param kwargs: Consist of required 'pipeline_name'.
     :return: IoT Analytics Pipeline Construct.
     """
-    pipeline_name = kwargs["pipeline_name"]
+    pipeline_name = kwargs["pipeline_name"].replace("-", "_")
     _channel_activity = channel_activity(resource=activities["channel"], next_resource=activities["datastore"])
     _datastore_activity = datastore_activity(resource=activities["datastore"])
 

@@ -8,7 +8,7 @@ def base_iot_analytics_channel(construct, **kwargs):
     :param kwargs: Consist of required 'channel_name', and optional 'retention_period'.
     :return: IoT Analytics Channel Construct.
     """
-    channel_name = kwargs["channel_name"]
+    channel_name = kwargs["channel_name"].replace("-", "_")
     retention_days = kwargs.get("retention_period")
     unlimited_storage = False if retention_days is not None else True
 

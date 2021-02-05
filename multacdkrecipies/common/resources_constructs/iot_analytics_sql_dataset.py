@@ -9,7 +9,7 @@ def base_iot_analytics_dataset(construct, resource_dependencies: list, **kwargs)
     :param kwargs: Consist of required 'dataset_name', 'sql_action', 'trigger_action'. Optional 'retention_period'
     :return: IoT Analytics Dataset Construct.
     """
-    dataset_name = kwargs["dataset_name"]
+    dataset_name = kwargs["dataset_name"].replace("-", "_")
 
     received_retention_days = kwargs.get("retention_period")
     unlimited_storage = False if received_retention_days is not None else True
