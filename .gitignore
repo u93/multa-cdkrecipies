@@ -139,3 +139,5 @@ idea/
 cdk.out/
 Scripts/
 pyvenv.cfg
+
+.idea/
