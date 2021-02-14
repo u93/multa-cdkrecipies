@@ -2,7 +2,7 @@ import os
 from setuptools import setup, find_packages
 
 
-VERSION = os.environ.get("VERSION", "0.2.1")
+VERSION = os.environ.get("VERSION", "0.2.2")
 CDK_VERSION = os.environ.get("CDK_VERSION", "1.89.0")
 
 with open("./README.md") as fp:
