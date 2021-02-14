@@ -1,7 +1,5 @@
 from schema import Schema, And, Use, Optional
 
-# TODO: ADD SNS, SQS, IOTRULE TO BASE VALIDATIONS. REFACTOR RECIPIES
-
 LAMBDA_BASE_SCHEMA = Schema(
     {
         "lambda_name": And(Use(str)),
@@ -11,6 +9,7 @@ LAMBDA_BASE_SCHEMA = Schema(
         "handler": And(Use(str)),
         Optional("layers"): [And(Use(str))],
         Optional("timeout"): And(Use(int)),
+        Optional("exclude"): [And(Use(str))],
         Optional("reserved_concurrent_executions"): And(Use(int)),
         Optional("environment_vars"): {And(Use(str)): And(Use(str))},
         "iam_actions": [And(Use(str))],
@@ -34,6 +33,7 @@ AUTHORIZER_LAMBDA_BASE_SCHEMA = Schema(
             "arn": And(Use(str)),
             "identifier": And(Use(str)),
         },
+        Optional("results_cache_ttl"): And(Use(int))
     }
 )
 

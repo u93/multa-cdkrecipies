@@ -54,7 +54,10 @@ def base_lambda_function(construct, **kwargs):
         construct,
         id=function_name,
         function_name=function_name,
-        code=lambda_.Code.from_asset(path=code_path),
+        code=lambda_.Code.from_asset(
+            path=code_path,
+            exclude=kwargs.get("exclude")
+        ),
         handler=kwargs["handler"],
         runtime=function_runtime,
         layers=function_layers,
