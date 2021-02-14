@@ -62,8 +62,16 @@ class AwsApiGatewayLambdaFanOutBE(core.Construct):
         if self._authorizer_function is not None:
             # Define Gateway Token Authorizer
             authorizer_name = api_configuration["apigateway_name"] + "_" + "authorizer"
+            if authorizer_functions.get("results_cache_ttl") is not None:
+                results_cache_ttl = core.Duration.minutes(authorizer_functions.get("results_cache_ttl"))
+            else:
+                results_cache_ttl = None
             gateway_authorizer = api_gateway.TokenAuthorizer(
-                self, id=authorizer_name, authorizer_name=authorizer_name, handler=self._authorizer_function
+                self,
+                id=authorizer_name,
+                authorizer_name=authorizer_name,
+                handler=self._authorizer_function,
+                results_cache_ttl=results_cache_ttl
             )
 
         # Defining Custom Domain
