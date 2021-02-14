@@ -113,6 +113,13 @@ class AwsUserServerlessBackend(core.Construct):
         return self._user_pool
 
     @property
+    def user_pool_client(self):
+        """
+        :return: Construct Cognito User Pool Client.
+        """
+        return self._user_pool_client
+
+    @property
     def identity_pool(self):
         """
         :return: Construct Cognito Identity Pool.
