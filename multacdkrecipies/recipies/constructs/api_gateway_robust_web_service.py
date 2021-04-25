@@ -208,11 +208,10 @@ class AwsApiGatewayLambdaPipes(core.Construct):
 
     def set_authorizer(self):
         # Define API Gateway Authorizer
-        api_configuration = self._configuration["api"]
-        authorizer_configuration = api_configuration.get("authorizer")
-
         gateway_authorizer = None
 
+        api_configuration = self._configuration["api"]
+        authorizer_configuration = api_configuration.get("authorizer")
         if authorizer_configuration is None:
             return gateway_authorizer
 
@@ -267,11 +266,17 @@ class AwsApiGatewayLambdaPipes(core.Construct):
             else:
                 results_cache_ttl = None
 
-            user_pools = [
-                cognito.UserPool.from_user_pool_id(self, id=f"imported_pool_auth_{pool_id}", user_pool_id=pool_id)
-                for pool_id
-                in cognito_authorizer_config.get("user_pool_ids")
-            ]
+            user_pools = list()
+            for index, pool_id in enumerate(cognito_authorizer_config.get("user_pool_ids")):
+                cognito_pool = cognito.UserPool.from_user_pool_id(
+                    self, id=f"imported_pool_auth_{index}", user_pool_id=pool_id
+                )
+                user_pools.append(cognito_pool)
+            # user_pools = [
+            #     cognito.UserPool.from_user_pool_id(self, id=f"imported_pool_auth_{pool_id}", user_pool_id=pool_id)
+            #     for pool_id
+            #     in cognito_authorizer_config.get("user_pool_ids")
+            # ]
 
             gateway_authorizer = authorizer(
                 self,
