@@ -81,7 +81,8 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         #     api_gateway.CognitoUserPoolsAuthorizer
 
         # Define API Gateway Authorizer
-        self.gateway_authorizer = self.set_authorizer()
+        self._authorizer_function = None
+        self._gateway_authorizer = self.set_authorizer()
 
         # Defining Custom Domain
         domain_options = None
@@ -160,7 +161,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         # Define API Gateway Root Methods
         root_methods = api_configuration["settings"].get("default_http_methods", list())
         for method in root_methods:
-            self._lambda_rest_api.root.add_method(http_method=method, authorizer=self.gateway_authorizer)
+            self._lambda_rest_api.root.add_method(http_method=method, authorizer=self._gateway_authorizer)
 
         # Defining Resource Trees for API Gateway with Custom Integrations
         resource_trees = api_configuration["resource_trees"]
@@ -171,7 +172,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                 resource_base.add_method(
                     http_method=method,
                     integration=api_gateway.LambdaIntegration(handler=resource_base_handler),
-                    authorizer=self.gateway_authorizer,
+                    authorizer=self._gateway_authorizer,
                 )
             # resource_base.add_cors_preflight(allow_methods=resource_tree["methods"], allow_origins=["*"])
 
@@ -183,7 +184,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                     resource_base_child.add_method(
                         http_method=method,
                         integration=api_gateway.LambdaIntegration(handler=resource_base_child_handler),
-                        authorizer=self.gateway_authorizer,
+                        authorizer=self._gateway_authorizer,
                     )
                 # resource_base_child.add_cors_preflight(
                 #     allow_methods=resource_base_child_definition["methods"], allow_origins=["*"]
@@ -199,7 +200,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                         resource_base_grandchild.add_method(
                             http_method=method,
                             integration=api_gateway.LambdaIntegration(handler=resource_base_grandchild_handler),
-                            authorizer=self.gateway_authorizer,
+                            authorizer=self._gateway_authorizer,
                         )
                     # resource_base_grandchild.add_cors_preflight(
                     #     allow_methods=resource_base_grandchild_tree["methods"], allow_origins=["*"]
@@ -226,15 +227,14 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         if token_authorizer_config or request_authorizer_config:
             # Define Lambda Authorizer Function
             authorizer_functions = authorizer_config.get("function")
-            _authorizer_function = None
             if authorizer_functions.get("imported") is not None:
-                _authorizer_function = lambda_.Function.from_function_arn(
+                self._authorizer_function = lambda_.Function.from_function_arn(
                     self,
                     id=authorizer_functions.get("imported").get("identifier"),
                     function_arn=authorizer_functions.get("imported").get("arn"),
                 )
             elif authorizer_functions.get("origin") is not None:
-                _authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
+                self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
             else:
                 raise RuntimeError("Undefined function type used...")
 
@@ -306,6 +306,12 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         :return: Construct API Gateway Authorizer Function.
         """
         return self._authorizer_function
+
+    def gateway_authorizer(self):
+        """
+        :return: Construct API Gateway Authorizer Resource.
+        """
+        return self._gateway_authorizer
 
     @property
     def handler_function(self):
