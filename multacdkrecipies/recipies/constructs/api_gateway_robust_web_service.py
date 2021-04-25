@@ -2,6 +2,7 @@ from aws_cdk import (
     core,
     aws_apigateway as api_gateway,
     aws_certificatemanager as cert_manager,
+    aws_cognito as cognito,
     aws_lambda as lambda_,
 )
 
@@ -45,35 +46,42 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         api_gateway_name = self.prefix + "_" + api_configuration["apigateway_name"] + "_" + self.environment_
         api_gateway_name_description = api_configuration.get("apigateway_description")
 
-        # Define Lambda Authorizer Function
-        authorizer_functions = api_configuration.get("authorizer_function")
-        self._authorizer_function = None
-        if authorizer_functions is not None:
-            if authorizer_functions.get("imported") is not None:
-                self._authorizer_function = lambda_.Function.from_function_arn(
-                    self,
-                    id=authorizer_functions.get("imported").get("identifier"),
-                    function_arn=authorizer_functions.get("imported").get("arn"),
-                )
-            elif authorizer_functions.get("origin") is not None:
-                self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
+        # # Define Lambda Authorizer Function
+        # authorizer_functions = api_configuration.get("authorizer_function")
+        # self._authorizer_function = None
+        # if authorizer_functions is not None:
+        #     if authorizer_functions.get("imported") is not None:
+        #         self._authorizer_function = lambda_.Function.from_function_arn(
+        #             self,
+        #             id=authorizer_functions.get("imported").get("identifier"),
+        #             function_arn=authorizer_functions.get("imported").get("arn"),
+        #         )
+        #     elif authorizer_functions.get("origin") is not None:
+        #         self._authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
+        #
+        # # Define API Gateway Authorizer
+        # gateway_authorizer = None
+        # if self._authorizer_function is not None:
+        #     # Define Gateway Token Authorizer
+        #     authorizer_name = api_configuration["apigateway_name"] + "_" + "authorizer"
+        #     if authorizer_functions.get("results_cache_ttl") is not None:
+        #         results_cache_ttl = core.Duration.minutes(authorizer_functions.get("results_cache_ttl"))
+        #     else:
+        #         results_cache_ttl = None
+        #     gateway_authorizer = api_gateway.TokenAuthorizer(
+        #         self,
+        #         id=authorizer_name,
+        #         authorizer_name=authorizer_name,
+        #         handler=self._authorizer_function,
+        #         results_cache_ttl=results_cache_ttl
+        #     )
+        #
+        #     api_gateway.TokenAuthorizer
+        #     api_gateway.RequestAuthorizer
+        #     api_gateway.CognitoUserPoolsAuthorizer
 
         # Define API Gateway Authorizer
-        gateway_authorizer = None
-        if self._authorizer_function is not None:
-            # Define Gateway Token Authorizer
-            authorizer_name = api_configuration["apigateway_name"] + "_" + "authorizer"
-            if authorizer_functions.get("results_cache_ttl") is not None:
-                results_cache_ttl = core.Duration.minutes(authorizer_functions.get("results_cache_ttl"))
-            else:
-                results_cache_ttl = None
-            gateway_authorizer = api_gateway.TokenAuthorizer(
-                self,
-                id=authorizer_name,
-                authorizer_name=authorizer_name,
-                handler=self._authorizer_function,
-                results_cache_ttl=results_cache_ttl
-            )
+        self.gateway_authorizer = self.set_authorizer()
 
         # Defining Custom Domain
         domain_options = None
@@ -152,7 +160,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
         # Define API Gateway Root Methods
         root_methods = api_configuration["settings"].get("default_http_methods", list())
         for method in root_methods:
-            self._lambda_rest_api.root.add_method(http_method=method, authorizer=gateway_authorizer)
+            self._lambda_rest_api.root.add_method(http_method=method, authorizer=self.gateway_authorizer)
 
         # Defining Resource Trees for API Gateway with Custom Integrations
         resource_trees = api_configuration["resource_trees"]
@@ -163,7 +171,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                 resource_base.add_method(
                     http_method=method,
                     integration=api_gateway.LambdaIntegration(handler=resource_base_handler),
-                    authorizer=gateway_authorizer,
+                    authorizer=self.gateway_authorizer,
                 )
             # resource_base.add_cors_preflight(allow_methods=resource_tree["methods"], allow_origins=["*"])
 
@@ -175,7 +183,7 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                     resource_base_child.add_method(
                         http_method=method,
                         integration=api_gateway.LambdaIntegration(handler=resource_base_child_handler),
-                        authorizer=gateway_authorizer,
+                        authorizer=self.gateway_authorizer,
                     )
                 # resource_base_child.add_cors_preflight(
                 #     allow_methods=resource_base_child_definition["methods"], allow_origins=["*"]
@@ -191,11 +199,92 @@ class AwsApiGatewayLambdaPipes(core.Construct):
                         resource_base_grandchild.add_method(
                             http_method=method,
                             integration=api_gateway.LambdaIntegration(handler=resource_base_grandchild_handler),
-                            authorizer=gateway_authorizer,
+                            authorizer=self.gateway_authorizer,
                         )
                     # resource_base_grandchild.add_cors_preflight(
                     #     allow_methods=resource_base_grandchild_tree["methods"], allow_origins=["*"]
                     # )
+
+    def set_authorizer(self):
+        # Define API Gateway Authorizer
+        api_configuration = self._configuration["api"]
+        authorizer_configuration = api_configuration.get("authorizer")
+
+        gateway_authorizer = None
+
+        if authorizer_configuration is None:
+            return gateway_authorizer
+
+        authorizer_name = f"{self.prefix}_{api_configuration['apigateway_name']}_authorizer_{self.environment_}"
+
+        token_authorizer_config = authorizer_configuration.get("token")
+        request_authorizer_config = authorizer_configuration.get("request")
+        cognito_authorizer_config = authorizer_configuration.get("cognito")
+
+        authorizer_config = token_authorizer_config or request_authorizer_config or cognito_authorizer_config
+
+        if token_authorizer_config or request_authorizer_config:
+            # Define Lambda Authorizer Function
+            authorizer_functions = authorizer_config.get("function")
+            _authorizer_function = None
+            if authorizer_functions.get("imported") is not None:
+                _authorizer_function = lambda_.Function.from_function_arn(
+                    self,
+                    id=authorizer_functions.get("imported").get("identifier"),
+                    function_arn=authorizer_functions.get("imported").get("arn"),
+                )
+            elif authorizer_functions.get("origin") is not None:
+                _authorizer_function = base_lambda_function(self, **authorizer_functions.get("origin"))
+            else:
+                raise RuntimeError("Undefined function type used...")
+
+            # Define Gateway Token or Request Authorizer
+            if token_authorizer_config:
+                authorizer = api_gateway.TokenAuthorizer
+            elif request_authorizer_config:
+                authorizer = api_gateway.RequestAuthorizer
+            else:
+                raise RuntimeError("Undefined authorizer configured...")
+
+            if authorizer_functions.get("results_cache_ttl") is not None:
+                results_cache_ttl = core.Duration.minutes(authorizer_functions.get("results_cache_ttl"))
+            else:
+                results_cache_ttl = None
+
+            gateway_authorizer = authorizer(
+                self,
+                id=authorizer_name,
+                authorizer_name=authorizer_name,
+                handler=self._authorizer_function,
+                results_cache_ttl=results_cache_ttl
+            )
+
+        elif cognito_authorizer_config:
+            authorizer = api_gateway.CognitoUserPoolsAuthorizer
+
+            if cognito_authorizer_config.get("results_cache_ttl") is not None:
+                results_cache_ttl = core.Duration.minutes(cognito_authorizer_config.get("results_cache_ttl"))
+            else:
+                results_cache_ttl = None
+
+            user_pools = [
+                cognito.UserPool.from_user_pool_id(self, id=f"imported_pool_auth_{pool_id}", user_pool_id=pool_id)
+                for pool_id
+                in cognito_authorizer_config.get("user_pool_ids")
+            ]
+
+            gateway_authorizer = authorizer(
+                self,
+                id=authorizer_name,
+                authorizer_name=authorizer_name,
+                results_cache_ttl=results_cache_ttl,
+                cognito_user_pools=user_pools
+            )
+
+        else:
+            raise RuntimeError("Error undefined gateway authorizer used...")
+
+        return gateway_authorizer
 
     @property
     def configuration(self):

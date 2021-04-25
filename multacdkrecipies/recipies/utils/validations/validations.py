@@ -39,7 +39,18 @@ APIGATEWAY_SIMPLE_WEB_SERVICE_SCHEMA = Schema(
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
             "proxy": And(Use(bool)),
-            Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
+            Optional("authorizer"): {
+                Optional("token"): {
+                    "function": AUTHORIZER_LAMBDA_BASE_SCHEMA
+                },
+                Optional("request"): {
+                    "function": AUTHORIZER_LAMBDA_BASE_SCHEMA
+                },
+                Optional("cognito"): {
+                    "user_pool_ids": And(Use(list)),
+                    Optional("results_cache_ttl"): And(Use(int))
+                }
+            },
             "settings": {
                 "proxy": And(Use(bool)),
                 Optional("allowed_origins"): [And(Use(str))],
@@ -68,7 +79,19 @@ APIGATEWAY_ROBUST_WEB_SERVICE_SCHEMA = Schema(
         "api": {
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
-            Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
+            Optional("authorizer"): {
+                Optional("token"): {
+                    "function": AUTHORIZER_LAMBDA_BASE_SCHEMA
+                },
+                Optional("request"): {
+                    "function": AUTHORIZER_LAMBDA_BASE_SCHEMA
+                },
+                Optional("cognito"): {
+                    "user_pool_ids": And(Use(list)),
+                    Optional("results_cache_ttl"): And(Use(int))
+                }
+            },
+            # Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
             "settings": {
                 "proxy": And(Use(bool)),
                 Optional("allowed_origins"): [And(Use(str))],
@@ -112,7 +135,17 @@ APIGATEWAY_FAN_OUT_WEB_SERVICE_SCHEMA = Schema(
         "api": {
             "apigateway_name": And(Use(str)),
             Optional("apigateway_description"): And(Use(str)),
-            Optional("authorizer_function"): AUTHORIZER_LAMBDA_BASE_SCHEMA,
+            Optional("authorizer"): {
+                Optional("token"): {
+                    "function": AUTHORIZER_LAMBDA_BASE_SCHEMA
+                },
+                Optional("request"): {
+                    "function": AUTHORIZER_LAMBDA_BASE_SCHEMA
+                },
+                Optional("cognito"): {
+                    "function": AUTHORIZER_LAMBDA_BASE_SCHEMA
+                }
+            },
             "settings": {
                 "proxy": And(Use(bool)),
                 Optional("allowed_origins"): [And(Use(str))],
